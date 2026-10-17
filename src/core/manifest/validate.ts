@@ -104,6 +104,19 @@ export function validateManifest(input: unknown): ValidationResult<CarManifest> 
   if (!isStr(m.defaultCamera) || !camIds.has(m.defaultCamera))
     err('defaultCamera', 'cameraPresets içindeki bir anahtar olmalı');
 
+  // Boya bölgesi kameraları (opsiyonel)
+  if (m.paintZoneCameras !== undefined) {
+    const pzc = m.paintZoneCameras;
+    const zones = Array.isArray(m.paintZones) ? (m.paintZones as unknown[]) : [];
+    if (!isObj(pzc)) err('paintZoneCameras', 'nesne olmalı');
+    else
+      for (const [zone, cam] of Object.entries(pzc)) {
+        if (!zones.includes(zone)) err(`paintZoneCameras.${zone}`, 'paintZones içinde yok');
+        if (!isStr(cam) || !camIds.has(cam))
+          err(`paintZoneCameras.${zone}`, `"${String(cam)}" cameraPresets içinde tanımlı değil`);
+      }
+  }
+
   // Slotlar
   const slots = m.slots;
   if (!isObj(slots) || Object.keys(slots).length === 0) err('slots', 'boş olmayan nesne olmalı');

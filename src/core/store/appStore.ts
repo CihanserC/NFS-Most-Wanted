@@ -12,10 +12,14 @@ export type AppState = {
   /** Geri dönülünce menü vurgusunun kalacağı son kategori/slot. */
   lastCategoryId: string | null;
   lastSlotId: string | null;
+  /** Boya kategorisinde seçili bölge. */
+  paintZone: string | null;
+  lastPaintZone: string | null;
   setMode: (mode: AppMode) => void;
   toggleTurntable: () => void;
   selectCategory: (categoryId: string | null) => void;
   selectSlot: (slotId: string | null) => void;
+  selectPaintZone: (zone: string | null) => void;
 };
 
 export const createAppStore = () =>
@@ -27,6 +31,8 @@ export const createAppStore = () =>
       slotId: null,
       lastCategoryId: null,
       lastSlotId: null,
+      paintZone: null,
+      lastPaintZone: null,
       setMode: (mode) =>
         set((s) => {
           s.mode = mode;
@@ -41,11 +47,18 @@ export const createAppStore = () =>
           s.categoryId = categoryId;
           s.slotId = null;
           s.lastSlotId = null;
+          s.paintZone = null;
+          s.lastPaintZone = null;
         }),
       selectSlot: (slotId) =>
         set((s) => {
           if (s.slotId !== null) s.lastSlotId = s.slotId;
           s.slotId = slotId;
+        }),
+      selectPaintZone: (zone) =>
+        set((s) => {
+          if (s.paintZone !== null) s.lastPaintZone = s.paintZone;
+          s.paintZone = zone;
         }),
     })),
   );

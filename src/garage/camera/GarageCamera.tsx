@@ -20,8 +20,10 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2
 /** Seçili slotun manifestteki kamera preset'ini döndürür (slot yoksa varsayılan). */
 function usePresetId(): string {
   const slotId = useAppStore((s) => s.slotId);
+  const paintZone = useAppStore((s) => s.paintZone);
   const carId = useBuildStore((s) => s.build.carId);
   const { manifest } = getCar(carId);
+  if (paintZone) return manifest.paintZoneCameras?.[paintZone] ?? manifest.defaultCamera;
   return (slotId && manifest.slots[slotId]?.camera) || manifest.defaultCamera;
 }
 

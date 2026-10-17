@@ -1,0 +1,119 @@
+[
+  {
+    "id": "stallion_orange",
+    "paint": {
+      "type": "metallic",
+      "color": "#c4410f",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffe2c2",
+      "gloss": 0.9
+    }
+  },
+  {
+    "id": "midnight_metallic",
+    "paint": {
+      "type": "metallic",
+      "color": "#0d0f14",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.25,
+      "flakeDensity": 0.75,
+      "flakeColor": "#c9d4ff",
+      "gloss": 0.9
+    }
+  },
+  {
+    "id": "ember_candy",
+    "paint": {
+      "type": "candy",
+      "color": "#b3130a",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.4,
+      "flakeColor": "#ffb0a0",
+      "gloss": 0.9
+    }
+  },
+  {
+    "id": "glacier_pearl",
+    "paint": {
+      "type": "pearl",
+      "color": "#e8ecef",
+      "secondaryColor": "#8fd3ff",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffffff",
+      "gloss": 0.9
+    }
+  },
+  {
+    "id": "army_matte",
+    "paint": {
+      "type": "matte",
+      "color": "#3d4a32",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffe2c2",
+      "gloss": 0.3
+    }
+  },
+  {
+    "id": "graphite_satin",
+    "paint": {
+      "type": "satin",
+      "color": "#3a3d42",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffe2c2",
+      "gloss": 0.5
+    }
+  },
+  {
+    "id": "gold_chrome",
+    "paint": {
+      "type": "chrome",
+      "color": "#e0b04f",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffe2c2",
+      "gloss": 1
+    }
+  },
+  {
+    "id": "dusk_chameleon",
+    "paint": {
+      "type": "chameleon",
+      "color": "#5a1fa3",
+      "secondaryColor": "#1fa38a",
+      "tertiaryColor": "#e0b040",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.4,
+      "flakeColor": "#ffe2c2",
+      "gloss": 0.9
+    }
+  },
+  {
+    "id": "classic_white",
+    "paint": {
+      "type": "solid",
+      "color": "#f1efe6",
+      "secondaryColor": "#ffd27a",
+      "tertiaryColor": "#3a6cff",
+      "flakeSize": 0.35,
+      "flakeDensity": 0.6,
+      "flakeColor": "#ffe2c2",
+      "gloss": 0.9
+    }
+  }
+]

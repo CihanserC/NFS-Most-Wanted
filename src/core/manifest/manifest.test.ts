@@ -55,6 +55,14 @@ describe('manifest doğrulayıcı', () => {
     expect(errors.some((e) => e.startsWith('wheels.FL.position'))).toBe(true);
   });
 
+  it('boya bölgesi kamera referanslarını doğrular', () => {
+    const m = clone();
+    m.paintZoneCameras = { wing: 'side', roof: 'nowhere' };
+    const errors = errorsOf(m);
+    expect(errors).toContain('paintZoneCameras.wing: paintZones içinde yok');
+    expect(errors.some((e) => e.startsWith('paintZoneCameras.roof'))).toBe(true);
+  });
+
   it('birden fazla hatayı birlikte raporlar', () => {
     const m = clone();
     m.id = 'Bad Id';

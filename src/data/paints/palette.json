@@ -1,0 +1,66 @@
+[
+  {
+    "id": "volcano_orange",
+    "hex": "#d9480f"
+  },
+  {
+    "id": "ember_red",
+    "hex": "#b3130a"
+  },
+  {
+    "id": "wine_red",
+    "hex": "#5e0f1a"
+  },
+  {
+    "id": "neon_pink",
+    "hex": "#e8336f"
+  },
+  {
+    "id": "dusk_purple",
+    "hex": "#4b1d6e"
+  },
+  {
+    "id": "cobra_blue",
+    "hex": "#1d4fa8"
+  },
+  {
+    "id": "racing_teal",
+    "hex": "#0f8a8a"
+  },
+  {
+    "id": "forest_green",
+    "hex": "#1f4d2b"
+  },
+  {
+    "id": "lime_yellow",
+    "hex": "#d6d11a"
+  },
+  {
+    "id": "sunset_gold",
+    "hex": "#d99a1e"
+  },
+  {
+    "id": "copper_brown",
+    "hex": "#7a3f1d"
+  },
+  {
+    "id": "champagne",
+    "hex": "#cdbb94"
+  },
+  {
+    "id": "snow_white",
+    "hex": "#f1efe6"
+  },
+  {
+    "id": "smoke_silver",
+    "hex": "#a7abb1"
+  },
+  {
+    "id": "asphalt_grey",
+    "hex": "#3a3d42"
+  },
+  {
+    "id": "ink_black",
+    "hex": "#0b0c0f"
+  }
+]

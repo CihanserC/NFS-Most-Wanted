@@ -1,0 +1,273 @@
+.pe {
+  padding: 4px 18px 16px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.pe section {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gm-line);
+}
+
+.pe section:last-child {
+  border-bottom: 0;
+}
+
+.pe h3,
+.pe-label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gm-accent);
+}
+
+.pe button {
+  font: inherit;
+  color: var(--gm-text);
+  cursor: pointer;
+}
+
+.pe-types {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.pe-type {
+  padding: 7px 0;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--gm-bg-item);
+  border: 1px solid var(--gm-line);
+}
+
+.pe-type:hover {
+  border-color: var(--gm-accent);
+}
+
+.pe-type.is-active {
+  color: #000 !important;
+  background: var(--gm-accent);
+  border-color: var(--gm-accent);
+}
+
+.pe-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.pe-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--gm-line);
+}
+
+.pe-tab i,
+.pe-preset i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.pe-tab.is-active {
+  border-color: var(--gm-accent-2);
+  color: var(--gm-accent-2) !important;
+}
+
+.pe-color {
+  display: flex;
+  gap: 12px;
+}
+
+.pe-color-side {
+  flex: 1;
+  min-width: 0;
+}
+
+.cw {
+  width: 140px;
+  flex: none;
+}
+
+.cw-disc {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.cw-disc canvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.cw-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #000;
+  pointer-events: none;
+}
+
+.pe-hex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pe-hex span {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gm-dim);
+}
+
+.pe input:not([type='range']),
+.pe textarea {
+  min-width: 0;
+  flex: 1;
+  padding: 5px 8px;
+  font: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  color: var(--gm-text);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--gm-line);
+}
+
+.pe input:focus,
+.pe textarea:focus {
+  outline: 1px solid var(--gm-accent);
+}
+
+.pe-palette {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.pe-palette button {
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pe-palette button:hover {
+  outline: 2px solid var(--gm-accent);
+}
+
+.pe-slider {
+  display: block;
+  margin: 6px 0 2px;
+}
+
+.pe-slider span {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gm-dim);
+}
+
+.pe-slider em {
+  font-style: normal;
+  color: var(--gm-text);
+}
+
+.pe-slider input {
+  width: 100%;
+  accent-color: var(--gm-accent);
+}
+
+.pe-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.pe-preset,
+.pe-preset button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 12px !important;
+  background: var(--gm-bg-item);
+  border: 1px solid var(--gm-line);
+}
+
+.pe-preset:hover,
+.pe-preset button:hover {
+  border-color: var(--gm-accent);
+}
+
+.pe-preset.is-user {
+  padding: 0;
+  border: 0;
+  background: none;
+  gap: 0;
+}
+
+.pe-x {
+  padding: 4px 7px !important;
+}
+
+.pe-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pe-wide {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.pe-json summary {
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gm-dim);
+}
+
+.pe-json textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 110px;
+  margin-top: 8px;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.pe-ok,
+.pe-err {
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+
+.pe-ok {
+  color: var(--gm-accent-2);
+}
+
+.pe-err {
+  color: #ff5a5a;
+}

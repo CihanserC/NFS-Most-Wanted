@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useBuildStore, useEffectiveParts } from '../core/store/stores';
 import { getCar } from '../data/cars';
 import { CarMaterialsProvider } from './materials/CarMaterialsContext';
+import { PaintSync } from './materials/PaintSync';
 import { PlaceholderBody } from './procedural/PlaceholderBody';
 import { PlaceholderWheels } from './procedural/PlaceholderWheels';
 import { slotRenderers } from './slots/registry';
@@ -25,6 +26,7 @@ export function CarRig() {
 
   return (
     <CarMaterialsProvider paintZones={car.manifest.paintZones}>
+      <PaintSync />
       <group name={car.manifest.id}>
         <PlaceholderBody car={car} parts={parts} />
         <PlaceholderWheels car={car} />

@@ -1,6 +1,39 @@
 # İlerleme
 
-## Aktif faz: Faz 2 — Boya Sistemi
+## Aktif faz: Faz 3 — Jant, Lastik, Fren
+
+## Faz 2 — Boya Sistemi ✅ (2026-10-17)
+
+**Yapılanlar**
+
+- **Veri modeli:** `PaintConfig` (tip, ana/2./3. renk, pul boyutu/yoğunluğu/rengi, vernik parlaklığı). `sanitizePaint` (bozuk veriyi düzeltir) ve `validatePaint` (katı) ile doğrulanır.
+- **8 boya tipi:** düz, metalik, perleskan, candy, mat, saten, krom, kameleon. Fiziksel davranışları `src/data/paints/types.json`'da (metalness, roughness ve vernik aralıkları, pul gücü, fresnel, sheen, iridescence). `resolvePaint` bunları three'den bağımsız parametrelere çevirir; testler 8 tipin birbirinden ayrıştığını doğrular.
+- **Araç boyası shader'ı** (`car/materials/carPaintMaterial.ts`): `MeshPhysicalMaterial` + `onBeforeCompile`.
+  - Nesne uzayında prosedürel metal pullar: normal eğme + renk + metalness, uzakta `fwidth` ile yumuşak sönüm.
+  - Perleskan renk kayması, candy derinliği (kenarlarda koyu/doygun), kameleonda 3 renk geçişi + `iridescence` (100–800 nm).
+  - Tüm boyalar tek shader programını paylaşır; değişiklikler uniform ile yapılır, yeniden derleme gerekmez.
+- **Bölgesel boyama:** manifestteki her `paintZone` ayrı boya alır. Bölgeler için `paintZoneCameras` eklendi (opsiyonel, doğrulanıyor).
+- **BuildState v2:** `paint` alanı eklendi; v1 → v2 migration yazıldı, eski kayıtlar varsayılan boyayla dolar.
+- **Store:** `setPaint` (çok bölge = tek undo adımı), geçici `previewPaint` ve `commitPaintPreview`. Sürüklerken geçmiş şişmez; bırakınca tek adım yazılır.
+- **UI:** Boya → bölge → editör.
+  - Tip seçici (üzerine gelince önizleme).
+  - Renk hedefi sekmeleri (ana / perle tonu / 2.–3. renk / pul rengi), HSV tekerleği + parlaklık kaydırıcısı, hex girişi, kurgusal isimli 16 renklik palet.
+  - Vernik ve pul kaydırıcıları, 9 fabrika preseti (8 tipin hepsi var), kullanıcı presetleri (kaydet/sil).
+  - "Tüm bölgelere uygula" ve JSON dışa/içe aktarma (panoya kopyalama; tek boya JSON'u da kabul edilir).
+- **Ortam:** prosedürel ortam haritasına yan dikey şeritler, ön/arka duvar ve zemin yansıması eklendi; krom ve vernik yansımaları artık okunuyor.
+- **Testler:** 70 test (renk dönüşümleri, boya doğrulama/sanitize, JSON gidiş-dönüş ve hata durumları, tip ayrışması, store boya undo/önizleme, migration v1→v2, kullanıcı preseti temizleme).
+
+**Notlar / kararlar**
+
+- Kullanıcı boya presetleri şimdilik `localStorage`'da (`muscle-garage.paint-presets`). Faz 9'da IndexedDB garajına taşınacak.
+- Jant, kaliper ve egzoz ucu gibi parçaların materyal ayarları, ilgili parçalar geldikçe aynı `PaintConfig` ile eklenecek (jant/kaliper Faz 3).
+- Pul ölçeği ekran çözünürlüğüne göre ayarlandı: varsayılan pul boyutunda pullar 1,5–3 m'de ince parıltı olarak görünür.
+
+**Eksik / bilinen sorunlar**
+
+- Sahne ışığı hâlâ kaba. Boya tiplerinin farkı en iyi döner tablada görülüyor; atmosfer Faz 4'te.
+- Renk tekerleği klavyeyle kullanılamıyor (hex girişi ve palet kullanılabiliyor).
+- Yeni kayıtların sayfa yenilenince kaybolması Faz 9'da çözülecek (kaydet/yükle).
 
 ## Faz 1 — Araç İskeleti ve Slot Sistemi ✅ (2026-10-17)
 
@@ -24,7 +57,6 @@
 
 **Eksik / bilinen sorunlar**
 
-- Boya tek renk placeholder (Faz 2).
 - Tekerlekler basit silindir (Faz 3).
 - Gamepad navigasyonu yok (UI cilası sonraki fazlarda).
 - Placeholder kaba: tampon uçları, kaput kenarları, kabin-gövde birleşimi basit.

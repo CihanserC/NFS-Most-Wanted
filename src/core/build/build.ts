@@ -1,4 +1,6 @@
 import type { CarManifest } from '../manifest/types';
+import { normalizePaintMap } from '../paint/paint';
+import type { PaintConfig } from '../paint/types';
 import { CURRENT_BUILD_VERSION, type BuildState } from './types';
 
 export const DEFAULT_BUILD_NAME = 'Yeni Proje';
@@ -13,6 +15,7 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     carId: manifest.id,
     name: DEFAULT_BUILD_NAME,
     parts: defaultParts(manifest),
+    paint: normalizePaintMap({}, manifest.paintZones),
     updatedAt: now.toISOString(),
   };
 }
@@ -44,4 +47,12 @@ export function withPart(
   now = new Date(),
 ): BuildState {
   return { ...build, parts: { ...build.parts, [slotId]: optionId }, updatedAt: now.toISOString() };
+}
+
+export function withPaint(
+  build: BuildState,
+  paint: Record<string, PaintConfig>,
+  now = new Date(),
+): BuildState {
+  return { ...build, paint: { ...build.paint, ...paint }, updatedAt: now.toISOString() };
 }

@@ -13,7 +13,7 @@ const TWO_PI = Math.PI * 2;
 export function Turntable({ children }: { children: ReactNode }) {
   const ref = useRef<Group>(null);
   const enabled = useAppStore((s) => s.turntable);
-  const focused = useAppStore((s) => s.slotId !== null);
+  const focused = useAppStore((s) => s.slotId !== null || s.paintZone !== null);
   const { speed, returnDamping } = sceneConfig.turntable;
 
   useFrame((_, delta) => {

@@ -1,8 +1,9 @@
 import categoriesJson from '../../data/ui/categories.json';
 
-export type MenuCategory = { id: string; slots: string[] };
+/** parts: slot -> seçenek listesi · paint: boya bölgesi -> boya editörü */
+export type MenuCategoryKind = 'parts' | 'paint';
+export type MenuCategory = { id: string; kind: MenuCategoryKind; slots: string[] };
 
-export const menuCategories: MenuCategory[] = categoriesJson;
+export const menuCategories = categoriesJson as MenuCategory[];
 
-export const categoryOfSlot = (slotId: string): MenuCategory | undefined =>
-  menuCategories.find((c) => c.slots.includes(slotId));
+export const isCategoryEnabled = (c: MenuCategory) => c.kind === 'paint' || c.slots.length > 0;

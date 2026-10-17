@@ -1,8 +1,10 @@
 import { BackSide, MeshPhysicalMaterial, MeshStandardMaterial, type Material } from 'three';
+import { DEFAULT_PAINT } from '../../core/paint/paint';
+import { createCarPaintMaterial, type CarPaintMaterial } from './carPaintMaterial';
 import { materialConfig as c } from './materialConfig';
 
 export type CarMaterials = {
-  paint: Record<string, MeshPhysicalMaterial>;
+  paint: Record<string, CarPaintMaterial>;
   chrome: MeshStandardMaterial;
   aluminum: MeshStandardMaterial;
   rubber: MeshStandardMaterial;
@@ -26,10 +28,7 @@ export type CarMaterials = {
 
 export function createCarMaterials(paintZones: string[]): CarMaterials {
   const paint = Object.fromEntries(
-    paintZones.map((zone) => [
-      zone,
-      new MeshPhysicalMaterial({ ...c.paint, name: `paint_${zone}` }),
-    ]),
+    paintZones.map((zone) => [zone, createCarPaintMaterial(`paint_${zone}`, DEFAULT_PAINT)]),
   );
   return {
     paint,
@@ -67,7 +66,7 @@ export function disposeCarMaterials(m: CarMaterials): void {
 }
 
 /** Boya bölgesi manifestte yoksa gövde boyasına düşer. */
-export function paintFor(m: CarMaterials, zone: string): MeshPhysicalMaterial {
+export function paintFor(m: CarMaterials, zone: string): CarPaintMaterial {
   const mat = m.paint[zone] ?? m.paint.body ?? Object.values(m.paint)[0];
   if (!mat) throw new Error('Araçta hiç boya bölgesi yok');
   return mat;

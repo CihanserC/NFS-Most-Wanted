@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { getCar } from '../../data/cars';
-import { createDefaultBuild, normalizeParts, withPart } from './build';
+import { createDefaultBuild, normalizeParts, withPaint, withPart } from './build';
 import { emptyHistory, record, redo, undo } from './history';
 import { BuildMigrationError, migrateBuild } from './migrate';
 import { deserializeBuild, serializeBuild } from './serialize';
+import { CURRENT_BUILD_VERSION } from './types';
 
 const { manifest } = getCar('vanta_stallion_70');
 
 describe('BuildState', () => {
   it('varsayılan build her slot için manifest varsayılanını içerir', () => {
     const b = createDefaultBuild(manifest);
-    expect(b.version).toBe(1);
+    expect(b.version).toBe(CURRENT_BUILD_VERSION);
+    expect(Object.keys(b.paint).sort()).toEqual([...manifest.paintZones].sort());
     expect(Object.keys(b.parts).sort()).toEqual(Object.keys(manifest.slots).sort());
     expect(b.parts.hood).toBe('stock');
   });
@@ -35,16 +37,37 @@ describe('BuildState', () => {
 });
 
 describe('migration', () => {
-  it("v0 kaydını v1'e taşır", () => {
+  it('v0 kaydını güncel sürüme taşır', () => {
     const migrated = migrateBuild({
       version: 0,
       carId: 'vanta_stallion_70',
       name: 'Eski',
       slots: { hood: 'cowl_induction' },
     });
-    expect(migrated.version).toBe(1);
+    expect(migrated.version).toBe(CURRENT_BUILD_VERSION);
     expect(migrated.parts).toEqual({ hood: 'cowl_induction' });
+    expect(migrated.paint).toEqual({});
     expect(migrated).not.toHaveProperty('slots');
+  });
+
+  it('v1 kaydının boyası varsayılanla dolar', () => {
+    const v1 = {
+      version: 1,
+      carId: 'vanta_stallion_70',
+      name: 'Eski',
+      parts: { hood: 'shaker_scoop' },
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    const b = deserializeBuild(JSON.stringify(v1), manifest);
+    expect(b.version).toBe(CURRENT_BUILD_VERSION);
+    expect(b.parts.hood).toBe('shaker_scoop');
+    expect(Object.keys(b.paint).sort()).toEqual([...manifest.paintZones].sort());
+  });
+
+  it('boyalı build JSON gidiş-dönüşünde boya korunur', () => {
+    const base = createDefaultBuild(manifest);
+    const b = withPaint(base, { roof: { ...base.paint.roof!, type: 'chameleon' } });
+    expect(deserializeBuild(serializeBuild(b), manifest).paint.roof?.type).toBe('chameleon');
   });
 
   it('gelecekteki sürümü ve sürümsüz kaydı reddeder', () => {

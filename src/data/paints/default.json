@@ -1,0 +1,10 @@
+{
+  "type": "metallic",
+  "color": "#c4410f",
+  "secondaryColor": "#ffd27a",
+  "tertiaryColor": "#3a6cff",
+  "flakeSize": 0.35,
+  "flakeDensity": 0.6,
+  "flakeColor": "#ffe2c2",
+  "gloss": 0.9
+}

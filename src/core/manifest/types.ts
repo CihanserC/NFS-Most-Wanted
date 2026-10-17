@@ -29,6 +29,8 @@ export type CarManifest = {
     wellClearanceMm: { front: number; rear: number };
   };
   paintZones: string[];
+  /** Boya bölgesi -> kamera preset'i (opsiyonel; yoksa defaultCamera). */
+  paintZoneCameras?: Record<string, string>;
   defaultCamera: string;
   cameraPresets: Record<string, CameraPreset>;
   slots: Record<string, SlotDefinition>;

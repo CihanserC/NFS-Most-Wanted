@@ -1,15 +1,8 @@
 /**
- * Placeholder materyal ayarları. Boya sistemi (Faz 2) gelene kadar tüm boya
- * bölgeleri aynı varsayılan boyayı kullanır.
+ * Araç parçalarının sabit materyal ayarları. Boya bölgeleri buradan değil,
+ * BuildState.paint'ten gelir (bkz. carPaintMaterial.ts).
  */
 export const materialConfig = {
-  paint: {
-    color: '#c4410f',
-    metalness: 0.25,
-    roughness: 0.35,
-    clearcoat: 1,
-    clearcoatRoughness: 0.04,
-  },
   chrome: { color: '#ffffff', metalness: 1, roughness: 0.04 },
   aluminum: { color: '#c8ccd2', metalness: 1, roughness: 0.28 },
   rubber: { color: '#111112', metalness: 0, roughness: 0.92 },

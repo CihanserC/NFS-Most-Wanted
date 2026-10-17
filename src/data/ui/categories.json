@@ -18,16 +18,57 @@
       "exhaust_tips",
       "fuel_cap",
       "interior"
-    ]
+    ],
+    "kind": "parts"
   },
-  { "id": "paint", "slots": [] },
-  { "id": "vinyl", "slots": [] },
-  { "id": "wheels_tires", "slots": [] },
-  { "id": "stance", "slots": [] },
-  { "id": "lights_glass", "slots": ["headlights", "taillights"] },
-  { "id": "engine_visual", "slots": ["engine"] },
-  { "id": "performance", "slots": [] },
-  { "id": "photo_mode", "slots": [] },
-  { "id": "test_drive", "slots": [] },
-  { "id": "garage", "slots": [] }
+  {
+    "id": "paint",
+    "slots": [],
+    "kind": "paint"
+  },
+  {
+    "id": "vinyl",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "wheels_tires",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "stance",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "lights_glass",
+    "slots": ["headlights", "taillights"],
+    "kind": "parts"
+  },
+  {
+    "id": "engine_visual",
+    "slots": ["engine"],
+    "kind": "parts"
+  },
+  {
+    "id": "performance",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "photo_mode",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "test_drive",
+    "slots": [],
+    "kind": "parts"
+  },
+  {
+    "id": "garage",
+    "slots": [],
+    "kind": "parts"
+  }
 ]

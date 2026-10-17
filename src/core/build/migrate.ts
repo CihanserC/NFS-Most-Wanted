@@ -12,6 +12,8 @@ const migrations: Record<number, (raw: RawBuild) => RawBuild> = {
     const { slots, ...rest } = raw;
     return { ...rest, parts: slots ?? {}, version: 1 };
   },
+  // 1 -> 2: boya sistemi. Bölgeler manifestten bilinir; deserialize varsayılanla doldurur.
+  1: (raw) => ({ ...raw, paint: {}, version: 2 }),
 };
 
 export class BuildMigrationError extends Error {

@@ -174,3 +174,15 @@
   color: var(--gm-dim);
   cursor: default;
 }
+
+.gm-panel.is-wide {
+  width: 400px;
+  top: 24px;
+  bottom: 56px;
+  max-height: none;
+}
+
+.gm-panel > .pe {
+  min-height: 0;
+  flex: 1;
+}
