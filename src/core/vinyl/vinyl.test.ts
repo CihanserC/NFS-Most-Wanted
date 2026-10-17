@@ -195,7 +195,7 @@ describe('katman işlemleri', () => {
 
   it('her şeklin geçerli bir SVG yolu var', () => {
     expect(VINYL_SHAPES.length).toBeGreaterThanOrEqual(10);
-    for (const s of VINYL_SHAPES) expect(s.path).toMatch(/^M[-\d.,]/);
+    for (const s of VINYL_SHAPES) if (s.kind !== 'glyph') expect(s.path).toMatch(/^M[-\d.,]/);
   });
 });
 

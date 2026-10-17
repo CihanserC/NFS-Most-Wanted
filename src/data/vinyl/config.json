@@ -11,11 +11,26 @@
     "rear": [1024, 512]
   },
   "limits": {
-    "scale": { "min": 0.02, "max": 12 },
-    "skew": { "min": -1.2, "max": 1.2 }
+    "scale": {
+      "min": 0.02,
+      "max": 12
+    },
+    "skew": {
+      "min": -1.2,
+      "max": 1.2
+    }
   },
   "defaults": {
     "color": "#ffffff",
     "scale": [1, 1]
+  },
+  "snap": {
+    "grid": 0.01,
+    "centerTolerance": 0.012,
+    "angleDeg": 15
+  },
+  "nudge": {
+    "step": 0.002,
+    "bigStep": 0.02
   }
 }

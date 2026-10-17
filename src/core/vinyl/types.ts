@@ -27,4 +27,7 @@ export type VinylLayer = {
   visible: boolean;
   locked: boolean;
   groupId?: string;
+  /** Yazı katmanı (shapeId 'text'): metin ve çizgi fontu */
+  text?: string;
+  fontId?: string;
 };

@@ -1,6 +1,34 @@
 # İlerleme
 
-## Aktif faz: Faz 6 — Vinil Editörü (Gelişmiş)
+## Aktif faz: Faz 7 — Diğer Görsel Modifiyeler
+
+## Faz 6 — Vinil Editörü (Gelişmiş) ✅ (2026-10-17)
+
+**Yapılanlar**
+
+- **Şekil kütüphanesi (§7.4):** temel şekiller, çizgi, şerit, eğik şerit, kavisli (C) şerit, gradyan şerit (renk soluyor), 3 alev parçası, şimşek, ok, köşeli ok, damalı desen, 0–9, A–Z + ÇĞİÖŞÜ ve - . ! / #. Kategorilere ayrıldı (Temel, Şeritler, Grafik, Rakam, Harf).
+- **Orijinal çizgi fontu** (`vinyl/shapes/strokeFont.ts`): 4×6 ızgara iskeleti; 4 stil (Blok, Yuvarlak, İnce, Hız/italik).
+  - Kalem çizgileri yüzey metresinde çizilir; yan yüzeylerin kare olmayan piksellerinde de kalınlık fiziksel olarak eşit kalır.
+  - Türkçe büyük harf dönüşümü (i→İ, ı→I).
+- **Yazı aracı:** yazı katmanı (metin + font, doğal oranla yerleşir), seçili yazıyı güncelleme ve "Şekle dönüştür" (harf başına katman, aynı yer/boy/açı/renk, tek grup).
+- **Maske / kesme:** değiştirici katman çizilmez; altındaki en yakın normal katmanı ara canvas'ta kırpar (destination-in) veya siler (destination-out). Art arda birden fazla değiştirici sırayla uygulanır; opaklık yumuşak maske verir.
+- **Gruplar ve çoklu seçim:**
+  - Araçta veya listede gruplu katmana tıklamak tüm grubu seçer; Alt ile tek üye, Shift/Ctrl ile seçime ekleme/çıkarma.
+  - Grupla / çöz: üyeler bitişik tutulur. Grup tek parça olarak sıralanır, çoğaltılır (yeni grup kimliğiyle) ve silinir.
+  - Grup dönüşümü (aynı yüzde): taşı, merkez etrafında döndür, eşit ölçek (üye sınırları korunur); turuncu gizmo.
+- **Hazır setler** (`data/vinyl/sets.json`, orijinal): Ralli Şeritleri, Arı Bandı, Yan C Şerit, Alevler, Yarış Numarası, Damalı Bayrak. Tek undo adımıyla eklenir; yüz başına grup olur.
+- **Vinil grubu dışa/içe aktarma:** seçim (gruplarıyla) veya tümü JSON olarak; panoya kopyalama veya dosyaya kaydetme, metinden veya dosyadan yükleme. İçe aktarılan katmanlar yeni kimlik alır ve tek grup olarak gelir (başka tasarıma taşınabilir).
+- **Klavye kısayolları:** Del, Ctrl+D, Ctrl+G, Ctrl+Shift+G, Ctrl+A, ok tuşları (Shift: büyük adım), [ ] ile sıralama (Ctrl: en alt/üst), M mıknatıs, V seç, P yerleştir.
+- **Mıknatıs:** taşırken ızgaraya ve orta çizgiye (u=0.5) yakalar, döndürmede 15° adım.
+- **Simetri:** yazı/harf/rakam kopyaları ayna yazısı olmaz, okunur kalır.
+- **Testler (165):** kütüphane kapsamı, font (Türkçe, sınırlar, stiller), yazı → şekil, maske planı, gruplama/seçim/sıralama/çoğaltma, grup dönüşümleri, mıknatıs, dışa/içe aktarma, setler, çeviri kapsamı.
+
+**Notlar / kararlar**
+
+- Grup dönüşümünde sadece eşit ölçek var (dönmüş üyelerin eşit olmayan ölçeği tek katman modeliyle ifade edilemez); eğme sadece tek katmanda.
+- Maske/kesme etkisi altındaki tek katmana (veya katman bloğuna değil) uygulanır.
+- "Şekle dönüştür" kütüphane harflerini (Blok stil) kullanır.
+- **Görsel doğrulama yapılamadı:** Faz 6 sırasında sistem belleği azaldığı için dev sunucusu sistem tarafından durduruldu ve talimat gereği yeniden başlatılmadı. Doğrulama birim testleri, tip kontrolü ve build ile yapıldı; tarayıcıda gözle kontrol bekliyor.
 
 ## Faz 5 — Vinil Editörü (Temel) ✅ (2026-10-17)
 

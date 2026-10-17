@@ -10,22 +10,32 @@ import {
   type Group,
   type Mesh,
 } from 'three';
-import { dragLayer, type DragStart, type GizmoHandle } from '../../core/vinyl/gizmo';
+import { useShallow } from 'zustand/react/shallow';
+import { dragLayer, type GizmoHandle } from '../../core/vinyl/gizmo';
+import {
+  commonSide,
+  selectionBounds,
+  snapPosition,
+  transformGroup,
+  type GroupHandle,
+} from '../../core/vinyl/group';
 import { updateLayer } from '../../core/vinyl/layers';
 import {
   carToSurface,
   layerCornersUV,
   surfaceToCar,
+  vinylConfig,
   type ProjectionBox,
 } from '../../core/vinyl/projection';
-import type { VinylLayer } from '../../core/vinyl/types';
+import type { VinylLayer, VinylSide } from '../../core/vinyl/types';
 import { useAppStore } from '../../core/store/appStore';
-import { useBuildStore, useVinylLayer } from '../../core/store/stores';
+import { useBuildStore } from '../../core/store/stores';
 import { categoryKind } from '../../garage/ui/categories';
 import { GIZMO_FLAG } from './gizmoFlag';
 
 const GIZMO = {
   color: '#3df2ff',
+  groupColor: '#ff7a18',
   handleColor: '#ffffff',
   rotateColor: '#ff7a18',
   skewColor: '#ffd23d',
@@ -38,17 +48,96 @@ const GIZMO = {
 
 type OrbitLike = { enabled: boolean };
 
-/** Seçili katmanın sınır kutusu ve tutamakları (projeksiyon düzleminde, car-space). */
+/** Sürüklerken kamera döndürmesini kapatır/açar (hook dışı yardımcı). */
+function setOrbitEnabled(controls: OrbitLike | null, enabled: boolean): void {
+  if (controls) controls.enabled = enabled;
+}
+type UV = [number, number];
+type DownEvent = { stopPropagation: () => void; nativeEvent: PointerEvent };
+type DownHandler = (e: DownEvent) => void;
+
+/**
+ * Seçimin gizmo'su (projeksiyon düzleminde, car-space).
+ * - Tek katman: taşı, köşelerden ölçek, döndür, eğ.
+ * - Grup / çoklu seçim (aynı yüzde): taşı, döndür, eşit ölçek (sınır kutusu etrafında).
+ */
 export function VinylGizmo({ root, box }: { root: RefObject<Group | null>; box: ProjectionBox }) {
   const active = useAppStore((s) => categoryKind(s.categoryId) === 'vinyl');
-  const selectedId = useAppStore((s) => s.selectedLayerId);
-  // Sadece seçili katmana abone: sürüklemede diğer 200+ katman yeniden çizim tetiklemez.
-  const layer = useVinylLayer(active ? selectedId : null);
-  if (!layer || !layer.visible) return null;
-  return <GizmoFor layer={layer} root={root} box={box} />;
+  const ids = useAppStore((s) => s.selectedLayerIds);
+  // Sadece seçili katmanlara abone: sürüklemede diğer katmanlar yeniden çizim tetiklemez.
+  const selected = useBuildStore(
+    useShallow((s) => {
+      if (!active || ids.length === 0) return [] as VinylLayer[];
+      const set = new Set(ids);
+      return (s.vinylPreview ?? s.build.vinyl).filter((l) => set.has(l.id));
+    }),
+  );
+  const visible = selected.filter((l) => l.visible);
+  if (visible.length === 0) return null;
+  if (visible.length === 1)
+    return <SingleGizmo layer={visible[0] as VinylLayer} root={root} box={box} />;
+  const side = commonSide(
+    visible,
+    visible.map((l) => l.id),
+  );
+  if (!side) return null;
+  return <GroupGizmo layers={visible} side={side} root={root} box={box} />;
 }
 
-function GizmoFor({
+/** İmleç -> projeksiyon düzlemi -> (u, v) ve sürükleme yaşam döngüsü. */
+function useDrag(root: RefObject<Group | null>, box: ProjectionBox, side: VinylSide) {
+  const { camera, gl } = useThree();
+  const controls = useThree((s) => s.controls) as OrbitLike | null;
+  const surface = box.surfaces[side];
+
+  const pointerUV = (clientX: number, clientY: number): UV | null => {
+    const g = root.current;
+    if (!g) return null;
+    const rect = gl.domElement.getBoundingClientRect();
+    const ndc = new Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    const ray = new Raycaster();
+    ray.setFromCamera(ndc, camera);
+    const n = new Vector3(...surface.planeNormal);
+    const worldNormal = n.clone().transformDirection(g.matrixWorld);
+    const worldPoint = g.localToWorld(n.multiplyScalar(surface.planeOffset));
+    const hit = ray.ray.intersectPlane(
+      new Plane().setFromNormalAndCoplanarPoint(worldNormal, worldPoint),
+      new Vector3(),
+    );
+    if (!hit) return null;
+    const p = g.worldToLocal(hit);
+    return carToSurface(box, side, [p.x, p.y, p.z]);
+  };
+
+  /** Sürükleme başlatır; onMove her harekette yeni katman listesini (önizleme) üretir. */
+  const start = (e: DownEvent, onMove: (startUV: UV, uv: UV, ev: PointerEvent) => VinylLayer[]) => {
+    e.stopPropagation();
+    const startUV = pointerUV(e.nativeEvent.clientX, e.nativeEvent.clientY);
+    if (!startUV) return;
+    setOrbitEnabled(controls, false);
+    const move = (ev: PointerEvent) => {
+      const uv = pointerUV(ev.clientX, ev.clientY);
+      if (uv) useBuildStore.getState().previewVinyl(onMove(startUV, uv, ev));
+    };
+    const end = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      setOrbitEnabled(controls, true);
+      useBuildStore.getState().commitVinylPreview();
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+  };
+
+  return { surface, start };
+}
+
+function SingleGizmo({
   layer,
   root,
   box,
@@ -57,23 +146,147 @@ function GizmoFor({
   root: RefObject<Group | null>;
   box: ProjectionBox;
 }) {
-  const surface = box.surfaces[layer.side];
-  const { camera, gl } = useThree();
-  const controls = useThree((s) => s.controls) as OrbitLike | null;
-  const toCar = (uv: [number, number]) =>
-    new Vector3(...surfaceToCar(box, layer.side, uv[0], uv[1]));
-
+  const { surface, start } = useDrag(root, box, layer.side);
   const cornersUV = layerCornersUV(layer, surface);
-  const corners = cornersUV.map(toCar);
-  const mid = (a: number, b: number): [number, number] => {
-    const p = cornersUV[a] as [number, number];
-    const q = cornersUV[b] as [number, number];
+  const mid = (a: number, b: number): UV => {
+    const p = cornersUV[a] as UV;
+    const q = cornersUV[b] as UV;
     return [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
   };
-  const topMid = toCar(mid(2, 3));
-  const rightMid = toCar(mid(1, 2));
-  const center = toCar(layer.position);
-  const up = topMid.clone().sub(center).normalize();
+
+  const begin = (handle: GizmoHandle) => (e: DownEvent) => {
+    if (layer.locked) return;
+    const base = useBuildStore.getState().build.vinyl;
+    start(e, (startUV, uv, ev) => {
+      const snap = useAppStore.getState().vinylSnap;
+      let next = dragLayer(
+        { handle, layer, startUV },
+        surface,
+        uv,
+        ev.shiftKey || (snap && handle === 'rotate'),
+      );
+      if (snap && handle === 'move')
+        next = {
+          ...next,
+          position: snapPosition(
+            next.position,
+            vinylConfig.snap.grid,
+            vinylConfig.snap.centerTolerance,
+          ),
+        };
+      return updateLayer(base, layer.id, next);
+    });
+  };
+
+  return (
+    <GizmoFrame
+      root={root}
+      box={box}
+      side={layer.side}
+      cornersUV={cornersUV}
+      center={layer.position}
+      color={GIZMO.color}
+      locked={layer.locked}
+      onMove={begin('move')}
+      onScale={begin('scale')}
+      onRotate={begin('rotate')}
+      skew={{ top: mid(2, 3), right: mid(1, 2), onSkewX: begin('skewX'), onSkewY: begin('skewY') }}
+    />
+  );
+}
+
+function GroupGizmo({
+  layers,
+  side,
+  root,
+  box,
+}: {
+  layers: VinylLayer[];
+  side: VinylSide;
+  root: RefObject<Group | null>;
+  box: ProjectionBox;
+}) {
+  const { surface, start } = useDrag(root, box, side);
+  const ids = layers.map((l) => l.id);
+  const b = selectionBounds(layers, ids, surface);
+  if (!b) return null;
+  const cornersUV: UV[] = [
+    [b[0], b[1]],
+    [b[2], b[1]],
+    [b[2], b[3]],
+    [b[0], b[3]],
+  ];
+  const locked = layers.some((l) => l.locked);
+
+  const begin = (handle: GroupHandle) => (e: DownEvent) => {
+    if (locked) return;
+    const base = useBuildStore.getState().build.vinyl;
+    start(e, (startUV, uv, ev) => {
+      const snap = useAppStore.getState().vinylSnap;
+      let target = uv;
+      if (snap && handle === 'move') {
+        // Kayma miktarını ızgaraya yakala
+        const g = vinylConfig.snap.grid;
+        target = [
+          startUV[0] + Math.round((uv[0] - startUV[0]) / g) * g,
+          startUV[1] + Math.round((uv[1] - startUV[1]) / g) * g,
+        ];
+      }
+      const angle = ev.shiftKey || snap ? vinylConfig.snap.angleDeg : 0;
+      return transformGroup(base, ids, surface, handle, startUV, target, angle);
+    });
+  };
+
+  return (
+    <GizmoFrame
+      root={root}
+      box={box}
+      side={side}
+      cornersUV={cornersUV}
+      center={[(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]}
+      color={GIZMO.groupColor}
+      locked={locked}
+      onMove={begin('move')}
+      onScale={begin('scale')}
+      onRotate={begin('rotate')}
+    />
+  );
+}
+
+/** Ortak çizim: dış çizgi, görünmez taşıma alanı ve tutamaklar. */
+function GizmoFrame({
+  root,
+  box,
+  side,
+  cornersUV,
+  center,
+  color,
+  locked,
+  onMove,
+  onScale,
+  onRotate,
+  skew,
+}: {
+  root: RefObject<Group | null>;
+  box: ProjectionBox;
+  side: VinylSide;
+  cornersUV: UV[];
+  center: UV;
+  color: string;
+  locked: boolean;
+  onMove: DownHandler;
+  onScale: DownHandler;
+  onRotate: DownHandler;
+  skew?: { top: UV; right: UV; onSkewX: DownHandler; onSkewY: DownHandler };
+}) {
+  const surface = box.surfaces[side];
+  const toCar = (uv: UV) => new Vector3(...surfaceToCar(box, side, uv[0], uv[1]));
+  const corners = cornersUV.map(toCar);
+  const topMid = toCar([
+    ((cornersUV[2] as UV)[0] + (cornersUV[3] as UV)[0]) / 2,
+    ((cornersUV[2] as UV)[1] + (cornersUV[3] as UV)[1]) / 2,
+  ]);
+  const up = topMid.clone().sub(toCar(center)).normalize();
 
   // Kalıcı geometriler; sürüklerken sadece köşe konumları yerinde güncellenir.
   const { fill, outline } = useMemo(() => {
@@ -100,56 +313,6 @@ function GizmoFor({
     }
   });
 
-  /** Ekrandaki imleç -> projeksiyon düzlemi -> (u, v) */
-  const pointerUV = (clientX: number, clientY: number): [number, number] | null => {
-    const g = root.current;
-    if (!g) return null;
-    const rect = gl.domElement.getBoundingClientRect();
-    const ndc = new Vector2(
-      ((clientX - rect.left) / rect.width) * 2 - 1,
-      -((clientY - rect.top) / rect.height) * 2 + 1,
-    );
-    const ray = new Raycaster();
-    ray.setFromCamera(ndc, camera);
-    const n = new Vector3(...surface.planeNormal);
-    const worldNormal = n.clone().transformDirection(g.matrixWorld);
-    const worldPoint = g.localToWorld(n.multiplyScalar(surface.planeOffset));
-    const hit = ray.ray.intersectPlane(
-      new Plane().setFromNormalAndCoplanarPoint(worldNormal, worldPoint),
-      new Vector3(),
-    );
-    if (!hit) return null;
-    const p = g.worldToLocal(hit);
-    return carToSurface(box, layer.side, [p.x, p.y, p.z]);
-  };
-
-  const begin =
-    (handle: GizmoHandle) => (e: { stopPropagation: () => void; nativeEvent: PointerEvent }) => {
-      if (layer.locked) return;
-      e.stopPropagation();
-      const startUV = pointerUV(e.nativeEvent.clientX, e.nativeEvent.clientY);
-      if (!startUV) return;
-      const start: DragStart = { handle, layer, startUV };
-      const base = useBuildStore.getState().build.vinyl;
-      if (controls) controls.enabled = false;
-      const move = (ev: PointerEvent) => {
-        const uv = pointerUV(ev.clientX, ev.clientY);
-        if (!uv) return;
-        const next = dragLayer(start, surface, uv, ev.shiftKey);
-        useBuildStore.getState().previewVinyl(updateLayer(base, layer.id, next));
-      };
-      const end = () => {
-        window.removeEventListener('pointermove', move);
-        window.removeEventListener('pointerup', end);
-        window.removeEventListener('pointercancel', end);
-        if (controls) controls.enabled = true;
-        useBuildStore.getState().commitVinylPreview();
-      };
-      window.addEventListener('pointermove', move);
-      window.addEventListener('pointerup', end);
-      window.addEventListener('pointercancel', end);
-    };
-
   // Kamera projeksiyon düzleminin arkasındaysa (aracın öbür yüzüne bakıyorsa) gizmo gizlenir;
   // derinlik testi kapalı olduğu için aksi halde araç içinden görünürdü.
   const group = useRef<Group>(null);
@@ -166,27 +329,29 @@ function GizmoFor({
   return (
     <group ref={group} userData={{ [GIZMO_FLAG]: true }}>
       <lineLoop geometry={outline} renderOrder={GIZMO.renderOrder}>
-        <lineBasicMaterial color={GIZMO.color} depthTest={false} depthWrite={false} />
+        <lineBasicMaterial color={color} depthTest={false} depthWrite={false} />
       </lineLoop>
       {/* Taşıma alanı: görünmez ama tıklanabilir, böylece vinil örtülmez. */}
-      <mesh geometry={fill} renderOrder={GIZMO.renderOrder} onPointerDown={begin('move')}>
+      <mesh geometry={fill} renderOrder={GIZMO.renderOrder} onPointerDown={onMove}>
         <meshBasicMaterial colorWrite={false} depthTest={false} depthWrite={false} side={2} />
       </mesh>
-      {!layer.locked && (
+      {!locked && (
         <>
           {corners.map((c, i) => (
-            <Handle key={i} at={c} color={GIZMO.handleColor} onDown={begin('scale')} />
+            <Handle key={i} at={c} color={GIZMO.handleColor} onDown={onScale} />
           ))}
-          <Handle at={topMid} color={GIZMO.skewColor} onDown={begin('skewX')} diamond />
-          <Handle at={rightMid} color={GIZMO.skewColor} onDown={begin('skewY')} diamond />
-          <RotateHandle base={topMid} dir={up} onDown={begin('rotate')} />
+          {skew && (
+            <Handle at={toCar(skew.top)} color={GIZMO.skewColor} onDown={skew.onSkewX} diamond />
+          )}
+          {skew && (
+            <Handle at={toCar(skew.right)} color={GIZMO.skewColor} onDown={skew.onSkewY} diamond />
+          )}
+          <RotateHandle base={topMid} dir={up} onDown={onRotate} />
         </>
       )}
     </group>
   );
 }
-
-type DownHandler = (e: { stopPropagation: () => void; nativeEvent: PointerEvent }) => void;
 
 /** Kameraya uzaklıkla ölçeklenen (ekranda sabit boyutlu) tutamak. */
 function Handle({

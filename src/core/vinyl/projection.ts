@@ -10,6 +10,8 @@ export const vinylConfig = vinylConfigJson as {
   resolution: Record<VinylSide, [number, number]>;
   limits: { scale: { min: number; max: number }; skew: { min: number; max: number } };
   defaults: { color: string; scale: [number, number] };
+  snap: { grid: number; centerTolerance: number; angleDeg: number };
+  nudge: { step: number; bigStep: number };
 };
 
 /**
@@ -207,15 +209,20 @@ export type LayerInstance = {
   mirrored: boolean;
 };
 
+/** Yazı ve harf/rakam şekilleri: simetri kopyasında ters (ayna) yazılmaz, okunur kalır. */
+export const isReadableShape = (shapeId: string) =>
+  shapeId === 'text' || shapeId.startsWith('digit_') || shapeId.startsWith('letter_');
+
 /** Sol/sağ eşlemesinde aynı z için u_sağ = 1 - u_sol; diğer yüzlerde x ayna -> u' = 1 - u. */
 export function mirroredLayer(layer: VinylLayer): VinylLayer {
+  const readable = isReadableShape(layer.shapeId);
   return {
     ...layer,
     side: mirrorSide(layer.side),
     position: [1 - layer.position[0], layer.position[1]],
     rotationDeg: -layer.rotationDeg,
-    skew: [-layer.skew[0], -layer.skew[1]],
-    flipX: !layer.flipX,
+    skew: readable ? layer.skew : [-layer.skew[0], -layer.skew[1]],
+    flipX: readable ? layer.flipX : !layer.flipX,
   };
 }
 

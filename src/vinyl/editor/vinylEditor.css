@@ -98,3 +98,92 @@
   height: 12px;
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
+
+.ve-tools {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.ve-masks {
+  grid-template-columns: repeat(3, 1fr) !important;
+  margin-bottom: 6px;
+}
+
+.ve-fonts {
+  grid-template-columns: repeat(4, 1fr) !important;
+  margin: 8px 0;
+}
+
+.ve-fonts .pe-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ve-fonts svg {
+  width: 34px;
+  height: 22px;
+  stroke: currentColor;
+}
+
+.ve-text input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--gm-font) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ve-fold {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gm-line);
+}
+
+.ve-fold summary {
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gm-accent);
+  margin-bottom: 8px;
+}
+
+.ve-json {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 90px;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.ve-file {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ve-file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ve-group {
+  margin-left: auto;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 400;
+  color: #000;
+  background: var(--gm-accent);
+}
+
+.ve-keys {
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.ve-shapes svg {
+  color: var(--gm-text);
+}

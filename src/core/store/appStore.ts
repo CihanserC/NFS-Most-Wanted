@@ -24,7 +24,12 @@ export type AppState = {
   /** Vinil editörü: araca tıklama aracı, yerleştirilecek şekil, seçili katman, görünüm */
   vinylTool: 'select' | 'place';
   vinylShapeId: string;
-  selectedLayerId: string | null;
+  /** Seçili katmanlar (grup seçiminde tüm üyeler) */
+  selectedLayerIds: string[];
+  /** Mıknatıs: taşıma/kaydırmada ızgara ve orta çizgiye yakala */
+  vinylSnap: boolean;
+  vinylText: string;
+  vinylFontId: string;
   vinylView: VinylSide;
   /** Son kullanılan vinil rengi (yeni katmanlara uygulanır) */
   vinylColor: string;
@@ -37,7 +42,10 @@ export type AppState = {
   setWheelsLinked: (linked: boolean) => void;
   setVinylTool: (tool: 'select' | 'place') => void;
   setVinylShape: (shapeId: string) => void;
-  selectLayer: (id: string | null) => void;
+  selectLayers: (ids: string[]) => void;
+  setVinylSnap: (on: boolean) => void;
+  setVinylText: (text: string) => void;
+  setVinylFont: (fontId: string) => void;
   setVinylView: (side: VinylSide) => void;
   setVinylColor: (color: string) => void;
 };
@@ -57,7 +65,10 @@ export const createAppStore = () =>
       wheelsLinked: true,
       vinylTool: 'place',
       vinylShapeId: 'circle',
-      selectedLayerId: null,
+      selectedLayerIds: [],
+      vinylSnap: false,
+      vinylText: 'STALLION',
+      vinylFontId: 'block',
       vinylView: 'left',
       vinylColor: '#ffffff',
       setMode: (mode) =>
@@ -104,9 +115,21 @@ export const createAppStore = () =>
         set((s) => {
           s.vinylShapeId = shapeId;
         }),
-      selectLayer: (id) =>
+      selectLayers: (ids) =>
         set((s) => {
-          s.selectedLayerId = id;
+          s.selectedLayerIds = ids;
+        }),
+      setVinylSnap: (on) =>
+        set((s) => {
+          s.vinylSnap = on;
+        }),
+      setVinylText: (text) =>
+        set((s) => {
+          s.vinylText = text;
+        }),
+      setVinylFont: (fontId) =>
+        set((s) => {
+          s.vinylFontId = fontId;
         }),
       setVinylView: (side) =>
         set((s) => {

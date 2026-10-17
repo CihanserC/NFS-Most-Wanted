@@ -10,6 +10,9 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 const pair = (v: unknown, fallback: [number, number]): [number, number] =>
   Array.isArray(v) && v.length === 2 ? [num(v[0], fallback[0]), num(v[1], fallback[1])] : fallback;
 
+/** Yazı katmanında en fazla karakter */
+export const MAX_TEXT_LENGTH = 24;
+
 let counter = 0;
 /** Oturum içinde benzersiz, kayıtlarla çakışmayan kısa id. */
 export function newLayerId(): string {
@@ -45,6 +48,8 @@ export function sanitizeLayer(input: unknown, isShape: (id: string) => boolean):
     locked: input.locked === true,
   };
   if (typeof input.groupId === 'string' && input.groupId) layer.groupId = input.groupId;
+  if (typeof input.text === 'string') layer.text = input.text.slice(0, MAX_TEXT_LENGTH);
+  if (typeof input.fontId === 'string') layer.fontId = input.fontId;
   return layer;
 }
 

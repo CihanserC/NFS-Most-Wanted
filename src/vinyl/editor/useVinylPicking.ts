@@ -8,18 +8,22 @@ import {
   type ProjectionBox,
 } from '../../core/vinyl/projection';
 import { addLayer, createLayer, LayerLimitError } from '../../core/vinyl/layers';
+import { expandToGroups, selectionFor } from '../../core/vinyl/group';
 import { useAppStore } from '../../core/store/appStore';
 import { useBuildStore } from '../../core/store/stores';
 import { categoryKind } from '../../garage/ui/categories';
+import { shapeAspect } from '../shapes/library';
 import { GIZMO_FLAG } from './gizmoFlag';
 
 /** Tıklama ile sürükleme (orbit) ayrımı: bu kadar pikselden fazla hareket tıklama değildir. */
 const CLICK_MAX_DRAG_PX = 5;
 
 /**
- * Vinil editörü açıkken araca tıklama: "yerleştir" aracında seçili şekli tıklanan yüzeye
- * koyar; "seç" aracında altındaki en üst katmanı seçer. Editör kapalıyken boş nesne döner
- * (olay işleyicisi olmayınca R3F araç için raycast yapmaz).
+ * Vinil editörü açıkken araca tıklama:
+ * - Yerleştir: seçili şekli tıklanan yüzeye koyar (harf/rakam doğal oranıyla).
+ * - Seç: altındaki en üst katmanı seçer; grup üyesiyse tüm grubu (Alt: tek üye,
+ *   Shift: seçime ekle/çıkar).
+ * Editör kapalıyken boş nesne döner (olay işleyicisi olmayınca R3F araç için raycast yapmaz).
  */
 export function useVinylPicking(
   root: RefObject<Group | null>,
@@ -49,13 +53,31 @@ export function useVinylPicking(
     const layers = store.build.vinyl;
 
     if (app.vinylTool === 'select') {
-      app.selectLayer(hitTestLayers(layers, box, side, uv));
+      const hit = hitTestLayers(layers, box, side, uv);
+      if (!hit) {
+        if (!e.nativeEvent.shiftKey) app.selectLayers([]);
+        return;
+      }
+      const picked = selectionFor(layers, hit, e.nativeEvent.altKey);
+      if (e.nativeEvent.shiftKey) {
+        const current = new Set(app.selectedLayerIds);
+        const removing = picked.every((id) => current.has(id));
+        for (const id of picked) {
+          if (removing) current.delete(id);
+          else current.add(id);
+        }
+        app.selectLayers(expandToGroups(layers, [...current]));
+      } else app.selectLayers(picked);
       return;
     }
     try {
-      const layer = createLayer(app.vinylShapeId, side, uv, { color: app.vinylColor });
+      const aspect = shapeAspect(app.vinylShapeId);
+      const layer = createLayer(app.vinylShapeId, side, uv, {
+        color: app.vinylColor,
+        scale: [aspect, 1],
+      });
       store.setVinyl(addLayer(layers, layer));
-      app.selectLayer(layer.id);
+      app.selectLayers([layer.id]);
     } catch (err) {
       if (!(err instanceof LayerLimitError)) throw err;
       console.warn(err.message);
@@ -64,7 +86,7 @@ export function useVinylPicking(
 
   /** Seç aracında boşluğa tıklayınca seçimi bırak. */
   const onPointerMissed = () => {
-    if (useAppStore.getState().vinylTool === 'select') useAppStore.getState().selectLayer(null);
+    if (useAppStore.getState().vinylTool === 'select') useAppStore.getState().selectLayers([]);
   };
 
   return { onClick, onPointerMissed };
