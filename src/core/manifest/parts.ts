@@ -6,6 +6,8 @@ export type PartDefinition = {
   weightKg: number;
   downforce?: number;
   trackWidthLimitMm?: number;
+  /** Çamurluk dudağının stok gövdeden dışarı taşması (fitment kontrolü). */
+  fenderOutsetMm?: number;
 };
 
 export type PartsCatalog = Record<string, Record<string, PartDefinition>>;
@@ -13,7 +15,7 @@ export type PartsCatalog = Record<string, Record<string, PartDefinition>>;
 const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
-const OPTIONAL_NUMBERS = ['downforce', 'trackWidthLimitMm'] as const;
+const OPTIONAL_NUMBERS = ['downforce', 'trackWidthLimitMm', 'fenderOutsetMm'] as const;
 
 /** Parça kataloğunu doğrular ve manifestteki her slot seçeneğinin tanımlı olduğunu kontrol eder. */
 export function validatePartsCatalog(input: unknown, manifest: CarManifest): string[] {

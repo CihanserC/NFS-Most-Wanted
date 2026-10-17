@@ -1,6 +1,53 @@
 # İlerleme
 
-## Aktif faz: Faz 3 — Jant, Lastik, Fren
+## Aktif faz: Faz 4 — Atölye Atmosferi
+
+## Faz 3 — Jant, Lastik, Fren ✅ (2026-10-17)
+
+**Yapılanlar**
+
+- **Veri:** `src/data/wheels/`
+  - `limits.json`: çap 14–22" tam inç, genişlik 6–12" (0,5 adım), ET -30…+45, lastik genişliği/yanak oranı, disk aralığı.
+  - `styles.json`: stil başına kol sayısı ve dudak aralığı, varsayılan kaplama.
+  - `defaults.json`: stok kurulum, 15×7 / 15×8 klasik 5 kol, 225/60 – 245/60, beyaz yazılı lastik.
+- **BuildState v3:** `wheels {front, rear}`, `tires {front, rear}`, `brakes` eklendi; v2 → v3 migration yazıldı. Tüm değerler `normalizeFitment` ile adımlanır/sınırlanır. Disk, küçük janta sığacak şekilde otomatik küçültülür. Drag radial ön aksta engellenir.
+- **Saf hesaplar** (`core/wheels/`):
+  - Lastik dış çapı.
+  - Esnetilmiş / normal / dolgun görünüm (genişlik oranı).
+  - Jant çapına göre en büyük disk.
+  - Gövdenin lastik büyüklüğüne göre yükselmesi ve eğimi (rake).
+  - Fitment uyarıları: çamurluk kemerine sürtme, çamurluktan taşma (widebody/flare payı dahil), iç davlumbaza sürtme. Faz 7 için alçaltma parametresi şimdiden var.
+- **Prosedürel jant** (6 stil): klasik 5 kol, çelik + dog-dish kapak, örgü (çapraz kollar), derin 3 parça (cıvatalı), modern çok kol, drag (delikli).
+  - Lathe ile namlu ve dudak; extrude ile yüz/kol pencereleri; dish bükmesi; bijonlar ve merkez kapak.
+  - Kaplamalar: krom, parlatılmış, gunmetal, mat siyah, boyalı, iki tonlu (boyalı yüz + işlenmiş dudak).
+- **Lastik:** lathe profil. Yanak, genişlik/jant oranına göre şişer veya esner. Prosedürel diş normal haritası (sokak / yarı slik / drag radial). Yanak dokusu: düz siyah, beyaz yazılı (kurgusal "IRONHOOF RADIAL T/A"), beyaz bant.
+- **Fren:** disk (düz / delikli / çizgili doku), şapka, 2/4/6 piston kaliper (boy ve renk ayarlanabilir), kollar arasından görünür.
+- **Önbellek:** jant/lastik/fren geometrileri LRU önbellekte (aynı parametre tekrar üretilmez, eskiler `dispose` edilir). Kaplama ve renk geometriyi etkilemez.
+- **UI:** Jantlar & Lastikler editörü.
+  - Ön/arka bağlı veya staggered (aks sekmeleri).
+  - Stil, ölçü, offset, dudak, kol sayısı, kaplama, renk, merkez kapak, bijon.
+  - Lastik ölçüsü/yanak/tip ve hesaplanan dış çap.
+  - Fren ayarları ve canlı fitment uyarıları.
+  - Aksa göre kamera.
+- **Testler (104):**
+  - Değer sınırları, ölçü hesapları ve fitment senaryoları.
+  - Tüm stillerin tüm çap × genişlik × kol × dudak uçlarında geçerli geometri üretmesi (300+ kombinasyon).
+  - Kaliperin her çapta kol pencereleriyle örtüşmesi (görünürlük) ve önbellek/LRU davranışı.
+  - Lastik profili, v2 → v3 migration, store undo/önizleme.
+
+**Notlar / kararlar**
+
+- **Dudak derinliği:** Kollar bağlantı pedinden içe (kalipere doğru) bükülemez, gerçek jantlardaki gibi. Bu yüzden ulaşılabilecek dudak derinliği genişlik ve offset ile sınırlıdır; UI bunu "ulaşılan dudak" notuyla gösterir. Bu sayede kaliper hiçbir ayarda kollara değmez.
+- **Kaliper yerleşimi:** kaliper göbeğe sabittir; offset değişince jant hareket eder, fren hareket etmez.
+- **Fitment ölçüsü:** çamurluk dudağı, tekerlek merkezi yüksekliğindeki gövde yan yüzeyi + `fenderOutsetMm` (parça kataloğunda: stok 0, hafif flare 25, widebody 60 mm).
+- **Boya pulları:** yoğunluğu en fazla %20 yüzey kaplayacak şekilde sınırlandı ve metalik pul tonu yumuşatıldı. Yakın kamerada pullar fazla belirgindi.
+- **Klavye:** kaydırıcı/onay kutusu odaktayken de Esc ve geri al/yinele çalışıyor.
+
+**Eksik / bilinen sorunlar**
+
+- Tekerlekler atölyede dönmüyor (test sürüşünde Faz 8).
+- Yanak yazısı sadece dış yanakta; iç yanak düz.
+- Fitment, gövdenin kaba placeholder ölçülerine göre hesaplanıyor; gerçek modelde (Faz 10) çamurluk ölçüleri manifestten okunmalı.
 
 ## Faz 2 — Boya Sistemi ✅ (2026-10-17)
 
@@ -57,7 +104,6 @@
 
 **Eksik / bilinen sorunlar**
 
-- Tekerlekler basit silindir (Faz 3).
 - Gamepad navigasyonu yok (UI cilası sonraki fazlarda).
 - Placeholder kaba: tampon uçları, kaput kenarları, kabin-gövde birleşimi basit.
 - Undo sonrası menü vurgusu önceki öğede kalabiliyor (önizleme yok, sadece görsel).

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getCar } from '../../data/cars';
-import { createDefaultBuild, normalizeParts, withPaint, withPart } from './build';
+import { createDefaultBuild, normalizeParts, withFitment, withPaint, withPart } from './build';
 import { emptyHistory, record, redo, undo } from './history';
 import { BuildMigrationError, migrateBuild } from './migrate';
 import { deserializeBuild, serializeBuild } from './serialize';
@@ -68,6 +68,32 @@ describe('migration', () => {
     const base = createDefaultBuild(manifest);
     const b = withPaint(base, { roof: { ...base.paint.roof!, type: 'chameleon' } });
     expect(deserializeBuild(serializeBuild(b), manifest).paint.roof?.type).toBe('chameleon');
+  });
+
+  it('v2 kaydına varsayılan jant/lastik/fren eklenir, boya korunur', () => {
+    const base = createDefaultBuild(manifest);
+    const { wheels: _w, tires: _t, brakes: _b, ...v2 } = { ...base, version: 2 };
+    const b = deserializeBuild(JSON.stringify(v2), manifest);
+    expect(b.version).toBe(CURRENT_BUILD_VERSION);
+    expect(b.wheels).toEqual(base.wheels);
+    expect(b.tires).toEqual(base.tires);
+    expect(b.brakes).toEqual(base.brakes);
+    expect(b.paint).toEqual(base.paint);
+  });
+
+  it('jant/lastik/fren JSON gidiş-dönüşünde korunur', () => {
+    const base = createDefaultBuild(manifest);
+    const b = withFitment(base, {
+      wheels: {
+        front: { ...base.wheels.front, style: 'mesh', diameterIn: 18 },
+        rear: base.wheels.rear,
+      },
+      brakes: { ...base.brakes, rotor: 'drilled', pistons: 6 },
+    });
+    const back = deserializeBuild(serializeBuild(b), manifest);
+    expect(back.wheels.front.style).toBe('mesh');
+    expect(back.brakes.pistons).toBe(6);
+    expect(back).toEqual(b);
   });
 
   it('gelecekteki sürümü ve sürümsüz kaydı reddeder', () => {

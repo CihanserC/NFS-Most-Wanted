@@ -117,6 +117,16 @@ export function validateManifest(input: unknown): ValidationResult<CarManifest> 
       }
   }
 
+  // Jant editörü kameraları (opsiyonel)
+  if (m.wheelCameras !== undefined) {
+    const wc = m.wheelCameras;
+    if (!isObj(wc)) err('wheelCameras', 'nesne olmalı');
+    else
+      for (const axle of ['front', 'rear'])
+        if (!isStr(wc[axle]) || !camIds.has(wc[axle] as string))
+          err(`wheelCameras.${axle}`, 'cameraPresets içinde tanımlı olmalı');
+  }
+
   // Slotlar
   const slots = m.slots;
   if (!isObj(slots) || Object.keys(slots).length === 0) err('slots', 'boş olmayan nesne olmalı');

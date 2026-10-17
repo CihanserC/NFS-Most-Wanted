@@ -38,6 +38,10 @@
     "mirrors": "mirror",
     "bumpers": "front_three_quarter"
   },
+  "wheelCameras": {
+    "front": "wheel_front",
+    "rear": "wheel_rear"
+  },
   "defaultCamera": "overview",
   "cameraPresets": {
     "overview": {
@@ -61,8 +65,8 @@
       "target": [0, 0.55, 0]
     },
     "wheel_front": {
-      "position": [2.8, 0.7, 2.9],
-      "target": [0.8, 0.4, 1.42]
+      "position": [2.6, 0.75, 3.2],
+      "target": [0.75, 0.38, 1.6]
     },
     "mirror": {
       "position": [2.4, 1.4, 1.8],
@@ -99,6 +103,10 @@
     "paint_side": {
       "position": [5.4, 1.6, 3.6],
       "target": [0, 0.6, 1.2]
+    },
+    "wheel_rear": {
+      "position": [3.6, 0.9, 0.4],
+      "target": [0.6, 0.4, -1.2]
     }
   },
   "slots": {

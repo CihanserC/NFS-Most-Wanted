@@ -1,11 +1,20 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { createDefaultBuild, isValidPart, withPaint, withPart } from '../build/build';
+import {
+  createDefaultBuild,
+  fitmentOf,
+  isValidPart,
+  withFitment,
+  withPaint,
+  withPart,
+} from '../build/build';
 import { emptyHistory, record, redo, undo, type History } from '../build/history';
 import type { BuildState } from '../build/types';
 import type { CarManifest } from '../manifest/types';
 import { sanitizePaint } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
+import type { FitmentState } from '../wheels/types';
+import { normalizeFitment } from '../wheels/wheels';
 
 export type PartPreview = { slotId: string; optionId: string };
 /** Sürükleme/hover sırasında geçici boya; geçmişe yazılmaz. */
@@ -18,6 +27,8 @@ export type BuildStoreState = {
   /** Üzerine gelinen parça; onaylanmazsa clearPreview ile geri alınır. */
   preview: PartPreview | null;
   paintPreview: PaintPreview | null;
+  /** Jant/lastik/fren geçici önizlemesi (normalize edilmiş tam durum). */
+  fitmentPreview: FitmentState | null;
   setPart: (slotId: string, optionId: string) => void;
   previewPart: (slotId: string, optionId: string) => void;
   clearPreview: () => void;
@@ -27,6 +38,10 @@ export type BuildStoreState = {
   /** Geçici boyayı kalıcı yapar (slider bırakılınca vb.). */
   commitPaintPreview: () => void;
   clearPaintPreview: () => void;
+  setFitment: (patch: Partial<FitmentState>) => void;
+  previewFitment: (patch: Partial<FitmentState>) => void;
+  commitFitmentPreview: () => void;
+  clearFitmentPreview: () => void;
   undo: () => void;
   redo: () => void;
   loadBuild: (build: BuildState) => void;
@@ -51,6 +66,7 @@ export const createBuildStore = (manifest: CarManifest) => {
       history: emptyHistory<BuildState>(),
       preview: null,
       paintPreview: null,
+      fitmentPreview: null,
 
       setPart: (slotId, optionId) => {
         const { build, history } = get();
@@ -108,6 +124,33 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.paintPreview = null;
         }),
 
+      setFitment: (patch) => {
+        const { build, history } = get();
+        const next = withFitment(build, patch);
+        const changed = JSON.stringify(fitmentOf(next)) !== JSON.stringify(fitmentOf(build));
+        set((s) => {
+          s.fitmentPreview = null;
+          if (!changed) return;
+          s.history = record(history, build);
+          s.build = next;
+        });
+      },
+
+      previewFitment: (patch) =>
+        set((s) => {
+          s.fitmentPreview = normalizeFitment({ ...fitmentOf(get().build), ...patch });
+        }),
+
+      commitFitmentPreview: () => {
+        const p = get().fitmentPreview;
+        if (p) get().setFitment(p);
+      },
+
+      clearFitmentPreview: () =>
+        set((s) => {
+          s.fitmentPreview = null;
+        }),
+
       undo: () => {
         const r = undo(get().history, get().build);
         if (!r) return;
@@ -116,6 +159,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.build = r.present;
           s.preview = null;
           s.paintPreview = null;
+          s.fitmentPreview = null;
         });
       },
 
@@ -127,6 +171,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.build = r.present;
           s.preview = null;
           s.paintPreview = null;
+          s.fitmentPreview = null;
         });
       },
 
@@ -136,6 +181,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.history = emptyHistory();
           s.preview = null;
           s.paintPreview = null;
+          s.fitmentPreview = null;
         }),
     })),
   );

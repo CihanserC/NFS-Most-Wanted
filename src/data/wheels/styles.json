@@ -1,0 +1,38 @@
+{
+  "classic_5spoke": {
+    "spokes": null,
+    "fixedSpokes": 5,
+    "lipIn": { "min": 0.5, "max": 2, "default": 1 },
+    "defaultFinish": "polished"
+  },
+  "steel_dogdish": {
+    "spokes": { "min": 6, "max": 10, "default": 8 },
+    "fixedSpokes": null,
+    "lipIn": { "min": 0, "max": 1, "default": 0.5 },
+    "defaultFinish": "painted"
+  },
+  "mesh": {
+    "spokes": { "min": 10, "max": 20, "default": 16 },
+    "fixedSpokes": null,
+    "lipIn": { "min": 0.5, "max": 3, "default": 1.5 },
+    "defaultFinish": "two_tone"
+  },
+  "deep_dish_3pc": {
+    "spokes": { "min": 5, "max": 10, "default": 6 },
+    "fixedSpokes": null,
+    "lipIn": { "min": 2, "max": 5, "default": 3.5 },
+    "defaultFinish": "chrome"
+  },
+  "modern_multispoke": {
+    "spokes": { "min": 10, "max": 20, "default": 14 },
+    "fixedSpokes": null,
+    "lipIn": { "min": 0, "max": 1, "default": 0.25 },
+    "defaultFinish": "gunmetal"
+  },
+  "drag": {
+    "spokes": { "min": 5, "max": 8, "default": 6 },
+    "fixedSpokes": null,
+    "lipIn": { "min": 0, "max": 1.5, "default": 0.5 },
+    "defaultFinish": "polished"
+  }
+}

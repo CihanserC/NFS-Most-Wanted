@@ -1,0 +1,73 @@
+.we .pe-type:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.we-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gm-text);
+  cursor: pointer;
+}
+
+.we-check input {
+  accent-color: var(--gm-accent);
+}
+
+.we-row {
+  display: flex;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.we-issues {
+  margin: 4px 0 0;
+  padding: 8px 10px 8px 26px;
+  font-size: 12px;
+  color: #ffb347;
+  background: rgba(255, 140, 0, 0.08);
+  border-left: 2px solid #ffb347;
+}
+
+.we-info {
+  margin: 6px 0 10px;
+  font-size: 12px;
+  color: var(--gm-dim);
+}
+
+.we-color {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.we .we-hex {
+  flex: none;
+  width: 90px;
+}
+
+.we-swatches {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+}
+
+.we-swatches button {
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.we-swatches button:hover,
+.we-swatches button.is-active {
+  outline: 2px solid var(--gm-accent);
+}
+
+.we h3 {
+  margin-top: 10px;
+}

@@ -6,6 +6,7 @@ import { useAppStore } from '../../core/store/appStore';
 import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { sceneConfig } from '../scene/sceneConfig';
+import { categoryKind } from '../ui/categories';
 
 type Transition = {
   fromPos: Vector3;
@@ -21,8 +22,11 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2
 function usePresetId(): string {
   const slotId = useAppStore((s) => s.slotId);
   const paintZone = useAppStore((s) => s.paintZone);
+  const wheels = useAppStore((s) => categoryKind(s.categoryId) === 'wheels');
+  const wheelAxle = useAppStore((s) => s.wheelAxle);
   const carId = useBuildStore((s) => s.build.carId);
   const { manifest } = getCar(carId);
+  if (wheels) return manifest.wheelCameras?.[wheelAxle] ?? manifest.defaultCamera;
   if (paintZone) return manifest.paintZoneCameras?.[paintZone] ?? manifest.defaultCamera;
   return (slotId && manifest.slots[slotId]?.camera) || manifest.defaultCamera;
 }

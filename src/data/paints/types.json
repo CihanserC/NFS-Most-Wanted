@@ -18,7 +18,7 @@
     "clearcoat": 1,
     "clearcoatRoughness": [0.22, 0.015],
     "flakeStrength": 0.45,
-    "flakeTint": 0.55,
+    "flakeTint": 0.3,
     "fresnel": 0,
     "sheen": 0,
     "iridescence": 0,

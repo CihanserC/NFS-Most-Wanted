@@ -1,6 +1,8 @@
 import type { CarManifest } from '../manifest/types';
 import { normalizePaintMap } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
+import type { FitmentState } from '../wheels/types';
+import { normalizeFitment } from '../wheels/wheels';
 import { CURRENT_BUILD_VERSION, type BuildState } from './types';
 
 export const DEFAULT_BUILD_NAME = 'Yeni Proje';
@@ -16,6 +18,7 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     name: DEFAULT_BUILD_NAME,
     parts: defaultParts(manifest),
     paint: normalizePaintMap({}, manifest.paintZones),
+    ...normalizeFitment({}),
     updatedAt: now.toISOString(),
   };
 }
@@ -55,4 +58,21 @@ export function withPaint(
   now = new Date(),
 ): BuildState {
   return { ...build, paint: { ...build.paint, ...paint }, updatedAt: now.toISOString() };
+}
+
+export function fitmentOf(build: Pick<BuildState, 'wheels' | 'tires' | 'brakes'>): FitmentState {
+  return { wheels: build.wheels, tires: build.tires, brakes: build.brakes };
+}
+
+/** Kısmi tekerlek değişikliğini uygular; sonuç her zaman normalize edilmiş olur. */
+export function withFitment(
+  build: BuildState,
+  patch: Partial<FitmentState>,
+  now = new Date(),
+): BuildState {
+  return {
+    ...build,
+    ...normalizeFitment({ ...fitmentOf(build), ...patch }),
+    updatedAt: now.toISOString(),
+  };
 }

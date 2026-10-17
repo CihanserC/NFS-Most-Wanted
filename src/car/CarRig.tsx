@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { useBuildStore, useEffectiveParts } from '../core/store/stores';
+import { bodyLift } from '../core/wheels/fitment';
+import { useBuildStore, useEffectiveFitment, useEffectiveParts } from '../core/store/stores';
 import { getCar } from '../data/cars';
 import { CarMaterialsProvider } from './materials/CarMaterialsContext';
 import { PaintSync } from './materials/PaintSync';
 import { PlaceholderBody } from './procedural/PlaceholderBody';
-import { PlaceholderWheels } from './procedural/PlaceholderWheels';
+import { ProceduralWheels } from './procedural/wheels/ProceduralWheels';
 import { slotRenderers } from './slots/registry';
 import { isRenderedSlot } from './slots/slotIds';
 
@@ -13,7 +14,15 @@ export function CarRig() {
   const carId = useBuildStore((s) => s.build.carId);
   const car = getCar(carId);
   const parts = useEffectiveParts();
+  const fitment = useEffectiveFitment();
   const slotIds = Object.keys(car.manifest.slots);
+  const { wheels, dimensions } = car.manifest;
+  // Lastik büyüdükçe gövde yükselir; ön/arka farkı eğim (rake) verir.
+  const { lift, pitch } = bodyLift(
+    fitment,
+    { front: wheels.FL.position[1], rear: wheels.RL.position[1] },
+    dimensions.wheelbase,
+  );
 
   useEffect(() => {
     if (car.manifest.model !== null)
@@ -27,9 +36,9 @@ export function CarRig() {
   return (
     <CarMaterialsProvider paintZones={car.manifest.paintZones}>
       <PaintSync />
-      <group name={car.manifest.id}>
+      <group name={car.manifest.id} position-y={lift} rotation-x={pitch}>
         <PlaceholderBody car={car} parts={parts} />
-        <PlaceholderWheels car={car} />
+        <ProceduralWheels car={car} fitment={fitment} />
         {slotIds.filter(isRenderedSlot).map((slotId) => {
           const Renderer = slotRenderers[slotId];
           const option = parts[slotId];

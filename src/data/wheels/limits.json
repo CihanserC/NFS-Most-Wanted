@@ -1,0 +1,10 @@
+{
+  "diameterIn": { "min": 14, "max": 22, "step": 1 },
+  "widthIn": { "min": 6, "max": 12, "step": 0.5 },
+  "offsetMm": { "min": -30, "max": 45, "step": 1 },
+  "tireWidthMm": { "min": 155, "max": 345, "step": 5 },
+  "tireAspect": { "min": 25, "max": 80, "step": 5 },
+  "discMm": { "min": 240, "max": 420, "step": 5 },
+  "discRimClearanceMm": 75,
+  "stretchRatio": { "stretched": 0.95, "meaty": 1.15 }
+}

@@ -2,6 +2,7 @@ import { useRef, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { MathUtils, type Group } from 'three';
 import { useAppStore } from '../../core/store/appStore';
+import { categoryKind } from '../ui/categories';
 import { sceneConfig } from './sceneConfig';
 
 const TWO_PI = Math.PI * 2;
@@ -13,7 +14,9 @@ const TWO_PI = Math.PI * 2;
 export function Turntable({ children }: { children: ReactNode }) {
   const ref = useRef<Group>(null);
   const enabled = useAppStore((s) => s.turntable);
-  const focused = useAppStore((s) => s.slotId !== null || s.paintZone !== null);
+  const focused = useAppStore(
+    (s) => s.slotId !== null || s.paintZone !== null || categoryKind(s.categoryId) === 'wheels',
+  );
   const { speed, returnDamping } = sceneConfig.turntable;
 
   useFrame((_, delta) => {

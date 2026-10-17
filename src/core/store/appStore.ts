@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
+import type { Axle } from '../wheels/types';
+
 export type AppMode = 'garage' | 'drive';
 
 export type AppState = {
@@ -15,11 +17,16 @@ export type AppState = {
   /** Boya kategorisinde seçili bölge. */
   paintZone: string | null;
   lastPaintZone: string | null;
+  /** Jant editöründe düzenlenen aks ve ön/arka bağlı mı (staggered değil). */
+  wheelAxle: Axle;
+  wheelsLinked: boolean;
   setMode: (mode: AppMode) => void;
   toggleTurntable: () => void;
   selectCategory: (categoryId: string | null) => void;
   selectSlot: (slotId: string | null) => void;
   selectPaintZone: (zone: string | null) => void;
+  setWheelAxle: (axle: Axle) => void;
+  setWheelsLinked: (linked: boolean) => void;
 };
 
 export const createAppStore = () =>
@@ -33,6 +40,8 @@ export const createAppStore = () =>
       lastSlotId: null,
       paintZone: null,
       lastPaintZone: null,
+      wheelAxle: 'front',
+      wheelsLinked: true,
       setMode: (mode) =>
         set((s) => {
           s.mode = mode;
@@ -59,6 +68,15 @@ export const createAppStore = () =>
         set((s) => {
           if (s.paintZone !== null) s.lastPaintZone = s.paintZone;
           s.paintZone = zone;
+        }),
+      setWheelAxle: (axle) =>
+        set((s) => {
+          s.wheelAxle = axle;
+        }),
+      setWheelsLinked: (linked) =>
+        set((s) => {
+          s.wheelsLinked = linked;
+          if (linked) s.wheelAxle = 'front';
         }),
     })),
   );

@@ -22,6 +22,9 @@ export type PaintTypeProfile = {
 /** Pul boyutu -> metre başına hücre sayısı [ince, iri]. */
 export const FLAKE_CELLS_PER_METER: [number, number] = [700, 180];
 
+/** Pul yoğunluğu 1 iken yüzey hücrelerinin en fazla bu kadarı pul olur (gerisi taban boya). */
+export const MAX_FLAKE_COVERAGE = 0.2;
+
 export const paintTypeProfiles = paintTypesJson as Record<PaintType, PaintTypeProfile>;
 
 /** Shader'daki uPaintMode değeri; PAINT_TYPES sırası. */
@@ -69,7 +72,7 @@ export function resolvePaint(p: PaintConfig): ResolvedPaint {
     iridescenceIOR: prof.iridescenceIOR,
     iridescenceThicknessRange: prof.iridescenceThicknessRange,
     flakeScale: range(FLAKE_CELLS_PER_METER, p.flakeSize),
-    flakeDensity: hasFlakes ? p.flakeDensity : 0,
+    flakeDensity: hasFlakes ? p.flakeDensity * MAX_FLAKE_COVERAGE : 0,
     flakeStrength: prof.flakeStrength,
     flakeTint: prof.flakeTint,
     flakeColor: p.flakeColor,

@@ -1,0 +1,33 @@
+{
+  "wheels": {
+    "front": {
+      "style": "classic_5spoke",
+      "diameterIn": 15,
+      "widthIn": 7,
+      "offsetMm": 10,
+      "lipIn": 1,
+      "spokes": 5,
+      "finish": "polished",
+      "color": "#1a1b1f",
+      "centerCap": true,
+      "lugNuts": true
+    },
+    "rear": {
+      "style": "classic_5spoke",
+      "diameterIn": 15,
+      "widthIn": 8,
+      "offsetMm": 15,
+      "lipIn": 1,
+      "spokes": 5,
+      "finish": "polished",
+      "color": "#1a1b1f",
+      "centerCap": true,
+      "lugNuts": true
+    }
+  },
+  "tires": {
+    "front": { "widthMm": 225, "aspect": 60, "sidewall": "raised_white_letters", "type": "street" },
+    "rear": { "widthMm": 245, "aspect": 60, "sidewall": "raised_white_letters", "type": "street" }
+  },
+  "brakes": { "discMm": 280, "rotor": "plain", "pistons": 2, "caliperColor": "#b3130a" }
+}

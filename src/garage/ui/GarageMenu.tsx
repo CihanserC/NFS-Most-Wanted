@@ -5,6 +5,7 @@ import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
+import { WheelsEditor } from './wheels/WheelsEditor';
 import './garageMenu.css';
 
 type Item = { id: string; label: string; disabled?: boolean; meta?: string; installed?: boolean };
@@ -12,8 +13,12 @@ type Item = { id: string; label: string; disabled?: boolean; meta?: string; inst
 /**
  * categories -> (parça kategorisi) slots -> options
  *            -> (boya kategorisi) zones -> paint (editör)
+ *            -> (jant kategorisi) wheels (editör)
  */
-type Level = 'categories' | 'slots' | 'options' | 'zones' | 'paint';
+type Level = 'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels';
+
+/** Kendi kontrolleri olan (liste olmayan) seviyeler. */
+const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels'];
 
 const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
 
@@ -24,19 +29,22 @@ export function GarageMenu() {
   const carId = useBuildStore((s) => s.build.carId);
   const parts = useBuildStore((s) => s.build.parts);
   const paint = useBuildStore((s) => s.build.paint);
-  const { setPart, previewPart, clearPreview, clearPaintPreview } = useBuildStore.getState();
+  const { setPart, previewPart, clearPreview, clearPaintPreview, clearFitmentPreview } =
+    useBuildStore.getState();
   const car = getCar(carId);
   const category = menuCategories.find((c) => c.id === categoryId);
 
   const level: Level = !category
     ? 'categories'
-    : category.kind === 'paint'
-      ? paintZone
-        ? 'paint'
-        : 'zones'
-      : slotId
-        ? 'options'
-        : 'slots';
+    : category.kind === 'wheels'
+      ? 'wheels'
+      : category.kind === 'paint'
+        ? paintZone
+          ? 'paint'
+          : 'zones'
+        : slotId
+          ? 'options'
+          : 'slots';
 
   const items: Item[] = useMemo(() => {
     switch (level) {
@@ -67,6 +75,7 @@ export function GarageMenu() {
           meta: paint[z] ? t(`paintType.${paint[z].type}`) : undefined,
         }));
       case 'paint':
+      case 'wheels':
         return [];
     }
   }, [level, category, slotId, car, parts, paint]);
@@ -122,11 +131,20 @@ export function GarageMenu() {
   const back = useCallback(() => {
     clearPreview();
     clearPaintPreview();
+    clearFitmentPreview();
     setHl({ key: '', index: 0 });
     if (level === 'options') selectSlot(null);
     else if (level === 'paint') selectPaintZone(null);
-    else if (level === 'slots' || level === 'zones') selectCategory(null);
-  }, [level, clearPreview, clearPaintPreview, selectSlot, selectPaintZone, selectCategory]);
+    else if (level === 'slots' || level === 'zones' || level === 'wheels') selectCategory(null);
+  }, [
+    level,
+    clearPreview,
+    clearPaintPreview,
+    clearFitmentPreview,
+    selectSlot,
+    selectPaintZone,
+    selectCategory,
+  ]);
 
   const move = useCallback(
     (delta: number) => {
@@ -145,19 +163,23 @@ export function GarageMenu() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const typing =
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLSelectElement;
-      if (typing) return;
+      // Metin alanlarında tüm tuşlar alana aittir. Kaydırıcı/onay kutusu odaktayken
+      // Esc ve geri al/yinele yine çalışır; ok tuşları kontrolün kendisine kalır.
+      const t = e.target;
+      const textEntry =
+        t instanceof HTMLTextAreaElement ||
+        t instanceof HTMLSelectElement ||
+        (t instanceof HTMLInputElement && !['range', 'checkbox', 'button'].includes(t.type));
+      if (textEntry) return;
+      const onControl = t instanceof HTMLInputElement;
       const ctrl = e.ctrlKey || e.metaKey;
       const key = e.key.toLowerCase();
       if (ctrl && key === 'z' && !e.shiftKey) useBuildStore.getState().undo();
       else if (ctrl && (key === 'y' || (key === 'z' && e.shiftKey)))
         useBuildStore.getState().redo();
       else if (e.key === 'Escape') back();
-      // Boya editöründe ok/Enter/Backspace kontrollerin kendisine kalır.
-      else if (level === 'paint') return;
+      // Editörlerde ok/Enter/Backspace kontrollerin kendisine kalır.
+      else if (EDITOR_LEVELS.includes(level) || onControl) return;
       else if (e.key === 'ArrowDown') move(1);
       else if (e.key === 'ArrowUp') move(-1);
       else if (e.key === 'Enter') activate(highlight);
@@ -172,7 +194,7 @@ export function GarageMenu() {
   const title =
     level === 'categories'
       ? car.manifest.displayName
-      : level === 'slots' || level === 'zones'
+      : level === 'slots' || level === 'zones' || level === 'wheels'
         ? categoryLabel(categoryId as string)
         : level === 'paint'
           ? t(`paintZone.${paintZone}`)
@@ -181,7 +203,7 @@ export function GarageMenu() {
 
   return (
     <div className="gm-root">
-      <div className={`gm-panel${level === 'paint' ? ' is-wide' : ''}`}>
+      <div className={`gm-panel${EDITOR_LEVELS.includes(level) ? ' is-wide' : ''}`}>
         <div className="gm-header">
           {level !== 'categories' && (
             <button type="button" className="gm-back" onClick={back} aria-label={t('ui.back')}>
@@ -197,7 +219,9 @@ export function GarageMenu() {
             </div>
           </div>
         </div>
-        {level === 'paint' && paintZone ? (
+        {level === 'wheels' ? (
+          <WheelsEditor />
+        ) : level === 'paint' && paintZone ? (
           <PaintEditor zone={paintZone} zones={car.manifest.paintZones} />
         ) : (
           <ul
@@ -229,8 +253,8 @@ export function GarageMenu() {
         {hintKey && hasTranslation(hintKey) && <div className="gm-note">{t(hintKey)}</div>}
       </div>
       <div className="gm-hints">
-        {level !== 'paint' && <span>{t('ui.hint.navigate')}</span>}
-        {level !== 'paint' && <span>{t('ui.hint.confirm')}</span>}
+        {!EDITOR_LEVELS.includes(level) && <span>{t('ui.hint.navigate')}</span>}
+        {!EDITOR_LEVELS.includes(level) && <span>{t('ui.hint.confirm')}</span>}
         <span>{t('ui.hint.back')}</span>
         <span>{t('ui.hint.undo')}</span>
       </div>
