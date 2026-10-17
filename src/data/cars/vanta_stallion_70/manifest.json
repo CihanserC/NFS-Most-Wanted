@@ -1,0 +1,112 @@
+{
+  "id": "vanta_stallion_70",
+  "displayName": "Vanta Stallion '70",
+  "units": "meters",
+  "forwardAxis": "+Z",
+  "dimensions": { "length": 4.75, "width": 1.88, "height": 1.32, "wheelbase": 2.74 },
+  "massKg": 1560,
+  "drivetrain": "RWD",
+  "model": null,
+  "wheels": {
+    "FL": { "position": [0.78, 0.33, 1.42] },
+    "FR": { "position": [-0.78, 0.33, 1.42] },
+    "RL": { "position": [0.79, 0.33, -1.32] },
+    "RR": { "position": [-0.79, 0.33, -1.32] },
+    "wellClearanceMm": { "front": 60, "rear": 75 }
+  },
+  "paintZones": ["body", "roof", "hood", "mirrors", "bumpers"],
+  "defaultCamera": "overview",
+  "cameraPresets": {
+    "overview": { "position": [5.2, 1.6, 6.0], "target": [0, 0.6, 0] },
+    "front_three_quarter": { "position": [3.2, 1.2, 4.8], "target": [0, 0.55, 1.4] },
+    "front_low": { "position": [1.2, 0.55, 4.6], "target": [0, 0.5, 2.0] },
+    "hood_top": { "position": [1.8, 2.5, 3.8], "target": [0, 0.9, 1.3] },
+    "side": { "position": [5.4, 1.0, 0], "target": [0, 0.55, 0] },
+    "wheel_front": { "position": [2.8, 0.7, 2.9], "target": [0.8, 0.4, 1.42] },
+    "mirror": { "position": [2.4, 1.4, 1.8], "target": [0.9, 1.0, 0.45] },
+    "roof_top": { "position": [3.0, 3.2, 0.6], "target": [0, 1.1, -0.5] },
+    "rear_three_quarter": { "position": [3.4, 1.3, -4.8], "target": [0, 0.55, -1.4] },
+    "rear_low": { "position": [1.2, 0.55, -4.6], "target": [0, 0.5, -2.0] },
+    "rear_low_side": { "position": [2.9, 0.55, -3.9], "target": [0.4, 0.35, -1.6] },
+    "rear_top": { "position": [2.0, 2.6, -4.0], "target": [0, 1.0, -1.4] },
+    "engine_bay": { "position": [1.2, 2.5, 2.9], "target": [0, 0.9, 1.25] },
+    "interior": { "position": [1.9, 2.0, -0.4], "target": [0, 0.8, 0.1] }
+  },
+  "slots": {
+    "bumper_front": {
+      "options": ["stock_chrome", "chrome_delete", "pro_touring_lip"],
+      "default": "stock_chrome",
+      "camera": "front_three_quarter"
+    },
+    "bumper_rear": {
+      "options": ["stock_chrome", "bumper_delete", "diffuser"],
+      "default": "stock_chrome",
+      "camera": "rear_three_quarter"
+    },
+    "grille": { "options": ["stock", "mesh", "billet"], "default": "stock", "camera": "front_low" },
+    "chin_spoiler": {
+      "options": ["none", "classic", "carbon_splitter"],
+      "default": "none",
+      "camera": "front_low"
+    },
+    "hood": {
+      "options": ["stock", "cowl_induction", "shaker_scoop", "blower_cutout"],
+      "default": "stock",
+      "camera": "hood_top"
+    },
+    "hood_pins": {
+      "options": ["none", "chrome", "black"],
+      "default": "none",
+      "camera": "hood_top"
+    },
+    "side_skirts": {
+      "options": ["none", "slim", "pro_touring"],
+      "default": "none",
+      "camera": "side"
+    },
+    "fenders": {
+      "options": ["stock", "mild_flare", "widebody"],
+      "default": "stock",
+      "camera": "wheel_front"
+    },
+    "spoiler_rear": {
+      "options": ["none", "ducktail", "classic_wing", "high_wing"],
+      "default": "none",
+      "camera": "rear_three_quarter"
+    },
+    "rear_louvers": { "options": ["none", "classic"], "default": "none", "camera": "rear_top" },
+    "roof": { "options": ["painted", "vinyl_top"], "default": "painted", "camera": "roof_top" },
+    "mirrors": {
+      "options": ["chrome_bullet", "painted_racing", "carbon"],
+      "default": "chrome_bullet",
+      "camera": "mirror"
+    },
+    "headlights": {
+      "options": ["round_halogen", "led_halo", "hidden"],
+      "default": "round_halogen",
+      "camera": "front_low"
+    },
+    "taillights": {
+      "options": ["stock", "smoked", "led_strip"],
+      "default": "stock",
+      "camera": "rear_low"
+    },
+    "exhaust": {
+      "options": ["rear_dual", "side_pipes", "quad"],
+      "default": "rear_dual",
+      "camera": "rear_low_side"
+    },
+    "exhaust_tips": {
+      "options": ["round_chrome", "oval", "black_ceramic", "turn_down"],
+      "default": "round_chrome",
+      "camera": "rear_low_side"
+    },
+    "fuel_cap": { "options": ["stock", "racing"], "default": "stock", "camera": "rear_low" },
+    "engine": {
+      "options": ["stock_v8", "blower_v8", "air_cleaner", "chrome_covers"],
+      "default": "stock_v8",
+      "camera": "engine_bay"
+    },
+    "interior": { "options": ["stock", "roll_cage"], "default": "stock", "camera": "interior" }
+  }
+}

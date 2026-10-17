@@ -1,0 +1,176 @@
+:root {
+  --gm-bg: rgba(8, 9, 11, 0.82);
+  --gm-bg-item: rgba(255, 255, 255, 0.04);
+  --gm-line: rgba(255, 255, 255, 0.12);
+  --gm-text: #e9e9ec;
+  --gm-dim: #8a8d96;
+  --gm-accent: #ff7a18;
+  --gm-accent-2: #3df2ff;
+  --gm-font: Bahnschrift, 'DIN Alternate', 'Arial Narrow', system-ui, sans-serif;
+}
+
+.gm-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--gm-font);
+  color: var(--gm-text);
+  user-select: none;
+}
+
+.gm-panel {
+  position: absolute;
+  left: 32px;
+  bottom: 72px;
+  width: 340px;
+  max-height: calc(100% - 160px);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  background: var(--gm-bg);
+  border-left: 3px solid var(--gm-accent);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+  backdrop-filter: blur(6px);
+}
+
+.gm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--gm-line);
+}
+
+.gm-kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gm-accent);
+}
+
+.gm-title {
+  font-size: 26px;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.gm-back {
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+  color: var(--gm-text);
+  background: var(--gm-bg-item);
+  border: 1px solid var(--gm-line);
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.gm-back:hover {
+  background: var(--gm-accent);
+  color: #000;
+}
+
+.gm-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 12px;
+  overflow-y: auto;
+}
+
+.gm-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 18px;
+  font: inherit;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: var(--gm-text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.gm-item.is-active {
+  color: #000;
+  background: linear-gradient(90deg, var(--gm-accent) 0%, #ffb15c 100%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.gm-item.is-active .gm-meta {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.gm-item:disabled {
+  color: var(--gm-dim);
+  cursor: default;
+}
+
+.gm-item.is-installed:not(.is-active) .gm-meta {
+  color: var(--gm-accent-2);
+}
+
+.gm-meta {
+  font-size: 12px;
+  color: var(--gm-dim);
+  white-space: nowrap;
+}
+
+.gm-note {
+  padding: 10px 18px 14px;
+  font-size: 12px;
+  color: var(--gm-accent-2);
+  border-top: 1px solid var(--gm-line);
+}
+
+.gm-hints {
+  position: absolute;
+  left: 32px;
+  bottom: 24px;
+  display: flex;
+  gap: 18px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gm-dim);
+}
+
+.gm-topbar {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  font-family: var(--gm-font);
+}
+
+.gm-chip {
+  padding: 7px 16px;
+  font: inherit;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gm-text);
+  background: var(--gm-bg);
+  border: 1px solid var(--gm-line);
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.gm-chip:hover:not(:disabled) {
+  background: var(--gm-accent);
+  color: #000;
+}
+
+.gm-chip:disabled {
+  color: var(--gm-dim);
+  cursor: default;
+}

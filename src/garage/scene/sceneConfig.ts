@@ -1,17 +1,24 @@
 import { v2, v3 } from '../../core/math/tuples';
 
-/** Faz 0 atölye sahnesi ayarları. Sahne kodunda sihirli sayı olmaması için tek kaynak. */
+/** Atölye sahnesi ayarları. Sahne kodunda sihirli sayı olmaması için tek kaynak. */
 export const sceneConfig = {
   background: '#050506',
   fog: { color: '#050506', near: 8, far: 30 },
-  camera: { position: v3(4.5, 1.4, 5.5), fov: 40 },
+  camera: { fov: 40 },
   orbit: {
-    target: v3(0, 0.6, 0),
-    minDistance: 3,
+    minDistance: 1.6,
     maxDistance: 14,
     /** Kamera zemin altına inmesin (radyan). */
     maxPolarAngle: Math.PI / 2 - 0.05,
     dampingFactor: 0.08,
+  },
+  /** Slot seçilince kameranın preset'e geçişi. */
+  cameraTransition: { durationSec: 0.9 },
+  turntable: {
+    /** rad/sn */
+    speed: 0.25,
+    /** Slot seçilince aracın sıfır açıya dönüş hızı (damp lambda). */
+    returnDamping: 4,
   },
   floor: {
     size: 60,
@@ -24,16 +31,6 @@ export const sceneConfig = {
     mixStrength: 12,
     resolution: 1024,
     depthScale: 1,
-  },
-  /** Placeholder test kutusu (Faz 1'de araçla değişecek). */
-  testBox: {
-    size: v3(1.6, 1.0, 1.6),
-    color: '#d24a12',
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
-    roughness: 0.35,
-    metalness: 0.3,
-    turntableSpeed: 0.25,
   },
   lights: {
     ambient: 0.4,

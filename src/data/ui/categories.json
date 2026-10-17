@@ -1,0 +1,33 @@
+[
+  {
+    "id": "body_kit",
+    "slots": [
+      "bumper_front",
+      "bumper_rear",
+      "grille",
+      "chin_spoiler",
+      "hood",
+      "hood_pins",
+      "side_skirts",
+      "fenders",
+      "spoiler_rear",
+      "rear_louvers",
+      "roof",
+      "mirrors",
+      "exhaust",
+      "exhaust_tips",
+      "fuel_cap",
+      "interior"
+    ]
+  },
+  { "id": "paint", "slots": [] },
+  { "id": "vinyl", "slots": [] },
+  { "id": "wheels_tires", "slots": [] },
+  { "id": "stance", "slots": [] },
+  { "id": "lights_glass", "slots": ["headlights", "taillights"] },
+  { "id": "engine_visual", "slots": ["engine"] },
+  { "id": "performance", "slots": [] },
+  { "id": "photo_mode", "slots": [] },
+  { "id": "test_drive", "slots": [] },
+  { "id": "garage", "slots": [] }
+]

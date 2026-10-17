@@ -1,7 +1,8 @@
+import { CarRig } from '../../car/CarRig';
 import { GarageCamera } from '../camera/GarageCamera';
 import { GarageEnvironment } from './GarageEnvironment';
 import { GarageFloor } from './GarageFloor';
-import { TestBox } from './TestBox';
+import { Turntable } from './Turntable';
 import { sceneConfig } from './sceneConfig';
 
 export function GarageScene() {
@@ -24,7 +25,9 @@ export function GarageScene() {
         color={lights.warmSide.color}
         intensity={lights.warmSide.intensity}
       />
-      <TestBox />
+      <Turntable>
+        <CarRig />
+      </Turntable>
       <GarageFloor />
       <GarageCamera />
     </>

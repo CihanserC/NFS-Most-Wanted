@@ -1,0 +1,97 @@
+{
+  "bumper_front": {
+    "stock_chrome": { "price": 0, "weightKg": 0 },
+    "chrome_delete": { "price": 450, "weightKg": -9 },
+    "pro_touring_lip": { "price": 900, "weightKg": -6, "downforce": 0.04 }
+  },
+  "bumper_rear": {
+    "stock_chrome": { "price": 0, "weightKg": 0 },
+    "bumper_delete": { "price": 450, "weightKg": -9 },
+    "diffuser": { "price": 1200, "weightKg": -4, "downforce": 0.05 }
+  },
+  "grille": {
+    "stock": { "price": 0, "weightKg": 0 },
+    "mesh": { "price": 350, "weightKg": -1 },
+    "billet": { "price": 600, "weightKg": 1 }
+  },
+  "chin_spoiler": {
+    "none": { "price": 0, "weightKg": 0 },
+    "classic": { "price": 300, "weightKg": 2, "downforce": 0.03 },
+    "carbon_splitter": { "price": 1100, "weightKg": 1, "downforce": 0.06 }
+  },
+  "hood": {
+    "stock": { "price": 0, "weightKg": 0 },
+    "cowl_induction": { "price": 800, "weightKg": 2 },
+    "shaker_scoop": { "price": 1400, "weightKg": 4 },
+    "blower_cutout": { "price": 1800, "weightKg": -3 }
+  },
+  "hood_pins": {
+    "none": { "price": 0, "weightKg": 0 },
+    "chrome": { "price": 120, "weightKg": 0 },
+    "black": { "price": 120, "weightKg": 0 }
+  },
+  "side_skirts": {
+    "none": { "price": 0, "weightKg": 0 },
+    "slim": { "price": 500, "weightKg": 3 },
+    "pro_touring": { "price": 950, "weightKg": 5, "downforce": 0.02 }
+  },
+  "fenders": {
+    "stock": { "price": 0, "weightKg": 0, "trackWidthLimitMm": 15 },
+    "mild_flare": { "price": 1300, "weightKg": 4, "trackWidthLimitMm": 25 },
+    "widebody": { "price": 4200, "weightKg": 12, "trackWidthLimitMm": 40 }
+  },
+  "spoiler_rear": {
+    "none": { "price": 0, "weightKg": 0 },
+    "ducktail": { "price": 650, "weightKg": 3, "downforce": 0.05 },
+    "classic_wing": { "price": 900, "weightKg": 5, "downforce": 0.08 },
+    "high_wing": { "price": 1500, "weightKg": 7, "downforce": 0.14 }
+  },
+  "rear_louvers": {
+    "none": { "price": 0, "weightKg": 0 },
+    "classic": { "price": 550, "weightKg": 4 }
+  },
+  "roof": {
+    "painted": { "price": 0, "weightKg": 0 },
+    "vinyl_top": { "price": 700, "weightKg": 2 }
+  },
+  "mirrors": {
+    "chrome_bullet": { "price": 0, "weightKg": 0 },
+    "painted_racing": { "price": 250, "weightKg": 0 },
+    "carbon": { "price": 600, "weightKg": -1 }
+  },
+  "headlights": {
+    "round_halogen": { "price": 0, "weightKg": 0 },
+    "led_halo": { "price": 800, "weightKg": 0 },
+    "hidden": { "price": 1600, "weightKg": 6 }
+  },
+  "taillights": {
+    "stock": { "price": 0, "weightKg": 0 },
+    "smoked": { "price": 300, "weightKg": 0 },
+    "led_strip": { "price": 900, "weightKg": 0 }
+  },
+  "exhaust": {
+    "rear_dual": { "price": 0, "weightKg": 0 },
+    "side_pipes": { "price": 1700, "weightKg": -4 },
+    "quad": { "price": 1400, "weightKg": 3 }
+  },
+  "exhaust_tips": {
+    "round_chrome": { "price": 0, "weightKg": 0 },
+    "oval": { "price": 200, "weightKg": 0 },
+    "black_ceramic": { "price": 350, "weightKg": 0 },
+    "turn_down": { "price": 150, "weightKg": 0 }
+  },
+  "fuel_cap": {
+    "stock": { "price": 0, "weightKg": 0 },
+    "racing": { "price": 220, "weightKg": 0 }
+  },
+  "engine": {
+    "stock_v8": { "price": 0, "weightKg": 0 },
+    "blower_v8": { "price": 6500, "weightKg": 25 },
+    "air_cleaner": { "price": 400, "weightKg": 1 },
+    "chrome_covers": { "price": 650, "weightKg": 0 }
+  },
+  "interior": {
+    "stock": { "price": 0, "weightKg": 0 },
+    "roll_cage": { "price": 2500, "weightKg": 35 }
+  }
+}

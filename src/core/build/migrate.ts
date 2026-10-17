@@ -1,0 +1,41 @@
+import { CURRENT_BUILD_VERSION, type BuildState } from './types';
+
+type RawBuild = Record<string, unknown> & { version: number };
+
+/**
+ * migrations[n], `version: n` olan bir kaydı `version: n + 1`'e taşır.
+ * Yeni bir BuildState sürümü eklendiğinde buraya bir fonksiyon eklenir.
+ */
+const migrations: Record<number, (raw: RawBuild) => RawBuild> = {
+  // 0 -> 1: Faz 1 öncesi taslak kayıtlar `parts` yerine `slots` kullanıyordu.
+  0: (raw) => {
+    const { slots, ...rest } = raw;
+    return { ...rest, parts: slots ?? {}, version: 1 };
+  },
+};
+
+export class BuildMigrationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'BuildMigrationError';
+  }
+}
+
+export function migrateBuild(input: unknown): BuildState {
+  if (typeof input !== 'object' || input === null || Array.isArray(input))
+    throw new BuildMigrationError('Kayıt bir nesne değil');
+  let raw = input as RawBuild;
+  if (typeof raw.version !== 'number' || !Number.isInteger(raw.version))
+    throw new BuildMigrationError('Kayıtta geçerli bir "version" alanı yok');
+  if (raw.version > CURRENT_BUILD_VERSION)
+    throw new BuildMigrationError(
+      `Kayıt sürümü (${raw.version}) bu oyun sürümünden (${CURRENT_BUILD_VERSION}) yeni`,
+    );
+
+  while (raw.version < CURRENT_BUILD_VERSION) {
+    const step = migrations[raw.version];
+    if (!step) throw new BuildMigrationError(`${raw.version} sürümü için migration yok`);
+    raw = step(raw);
+  }
+  return raw as unknown as BuildState;
+}
