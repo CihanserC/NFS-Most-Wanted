@@ -72,7 +72,19 @@ describe('migration', () => {
 
   it('v2 kaydına varsayılan jant/lastik/fren eklenir, boya korunur', () => {
     const base = createDefaultBuild(manifest);
-    const { wheels: _w, tires: _t, brakes: _b, vinyl: _v, ...v2 } = { ...base, version: 2 };
+    const {
+      wheels: _w,
+      tires: _t,
+      brakes: _b,
+      vinyl: _v,
+      stance: _s,
+      glass: _g,
+      lighting: _l,
+      ...v2
+    } = {
+      ...base,
+      version: 2,
+    };
     const b = deserializeBuild(JSON.stringify(v2), manifest);
     expect(b.version).toBe(CURRENT_BUILD_VERSION);
     expect(b.wheels).toEqual(base.wheels);

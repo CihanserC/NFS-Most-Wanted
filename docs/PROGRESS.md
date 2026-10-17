@@ -1,6 +1,9 @@
 # İlerleme
 
-## Aktif faz: Faz 7 — Diğer Görsel Modifiyeler
+## Aktif faz: Faz 7 — Diğer Görsel Modifiyeler (DEVAM EDİYOR)
+
+**Faz 7 durumu (yarım):** Veri ve mantık katmanı hazır: `data/stance/stance.json` (sınırlar, varsayılanlar, Rake/Slammed/Gasser/Pro-Touring presetleri, renk paletleri), `core/stance/stance.ts` (normalize, preset, spacer limiti, gövde yükselmesi/eğimi), BuildState v5 (`stance`, `glass`, `lighting`) + v4→v5 migration, store `setLook/previewLook/commitLookPreview`, `useEffectiveLook`.
+**Kalan:** CarRig hiyerarşisi (gövde süspansiyonla hareket, tekerlek yerde; kök vinil grubu gövdeye taşınacak), tekerlekte kamber + spacer, checkFitment'e kamber/spacer, cam filmi ve far rengi senkronu, underglow (zemin parlaması + marşpiyel neonu + nokta ışıklar), Duruş editörü ve Işıklar & Camlar editörü, kategori kameraları, testler, tarayıcı doğrulaması.
 
 ## Faz 6 — Vinil Editörü (Gelişmiş) ✅ (2026-10-17)
 

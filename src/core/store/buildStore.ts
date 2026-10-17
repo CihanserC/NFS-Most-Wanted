@@ -8,9 +8,11 @@ import {
   withPaint,
   withPart,
   withVinyl,
+  withLook,
+  normalizeLook,
 } from '../build/build';
 import { emptyHistory, record, redo, undo, type History } from '../build/history';
-import type { BuildState } from '../build/types';
+import type { BuildState, LookFields } from '../build/types';
 import type { CarManifest } from '../manifest/types';
 import { sanitizePaint } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
@@ -33,6 +35,8 @@ export type BuildStoreState = {
   fitmentPreview: FitmentState | null;
   /** Vinil sürükleme önizlemesi (tam katman listesi) */
   vinylPreview: VinylLayer[] | null;
+  /** Duruş/cam/ışık önizlemesi (normalize edilmiş) */
+  lookPreview: LookFields | null;
   setPart: (slotId: string, optionId: string) => void;
   previewPart: (slotId: string, optionId: string) => void;
   clearPreview: () => void;
@@ -50,6 +54,10 @@ export type BuildStoreState = {
   previewVinyl: (layers: VinylLayer[]) => void;
   commitVinylPreview: () => void;
   clearVinylPreview: () => void;
+  setLook: (patch: Partial<LookFields>) => void;
+  previewLook: (patch: Partial<LookFields>) => void;
+  commitLookPreview: () => void;
+  clearLookPreview: () => void;
   undo: () => void;
   redo: () => void;
   loadBuild: (build: BuildState) => void;
@@ -76,6 +84,7 @@ export const createBuildStore = (manifest: CarManifest) => {
       paintPreview: null,
       fitmentPreview: null,
       vinylPreview: null,
+      lookPreview: null,
 
       setPart: (slotId, optionId) => {
         const { build, history } = get();
@@ -183,6 +192,28 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.vinylPreview = null;
         }),
 
+      setLook: (patch) => {
+        const { build, history } = get();
+        const next = withLook(build, patch);
+        const pick = (b: LookFields) => JSON.stringify([b.stance, b.glass, b.lighting]);
+        set((s) => {
+          s.lookPreview = null;
+          if (pick(next) === pick(build)) return;
+          s.history = record(history, build);
+          s.build = next;
+        });
+      },
+
+      // Düz nesneyle set: kaydırıcı sürüklerken immer maliyeti olmasın.
+      previewLook: (patch) => set({ lookPreview: normalizeLook(patch, get().build) }),
+
+      commitLookPreview: () => {
+        const p = get().lookPreview;
+        if (p) get().setLook(p);
+      },
+
+      clearLookPreview: () => set({ lookPreview: null }),
+
       undo: () => {
         const r = undo(get().history, get().build);
         if (!r) return;
@@ -193,6 +224,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.paintPreview = null;
           s.fitmentPreview = null;
           s.vinylPreview = null;
+          s.lookPreview = null;
         });
       },
 
@@ -206,6 +238,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.paintPreview = null;
           s.fitmentPreview = null;
           s.vinylPreview = null;
+          s.lookPreview = null;
         });
       },
 
@@ -217,6 +250,7 @@ export const createBuildStore = (manifest: CarManifest) => {
           s.paintPreview = null;
           s.fitmentPreview = null;
           s.vinylPreview = null;
+          s.lookPreview = null;
         }),
     })),
   );

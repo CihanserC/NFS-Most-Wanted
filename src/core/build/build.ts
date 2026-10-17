@@ -3,7 +3,8 @@ import { normalizePaintMap } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
 import type { FitmentState } from '../wheels/types';
 import { normalizeFitment } from '../wheels/wheels';
-import { CURRENT_BUILD_VERSION, type BuildState } from './types';
+import { normalizeGlass, normalizeLighting, normalizeStance } from '../stance/stance';
+import { CURRENT_BUILD_VERSION, type BuildState, type LookFields } from './types';
 
 export const DEFAULT_BUILD_NAME = 'Yeni Proje';
 
@@ -20,6 +21,9 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     paint: normalizePaintMap({}, manifest.paintZones),
     ...normalizeFitment({}),
     vinyl: [],
+    stance: normalizeStance({}),
+    glass: normalizeGlass({}),
+    lighting: normalizeLighting({}),
     updatedAt: now.toISOString(),
   };
 }
@@ -84,4 +88,21 @@ export function withVinyl(
   now = new Date(),
 ): BuildState {
   return { ...build, vinyl, updatedAt: now.toISOString() };
+}
+
+/** Duruş / cam / ışık alanlarını normalize ederek uygular. */
+export function normalizeLook(patch: Partial<LookFields>, base: LookFields): LookFields {
+  return {
+    stance: normalizeStance(patch.stance ?? base.stance),
+    glass: normalizeGlass(patch.glass ?? base.glass),
+    lighting: normalizeLighting(patch.lighting ?? base.lighting),
+  };
+}
+
+export function withLook(
+  build: BuildState,
+  patch: Partial<LookFields>,
+  now = new Date(),
+): BuildState {
+  return { ...build, ...normalizeLook(patch, build), updatedAt: now.toISOString() };
 }

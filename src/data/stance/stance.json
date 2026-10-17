@@ -1,0 +1,40 @@
+{
+  "limits": {
+    "rideHeightMm": { "min": -80, "max": 100, "step": 1 },
+    "camberDeg": { "min": -8, "max": 2, "step": 0.1 },
+    "trackMm": { "min": 0, "max": 40, "step": 1 },
+    "tint": { "min": 0, "max": 0.95, "step": 0.01 },
+    "underglowIntensity": { "min": 0, "max": 1, "step": 0.01 }
+  },
+  "defaults": {
+    "stance": {
+      "rideHeightMm": { "front": 0, "rear": 0 },
+      "camberDeg": { "front": 0, "rear": 0 },
+      "trackMm": { "front": 0, "rear": 0 }
+    },
+    "glass": { "tint": 0.2, "color": "#0b1014" },
+    "lighting": {
+      "headlightColor": "#ffe9b8",
+      "underglow": { "enabled": false, "color": "#2fd8ff", "intensity": 0.7 }
+    }
+  },
+  "presets": {
+    "stock": { "rideHeightMm": [0, 0], "camberDeg": [0, 0], "trackMm": [0, 0] },
+    "rake": { "rideHeightMm": [-30, 45], "camberDeg": [-0.5, 0], "trackMm": [0, 10] },
+    "slammed": { "rideHeightMm": [-70, -65], "camberDeg": [-3, -2], "trackMm": [10, 15] },
+    "gasser": { "rideHeightMm": [100, 30], "camberDeg": [0, 0], "trackMm": [0, 0] },
+    "pro_touring": { "rideHeightMm": [-40, -35], "camberDeg": [-1.5, -1], "trackMm": [5, 10] }
+  },
+  "headlightColors": ["#ffe9b8", "#ffffff", "#cfe8ff", "#9fd0ff", "#ffd23d"],
+  "underglowColors": ["#2fd8ff", "#ff7a18", "#e8336f", "#7a3cff", "#3dff7a", "#ffffff"],
+  "tintColors": ["#0b1014", "#101418", "#1a1206", "#061018", "#140a18"],
+  "underglowRender": {
+    "decalScale": [2.8, 6.2],
+    "decalOpacity": 0.9,
+    "tubeIntensity": 6,
+    "lightIntensity": 3,
+    "lightDistance": 3.5,
+    "tubeLength": 2.6,
+    "tubeRadius": 0.012
+  }
+}

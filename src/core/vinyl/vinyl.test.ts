@@ -268,7 +268,7 @@ describe('gizmo sürükleme', () => {
 describe('vinil kaydı ve geçmiş', () => {
   it('v3 kaydına boş vinil eklenir; vinil JSON gidiş-dönüşünde korunur', () => {
     const base = createDefaultBuild(car.manifest);
-    const { vinyl: _v, ...rest } = base;
+    const { vinyl: _v, stance: _s, glass: _g, lighting: _l, ...rest } = base;
     const v3 = { ...rest, version: 3 };
     expect(deserializeBuild(JSON.stringify(v3), car.manifest).vinyl).toEqual([]);
     const withLayers = withVinyl(base, [

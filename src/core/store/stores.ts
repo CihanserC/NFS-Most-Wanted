@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { DEFAULT_CAR_ID, getCar } from '../../data/cars';
 import { fitmentOf } from '../build/build';
+import type { LookFields } from '../build/types';
 import type { PaintConfig } from '../paint/types';
 import type { VinylLayer } from '../vinyl/types';
 import type { FitmentState } from '../wheels/types';
@@ -49,4 +50,13 @@ export function useVinylLayer(id: string | null): VinylLayer | undefined {
   return useBuildStore((s) =>
     id ? (s.vinylPreview ?? s.build.vinyl).find((l) => l.id === id) : undefined,
   );
+}
+
+/** Kayıtlı duruş/cam/ışık + (varsa) önizleme. */
+export function useEffectiveLook(): LookFields {
+  const stance = useBuildStore((s) => s.build.stance);
+  const glass = useBuildStore((s) => s.build.glass);
+  const lighting = useBuildStore((s) => s.build.lighting);
+  const preview = useBuildStore((s) => s.lookPreview);
+  return useMemo(() => preview ?? { stance, glass, lighting }, [stance, glass, lighting, preview]);
 }
