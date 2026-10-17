@@ -1,35 +1,32 @@
 import { CarRig } from '../../car/CarRig';
 import { GarageCamera } from '../camera/GarageCamera';
+import { FpsProbe } from '../fx/FpsProbe';
+import { PostFX } from '../fx/PostFX';
 import { GarageEnvironment } from './GarageEnvironment';
 import { GarageFloor } from './GarageFloor';
+import { GarageLights } from './GarageLights';
+import { GarageRoom } from './GarageRoom';
 import { Turntable } from './Turntable';
+import { TurntableInlay } from './TurntableInlay';
 import { sceneConfig } from './sceneConfig';
 
 export function GarageScene() {
-  const { background, fog, lights } = sceneConfig;
+  const { background, fog } = sceneConfig;
   return (
     <>
       <color attach="background" args={[background]} />
-      <fog attach="fog" args={[fog.color, fog.near, fog.far]} />
+      <fogExp2 attach="fog" args={[fog.color, fog.density]} />
       <GarageEnvironment />
-      <ambientLight intensity={lights.ambient} />
-      <spotLight
-        position={lights.key.position}
-        intensity={lights.key.intensity}
-        angle={lights.key.angle}
-        penumbra={lights.key.penumbra}
-        castShadow
-      />
-      <pointLight
-        position={lights.warmSide.position}
-        color={lights.warmSide.color}
-        intensity={lights.warmSide.intensity}
-      />
+      <GarageLights />
+      <GarageRoom />
+      <GarageFloor />
       <Turntable>
+        <TurntableInlay />
         <CarRig />
       </Turntable>
-      <GarageFloor />
       <GarageCamera />
+      <PostFX />
+      <FpsProbe />
     </>
   );
 }

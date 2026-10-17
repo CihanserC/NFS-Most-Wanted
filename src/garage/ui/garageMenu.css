@@ -186,3 +186,12 @@
   min-height: 0;
   flex: 1;
 }
+
+.gm-fps {
+  min-width: 70px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gm-fps.is-low {
+  color: #ffb347;
+}

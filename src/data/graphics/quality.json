@@ -1,0 +1,60 @@
+{
+  "low": {
+    "dpr": 1,
+    "shadows": false,
+    "shadowMapSize": 512,
+    "floorReflection": false,
+    "reflectorResolution": 256,
+    "ao": null,
+    "bloom": false,
+    "antialias": "fxaa",
+    "volumetric": false,
+    "flakes": false,
+    "msaaSamples": 0
+  },
+  "medium": {
+    "dpr": 1,
+    "shadows": true,
+    "shadowMapSize": 1024,
+    "floorReflection": true,
+    "reflectorResolution": 512,
+    "ao": null,
+    "bloom": true,
+    "antialias": "fxaa",
+    "volumetric": false,
+    "flakes": true,
+    "msaaSamples": 0
+  },
+  "high": {
+    "dpr": 1,
+    "shadows": true,
+    "shadowMapSize": 2048,
+    "floorReflection": true,
+    "reflectorResolution": 1024,
+    "ao": {
+      "quality": "medium",
+      "halfRes": true
+    },
+    "bloom": true,
+    "antialias": "smaa",
+    "volumetric": true,
+    "flakes": true,
+    "msaaSamples": 0
+  },
+  "ultra": {
+    "dpr": 2,
+    "shadows": true,
+    "shadowMapSize": 4096,
+    "floorReflection": true,
+    "reflectorResolution": 2048,
+    "ao": {
+      "quality": "high",
+      "halfRes": false
+    },
+    "bloom": true,
+    "antialias": "smaa",
+    "volumetric": true,
+    "flakes": true,
+    "msaaSamples": 0
+  }
+}

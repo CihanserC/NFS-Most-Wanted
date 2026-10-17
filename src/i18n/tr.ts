@@ -224,4 +224,16 @@ export const tr: Record<string, string> = {
   'fitment.arch_rub': 'lastik çamurluk kemerine sürtüyor',
   'fitment.fender_poke': 'lastik çamurluktan taşıyor',
   'fitment.inner_rub': 'lastik iç davlumbaza sürtüyor',
+
+  'ui.quality': 'Grafik',
+  'ui.toneMapping': 'Ton',
+  'ui.fpsToggle': 'Kare hızı göstergesi',
+  'ui.drawCalls': 'Çizim çağrısı',
+  'ui.triangles': 'Üçgen',
+  'quality.low': 'Düşük',
+  'quality.medium': 'Orta',
+  'quality.high': 'Yüksek',
+  'quality.ultra': 'Ultra',
+  'toneMapping.agx': 'AgX',
+  'toneMapping.aces': 'ACES',
 };

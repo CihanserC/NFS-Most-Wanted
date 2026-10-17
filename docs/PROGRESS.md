@@ -1,6 +1,50 @@
 # İlerleme
 
-## Aktif faz: Faz 4 — Atölye Atmosferi
+## Aktif faz: Faz 5 — Vinil Editörü (Temel)
+
+## Faz 4 — Atölye Atmosferi ✅ (2026-10-17)
+
+**Yapılanlar**
+
+- **Oda** (`garage/scene/GarageRoom.tsx`), tamamen prosedürel:
+  - Tuğla arka/ön duvar (renk + normal), oluklu sac yan duvarlar, tavan ve kirişler.
+  - Görünür tavan şerit softbox'ları ve araç çevresinde 8 dikey LED stant.
+  - Yan duvarlarda turuncu/turkuaz LED şeritler, arka duvarda orijinal neon tabela (hız çizgileri + şimşek).
+  - Aksesuarlar: takım dolabı, lastik yığınları, variller, tezgah.
+- **Zemin:** prosedürel beton (renk + pürüzlülük, derz çizgileri) ve `MeshReflectorMaterial` ile yansıma. Düşük kalitede yansıma kapalı.
+- **Döner tabla:** zemine gömülü yarı saydam disk (zemin yansıması altından görünür), turuncu LED halka ve araç altında yumuşak gölge; araçla birlikte döner.
+- **Işıklar:**
+  - Gölgeli tepe ana spot, hacimli huzme veren iki tavan spotu (drei `SpotLight volumetric`).
+  - Tuğla duvarı yalayan 3 spot, sıcak yan dolgu, soğuk arka kontur, sönük gök/zemin dolgusu.
+  - Üstel sis.
+- **Ortam haritası:** Lightformer panelleri görünür armatürlerle aynı konumlarda (tavan şeritleri, stantlar, LED şeritler, neon). Boya/krom yansımaları sahne ışıklarıyla tutarlı. Ayrı HDRI dosyası gerekmedi.
+- **Post-processing** (`garage/fx/PostFX.tsx`): N8AO → Bloom (mipmap) → Tone mapping → prosedürel renk düzenleme LUT'u (`colorGrade.ts`: gölgede teal, parlakta turuncu, kontrast/doygunluk) → vinyet → SMAA/FXAA.
+- **Kalite ayarları** (`data/graphics/quality.json`): Düşük/Orta/Yüksek/Ultra. Seviyeler şunları değiştirir: DPR, gölge haritası, zemin yansıması ve çözünürlüğü, AO, bloom, hacimli ışık, boya pulları, AA. Seçim tarayıcıda saklanır.
+- **Üst çubuk:** Grafik kalitesi, Ton (ACES/AgX) ve FPS göstergesi. FPS üzerine gelince çizim çağrısı ve üçgen sayısı da görünür.
+- **Kamera:** sınırlı orbit (oda içinde kalır), slot/bölge/aks preset geçişleri ve döner tabla Faz 1–3'ten devam ediyor.
+- **Testler (110):** LUT (nötr = birim dönüşüm, tonlama yönü, float veri ve aralık), kalite ayarlarının maliyet sırası, ayar sanitize.
+
+**Kararlar**
+
+- **Tone mapping (§17 açık kararı):** kullanıcı karşılaştırma görüntülerine bakarak seçti (`docs/tonemapping/`). Varsayılan **ACES** (daha doygun, dramatik); oyuncu üst çubuktan AgX'e geçebilir.
+- **Kenar yumuşatma:** Düşük/Orta FXAA, Yüksek/Ultra SMAA.
+- **HDRI dosyası yerine** sahneyle aynı yerlerde ışık panelleri olan prosedürel ortam haritası kullanıldı (asset bağımsızlığı, sahneyle birebir uyum).
+
+**Bulunan ve düzeltilen hata**
+
+- postprocessing `LookupTexture` float veri bekliyor. Uint8 LUT verisi geçersiz doku oluşturuyor; zincirdeki efekte göre ya tamamen siyah ekran (SMAA/MSAA ile) ya da zeminde siyah lekeler (FXAA ile) çıkıyordu. LUT artık `Float32Array`.
+
+**Performans (ölçüm)**
+
+- Test makinesi: **Intel UHD (entegre)**, 1280×575 tuval. FPS: Düşük 58 · Orta 52 · Yüksek 48 · Ultra 14.
+- Spesifikasyonun hedefi (orta seviye masaüstü GPU, 1080p, Yüksek ≥ 60 FPS) bu makinede doğrulanamadı. Orta seviye masaüstü GPU'lar bu entegre GPU'dan kat kat hızlı olduğundan hedefin tutması beklenir, ama **hedef donanımda ölçülmesi gerekiyor** (üst çubuktaki FPS göstergesi).
+- Düşük kalitede bile 60'ın altında olması, maliyetin efektlerden çok temel çizimden (fiziksel boya shader'ları, çok sayıda küçük mesh / çizim çağrısı) geldiğini gösteriyor. Bu, Faz 11'in (çizim çağrısı azaltma, geometri birleştirme) konusu.
+
+**Eksik / bilinen sorunlar**
+
+- Ultra, entegre GPU'da çok ağır (DPR 2 + tam çözünürlük AO + 4096 gölge); güçlü GPU'lar için.
+- Fotoğraf modu (serbest kamera, DoF, yüksek çözünürlüklü PNG) Faz 9'da.
+- Hacimli huzmeler basit konilerdir (gerçek ışık saçılması yok).
 
 ## Faz 3 — Jant, Lastik, Fren ✅ (2026-10-17)
 

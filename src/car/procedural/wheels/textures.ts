@@ -1,4 +1,5 @@
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace, type Texture } from 'three';
+import { heightToNormal, makeCanvas } from '../../../core/texture/canvas';
 import type { RotorType, TireSidewall, TireType } from '../../../core/wheels/types';
 
 /**
@@ -25,40 +26,11 @@ const cached = (key: string, make: () => Texture): Texture => {
   return t;
 };
 
-function canvas(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContext2D] {
-  const c = document.createElement('canvas');
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext('2d');
-  if (!ctx) throw new Error('Canvas 2D bağlamı alınamadı');
-  return [c, ctx];
-}
-
-/** Gri yükseklik haritasını tangent-uzayı normal haritasına çevirir. */
-function heightToNormal(ctx: CanvasRenderingContext2D, size: number, strength: number) {
-  const src = ctx.getImageData(0, 0, size, size).data;
-  const out = ctx.createImageData(size, size);
-  const h = (x: number, y: number) =>
-    (src[(((y + size) % size) * size + ((x + size) % size)) * 4] ?? 0) / 255;
-  for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++) {
-      const dx = (h(x - 1, y) - h(x + 1, y)) * strength;
-      const dy = (h(x, y - 1) - h(x, y + 1)) * strength;
-      const len = Math.hypot(dx, dy, 1);
-      const i = (y * size + x) * 4;
-      out.data[i] = ((dx / len) * 0.5 + 0.5) * 255;
-      out.data[i + 1] = ((dy / len) * 0.5 + 0.5) * 255;
-      out.data[i + 2] = ((1 / len) * 0.5 + 0.5) * 255;
-      out.data[i + 3] = 255;
-    }
-  ctx.putImageData(out, 0, 0);
-}
-
 /** Diş deseni normal haritası. u = çevre, v = sırt genişliği. */
 export function treadNormalMap(type: TireType): Texture {
   return cached(`tread:${type}`, () => {
     const { size, repeatAround, strength } = TEXTURE.tread;
-    const [c, ctx] = canvas(size, size);
+    const [c, ctx] = makeCanvas(size, size);
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = '#000';
@@ -94,7 +66,7 @@ export function treadNormalMap(type: TireType): Texture {
         ctx.stroke();
       }
     }
-    heightToNormal(ctx, size, strength);
+    heightToNormal(ctx, size, size, strength);
     const t = new CanvasTexture(c);
     t.wrapS = RepeatWrapping;
     t.wrapT = RepeatWrapping;
@@ -110,7 +82,7 @@ export function treadNormalMap(type: TireType): Texture {
 export function sidewallMap(style: TireSidewall): Texture {
   return cached(`sidewall:${style}`, () => {
     const { width, height, base, white } = TEXTURE.sidewall;
-    const [c, ctx] = canvas(width, height);
+    const [c, ctx] = makeCanvas(width, height);
     ctx.fillStyle = base;
     ctx.fillRect(0, 0, width, height);
     if (style === 'whitewall') {
@@ -142,7 +114,7 @@ export function sidewallMap(style: TireSidewall): Texture {
 export function rotorMap(rotor: RotorType): Texture {
   return cached(`rotor:${rotor}`, () => {
     const { size } = TEXTURE.rotor;
-    const [c, ctx] = canvas(size, size);
+    const [c, ctx] = makeCanvas(size, size);
     const cx = size / 2;
     ctx.fillStyle = '#8c8f94';
     ctx.fillRect(0, 0, size, size);

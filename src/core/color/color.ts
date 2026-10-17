@@ -69,3 +69,10 @@ export function hsvToRgb({ h, s, v }: HSV): RGB {
 
 export const hexToHsv = (hex: string): HSV => rgbToHsv(hexToRgb(hex));
 export const hsvToHex = (hsv: HSV): string => rgbToHex(hsvToRgb(hsv));
+
+/** sRGB hex -> lineer RGB, isteğe bağlı parlaklık çarpanıyla (bloom için HDR emissive renkler). */
+export function hexToLinearRgb(hex: string, intensity = 1): [number, number, number] {
+  const { r, g, b } = hexToRgb(hex);
+  const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4) * intensity;
+  return [lin(r), lin(g), lin(b)];
+}
