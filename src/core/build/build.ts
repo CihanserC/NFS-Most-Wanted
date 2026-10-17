@@ -19,6 +19,7 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     parts: defaultParts(manifest),
     paint: normalizePaintMap({}, manifest.paintZones),
     ...normalizeFitment({}),
+    vinyl: [],
     updatedAt: now.toISOString(),
   };
 }
@@ -75,4 +76,12 @@ export function withFitment(
     ...normalizeFitment({ ...fitmentOf(build), ...patch }),
     updatedAt: now.toISOString(),
   };
+}
+
+export function withVinyl(
+  build: BuildState,
+  vinyl: BuildState['vinyl'],
+  now = new Date(),
+): BuildState {
+  return { ...build, vinyl, updatedAt: now.toISOString() };
 }

@@ -1,6 +1,7 @@
 import { Color, MeshPhysicalMaterial, type IUniform } from 'three';
 import { paintMode, resolvePaint } from '../../core/paint/resolve';
 import type { PaintConfig } from '../../core/paint/types';
+import type { VinylUniforms } from './vinylUniforms';
 
 type PaintUniforms = {
   uPaintMode: IUniform<number>;
@@ -21,13 +22,21 @@ const MODE = {
 };
 
 /** Tüm araç boyaları aynı shader programını paylaşır; farklar uniform'larla gelir. */
-const PROGRAM_KEY = 'car-paint-v1';
+const PROGRAM_KEY = 'car-paint-v2';
 
 const VERTEX_HEAD = /* glsl */ `
 varying vec3 vFlakePos;
+uniform mat4 uCarInverse;
+varying vec3 vCarPos;
+varying vec3 vCarNormal;
 `;
+// Vinil projeksiyonu car-space'te: ayrı mesh'ler (kapı, kaput, tampon) aynı kutuya
+// projekte edildiği için desen parçalar arasında kesintisiz devam eder.
 const VERTEX_BODY = /* glsl */ `
 vFlakePos = transformed;
+vec4 vinylWorldPos = modelMatrix * vec4(transformed, 1.0);
+vCarPos = (uCarInverse * vinylWorldPos).xyz;
+vCarNormal = mat3(uCarInverse) * (mat3(modelMatrix) * objectNormal);
 `;
 
 const FRAGMENT_HEAD = /* glsl */ `
@@ -41,6 +50,22 @@ uniform vec3 uFlakeColor;
 uniform vec3 uColor2;
 uniform vec3 uColor3;
 uniform float uFresnel;
+
+varying vec3 vCarPos;
+varying vec3 vCarNormal;
+uniform float uVinylEnabled;
+uniform vec3 uVinylBox;
+uniform float uVinylSharpness;
+uniform sampler2D uVinylLeft;
+uniform sampler2D uVinylRight;
+uniform sampler2D uVinylTop;
+uniform sampler2D uVinylFront;
+uniform sampler2D uVinylRear;
+
+// Vinil dokuları ham (sRGB kodlu, önceden çarpılmış alfa) yüklenir; lineere burada çevrilir.
+vec3 vinylSrgbToLinear(vec3 c) {
+  return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 
 float paintHash13(vec3 p) {
   p = fract(p * 0.1031);
@@ -76,10 +101,43 @@ const FRAGMENT_BODY = /* glsl */ `
       : mix(uColor2, uColor3, (t - 0.5) * 2.0);
   }
 
-  if (uFlakeDensity > 0.0 && uFlakeStrength > 0.0) {
+  // Vinil: 5 yüzeyden normal ağırlıklı (triplanar mantığı) örnekleme. Doku önceden
+  // çarpılmış alfalı. Taban renge karışır; vernik (clearcoat) üstte kaldığı için vinil de
+  // verniklenmiş gibi parlar.
+  float vinylA = 0.0;
+  if (uVinylEnabled > 0.5) {
+    vec3 vn = normalize(vCarNormal);
+    vec3 vp = vCarPos;
+    float hl = uVinylBox.x;
+    float hw = uVinylBox.y;
+    float vh = uVinylBox.z;
+    float wl = pow(max(vn.x, 0.0), uVinylSharpness);
+    float wr = pow(max(-vn.x, 0.0), uVinylSharpness);
+    float wt = pow(max(vn.y, 0.0), uVinylSharpness);
+    float wf = pow(max(vn.z, 0.0), uVinylSharpness);
+    float wb = pow(max(-vn.z, 0.0), uVinylSharpness);
+    float wsum = wl + wr + wt + wf + wb;
+    if (wsum > 1e-4) {
+      vec4 vc = wl * texture(uVinylLeft, vec2((hl - vp.z) / (2.0 * hl), vp.y / vh))
+        + wr * texture(uVinylRight, vec2((vp.z + hl) / (2.0 * hl), vp.y / vh))
+        + wt * texture(uVinylTop, vec2((hw - vp.x) / (2.0 * hw), (vp.z + hl) / (2.0 * hl)))
+        + wf * texture(uVinylFront, vec2((vp.x + hw) / (2.0 * hw), vp.y / vh))
+        + wb * texture(uVinylRear, vec2((hw - vp.x) / (2.0 * hw), vp.y / vh));
+      // Aşağı bakan yüzlerde (ağırlık toplamı küçük) vinil yumuşakça kaybolur.
+      vc *= smoothstep(0.0, 0.2, wsum) / wsum;
+      vinylA = clamp(vc.a, 0.0, 1.0);
+      if (vinylA > 1e-4) vc.rgb = vinylSrgbToLinear(vc.rgb / vinylA) * vinylA;
+      diffuseColor.rgb = diffuseColor.rgb * (1.0 - vinylA) + vc.rgb;
+      // Folyo metalik değildir: altındaki boyanın pul ve metal etkisini bastır.
+      metalnessFactor = mix(metalnessFactor, 0.05, vinylA);
+      roughnessFactor = mix(roughnessFactor, 0.4, vinylA);
+    }
+  }
+
+  if (uFlakeDensity > 0.0 && uFlakeStrength > 0.0 && vinylA < 0.99) {
     vec3 fp = vFlakePos * uFlakeScale;
     // Uzakta piksel başına çok sayıda pul düşer: aliasing yerine yumuşakça kaybolur.
-    float fade = 1.0 - smoothstep(1.5, 4.0, length(fwidth(fp)));
+    float fade = (1.0 - smoothstep(1.5, 4.0, length(fwidth(fp)))) * (1.0 - vinylA);
     vec3 cell = floor(fp);
     if (fade > 0.0 && paintHash13(cell) < uFlakeDensity) {
       vec3 tilt = paintHash33(cell) * 2.0 - 1.0;
@@ -101,7 +159,11 @@ export type CarPaintMaterial = MeshPhysicalMaterial & {
   userData: { paintUniforms: PaintUniforms };
 };
 
-export function createCarPaintMaterial(name: string, paint: PaintConfig): CarPaintMaterial {
+export function createCarPaintMaterial(
+  name: string,
+  paint: PaintConfig,
+  vinyl: VinylUniforms,
+): CarPaintMaterial {
   const uniforms: PaintUniforms = {
     uPaintMode: { value: 0 },
     uFlakeScale: { value: 1 },
@@ -116,7 +178,7 @@ export function createCarPaintMaterial(name: string, paint: PaintConfig): CarPai
   const mat = new MeshPhysicalMaterial({ name }) as CarPaintMaterial;
   mat.userData.paintUniforms = uniforms;
   mat.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, uniforms);
+    Object.assign(shader.uniforms, uniforms, vinyl);
     shader.vertexShader = inject(shader.vertexShader, '#include <common>', VERTEX_HEAD, 'after');
     shader.vertexShader = inject(
       shader.vertexShader,

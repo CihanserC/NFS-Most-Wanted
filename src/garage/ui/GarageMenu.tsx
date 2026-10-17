@@ -6,6 +6,7 @@ import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
 import { WheelsEditor } from './wheels/WheelsEditor';
+import { VinylEditor } from '../../vinyl/editor/VinylEditor';
 import './garageMenu.css';
 
 type Item = { id: string; label: string; disabled?: boolean; meta?: string; installed?: boolean };
@@ -14,11 +15,12 @@ type Item = { id: string; label: string; disabled?: boolean; meta?: string; inst
  * categories -> (parça kategorisi) slots -> options
  *            -> (boya kategorisi) zones -> paint (editör)
  *            -> (jant kategorisi) wheels (editör)
+ *            -> (vinil kategorisi) vinyl (editör)
  */
-type Level = 'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels';
+type Level = 'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels' | 'vinyl';
 
 /** Kendi kontrolleri olan (liste olmayan) seviyeler. */
-const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels'];
+const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels', 'vinyl'];
 
 const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
 
@@ -38,13 +40,15 @@ export function GarageMenu() {
     ? 'categories'
     : category.kind === 'wheels'
       ? 'wheels'
-      : category.kind === 'paint'
-        ? paintZone
-          ? 'paint'
-          : 'zones'
-        : slotId
-          ? 'options'
-          : 'slots';
+      : category.kind === 'vinyl'
+        ? 'vinyl'
+        : category.kind === 'paint'
+          ? paintZone
+            ? 'paint'
+            : 'zones'
+          : slotId
+            ? 'options'
+            : 'slots';
 
   const items: Item[] = useMemo(() => {
     switch (level) {
@@ -76,6 +80,7 @@ export function GarageMenu() {
         }));
       case 'paint':
       case 'wheels':
+      case 'vinyl':
         return [];
     }
   }, [level, category, slotId, car, parts, paint]);
@@ -132,10 +137,12 @@ export function GarageMenu() {
     clearPreview();
     clearPaintPreview();
     clearFitmentPreview();
+    useBuildStore.getState().clearVinylPreview();
     setHl({ key: '', index: 0 });
     if (level === 'options') selectSlot(null);
     else if (level === 'paint') selectPaintZone(null);
-    else if (level === 'slots' || level === 'zones' || level === 'wheels') selectCategory(null);
+    else if (level === 'slots' || level === 'zones' || level === 'wheels' || level === 'vinyl')
+      selectCategory(null);
   }, [
     level,
     clearPreview,
@@ -194,7 +201,7 @@ export function GarageMenu() {
   const title =
     level === 'categories'
       ? car.manifest.displayName
-      : level === 'slots' || level === 'zones' || level === 'wheels'
+      : level === 'slots' || level === 'zones' || level === 'wheels' || level === 'vinyl'
         ? categoryLabel(categoryId as string)
         : level === 'paint'
           ? t(`paintZone.${paintZone}`)
@@ -219,7 +226,9 @@ export function GarageMenu() {
             </div>
           </div>
         </div>
-        {level === 'wheels' ? (
+        {level === 'vinyl' ? (
+          <VinylEditor />
+        ) : level === 'wheels' ? (
           <WheelsEditor />
         ) : level === 'paint' && paintZone ? (
           <PaintEditor zone={paintZone} zones={car.manifest.paintZones} />

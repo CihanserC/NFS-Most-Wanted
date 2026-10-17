@@ -1,6 +1,7 @@
 import { loadManifest } from '../../core/manifest/load';
 import { loadPartsCatalog, type PartsCatalog } from '../../core/manifest/parts';
 import type { CarManifest } from '../../core/manifest/types';
+import { createProjectionBox, type ProjectionBox } from '../../core/vinyl/projection';
 import {
   createBodySampler,
   parsePlaceholderProfile,
@@ -15,6 +16,8 @@ export type CarDefinition = {
   parts: PartsCatalog;
   /** Prosedürel placeholder gövde örnekleyicisi (model null iken kullanılır). */
   body: BodySampler;
+  /** Vinil kutu projeksiyonu (manifest boyutlarından) */
+  vinylBox: ProjectionBox;
 };
 
 function defineCar(
@@ -28,6 +31,7 @@ function defineCar(
     manifest,
     parts: loadPartsCatalog(partsJson, manifest),
     body: createBodySampler(manifest, profile),
+    vinylBox: createProjectionBox(manifest.dimensions),
   };
 }
 

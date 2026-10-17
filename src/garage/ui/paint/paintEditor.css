@@ -271,3 +271,7 @@
 .pe-err {
   color: #ff5a5a;
 }
+
+.pe {
+  overflow-x: hidden;
+}

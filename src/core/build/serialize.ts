@@ -2,6 +2,8 @@ import type { CarManifest } from '../manifest/types';
 import { DEFAULT_BUILD_NAME, normalizeParts } from './build';
 import { normalizePaintMap } from '../paint/paint';
 import { normalizeFitment } from '../wheels/wheels';
+import { sanitizeLayers } from '../vinyl/layers';
+import { hasVinylShape } from '../../vinyl/shapes/library';
 import { migrateBuild } from './migrate';
 import type { BuildState } from './types';
 
@@ -21,6 +23,7 @@ export function deserializeBuild(json: string, manifest: CarManifest): BuildStat
     parts: normalizeParts(parts, manifest),
     paint: normalizePaintMap(migrated.paint, manifest.paintZones),
     ...normalizeFitment(migrated),
+    vinyl: sanitizeLayers(migrated.vinyl, hasVinylShape),
     updatedAt:
       typeof migrated.updatedAt === 'string' ? migrated.updatedAt : new Date().toISOString(),
   };

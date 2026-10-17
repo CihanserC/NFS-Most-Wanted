@@ -15,7 +15,10 @@ export function Turntable({ children }: { children: ReactNode }) {
   const ref = useRef<Group>(null);
   const enabled = useAppStore((s) => s.turntable);
   const focused = useAppStore(
-    (s) => s.slotId !== null || s.paintZone !== null || categoryKind(s.categoryId) === 'wheels',
+    (s) =>
+      s.slotId !== null ||
+      s.paintZone !== null ||
+      ['wheels', 'vinyl'].includes(categoryKind(s.categoryId) ?? ''),
   );
   const { speed, returnDamping } = sceneConfig.turntable;
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
+import type { VinylSide } from '../vinyl/types';
 import type { Axle } from '../wheels/types';
 
 export type AppMode = 'garage' | 'drive';
@@ -20,6 +21,13 @@ export type AppState = {
   /** Jant editöründe düzenlenen aks ve ön/arka bağlı mı (staggered değil). */
   wheelAxle: Axle;
   wheelsLinked: boolean;
+  /** Vinil editörü: araca tıklama aracı, yerleştirilecek şekil, seçili katman, görünüm */
+  vinylTool: 'select' | 'place';
+  vinylShapeId: string;
+  selectedLayerId: string | null;
+  vinylView: VinylSide;
+  /** Son kullanılan vinil rengi (yeni katmanlara uygulanır) */
+  vinylColor: string;
   setMode: (mode: AppMode) => void;
   toggleTurntable: () => void;
   selectCategory: (categoryId: string | null) => void;
@@ -27,6 +35,11 @@ export type AppState = {
   selectPaintZone: (zone: string | null) => void;
   setWheelAxle: (axle: Axle) => void;
   setWheelsLinked: (linked: boolean) => void;
+  setVinylTool: (tool: 'select' | 'place') => void;
+  setVinylShape: (shapeId: string) => void;
+  selectLayer: (id: string | null) => void;
+  setVinylView: (side: VinylSide) => void;
+  setVinylColor: (color: string) => void;
 };
 
 export const createAppStore = () =>
@@ -42,6 +55,11 @@ export const createAppStore = () =>
       lastPaintZone: null,
       wheelAxle: 'front',
       wheelsLinked: true,
+      vinylTool: 'place',
+      vinylShapeId: 'circle',
+      selectedLayerId: null,
+      vinylView: 'left',
+      vinylColor: '#ffffff',
       setMode: (mode) =>
         set((s) => {
           s.mode = mode;
@@ -77,6 +95,26 @@ export const createAppStore = () =>
         set((s) => {
           s.wheelsLinked = linked;
           if (linked) s.wheelAxle = 'front';
+        }),
+      setVinylTool: (tool) =>
+        set((s) => {
+          s.vinylTool = tool;
+        }),
+      setVinylShape: (shapeId) =>
+        set((s) => {
+          s.vinylShapeId = shapeId;
+        }),
+      selectLayer: (id) =>
+        set((s) => {
+          s.selectedLayerId = id;
+        }),
+      setVinylView: (side) =>
+        set((s) => {
+          s.vinylView = side;
+        }),
+      setVinylColor: (color) =>
+        set((s) => {
+          s.vinylColor = color;
         }),
     })),
   );

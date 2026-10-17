@@ -33,6 +33,8 @@ export type CarManifest = {
   paintZoneCameras?: Record<string, string>;
   /** Jant editöründe aks -> kamera preset'i (opsiyonel). */
   wheelCameras?: { front: string; rear: string };
+  /** Vinil editöründe yüzey görünümü -> kamera preset'i (opsiyonel). */
+  vinylCameras?: Partial<Record<'left' | 'right' | 'top' | 'front' | 'rear', string>>;
   defaultCamera: string;
   cameraPresets: Record<string, CameraPreset>;
   slots: Record<string, SlotDefinition>;

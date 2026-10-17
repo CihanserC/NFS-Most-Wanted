@@ -1,7 +1,7 @@
 import categoriesJson from '../../data/ui/categories.json';
 
-/** parts: slot -> seçenek listesi · paint: boya bölgesi -> boya editörü · wheels: jant editörü */
-export type MenuCategoryKind = 'parts' | 'paint' | 'wheels';
+/** parts: slot -> seçenek listesi · paint: boya bölgesi -> boya editörü · wheels: jant editörü · vinyl: vinil editörü */
+export type MenuCategoryKind = 'parts' | 'paint' | 'wheels' | 'vinyl';
 export type MenuCategory = { id: string; kind: MenuCategoryKind; slots: string[] };
 
 export const menuCategories = categoriesJson as MenuCategory[];

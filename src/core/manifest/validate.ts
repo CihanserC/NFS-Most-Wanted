@@ -127,6 +127,19 @@ export function validateManifest(input: unknown): ValidationResult<CarManifest> 
           err(`wheelCameras.${axle}`, 'cameraPresets içinde tanımlı olmalı');
   }
 
+  // Vinil editörü kameraları (opsiyonel)
+  if (m.vinylCameras !== undefined) {
+    const vc = m.vinylCameras;
+    if (!isObj(vc)) err('vinylCameras', 'nesne olmalı');
+    else
+      for (const [side, cam] of Object.entries(vc)) {
+        if (!['left', 'right', 'top', 'front', 'rear'].includes(side))
+          err(`vinylCameras.${side}`, 'bilinmeyen yüzey');
+        if (!isStr(cam) || !camIds.has(cam))
+          err(`vinylCameras.${side}`, 'cameraPresets içinde tanımlı olmalı');
+      }
+  }
+
   // Slotlar
   const slots = m.slots;
   if (!isObj(slots) || Object.keys(slots).length === 0) err('slots', 'boş olmayan nesne olmalı');

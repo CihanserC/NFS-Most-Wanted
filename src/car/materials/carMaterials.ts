@@ -2,6 +2,7 @@ import { BackSide, MeshPhysicalMaterial, MeshStandardMaterial, type Material } f
 import { DEFAULT_PAINT } from '../../core/paint/paint';
 import { createCarPaintMaterial, type CarPaintMaterial } from './carPaintMaterial';
 import { materialConfig as c } from './materialConfig';
+import type { VinylUniforms } from './vinylUniforms';
 
 export type CarMaterials = {
   paint: Record<string, CarPaintMaterial>;
@@ -26,9 +27,9 @@ export type CarMaterials = {
   ledStrip: MeshStandardMaterial;
 };
 
-export function createCarMaterials(paintZones: string[]): CarMaterials {
+export function createCarMaterials(paintZones: string[], vinyl: VinylUniforms): CarMaterials {
   const paint = Object.fromEntries(
-    paintZones.map((zone) => [zone, createCarPaintMaterial(`paint_${zone}`, DEFAULT_PAINT)]),
+    paintZones.map((zone) => [zone, createCarPaintMaterial(`paint_${zone}`, DEFAULT_PAINT, vinyl)]),
   );
   return {
     paint,

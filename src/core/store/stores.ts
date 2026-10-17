@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { DEFAULT_CAR_ID, getCar } from '../../data/cars';
 import { fitmentOf } from '../build/build';
 import type { PaintConfig } from '../paint/types';
+import type { VinylLayer } from '../vinyl/types';
 import type { FitmentState } from '../wheels/types';
 import { createBuildStore } from './buildStore';
 
@@ -33,5 +34,19 @@ export function useEffectiveFitment(): FitmentState {
   return useMemo(
     () => preview ?? fitmentOf({ wheels, tires, brakes }),
     [wheels, tires, brakes, preview],
+  );
+}
+
+/** Kayıtlı vinil + (varsa) sürükleme önizlemesi. */
+export function useEffectiveVinyl(): VinylLayer[] {
+  const vinyl = useBuildStore((s) => s.build.vinyl);
+  const preview = useBuildStore((s) => s.vinylPreview);
+  return preview ?? vinyl;
+}
+
+/** Sadece tek bir katmana abone olur: başka katman değişince yeniden çizim tetiklenmez. */
+export function useVinylLayer(id: string | null): VinylLayer | undefined {
+  return useBuildStore((s) =>
+    id ? (s.vinylPreview ?? s.build.vinyl).find((l) => l.id === id) : undefined,
   );
 }

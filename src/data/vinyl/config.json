@@ -1,0 +1,21 @@
+{
+  "layerLimit": 500,
+  "baseShapeSizeM": 0.5,
+  "projectionMarginM": 0.05,
+  "blendSharpness": 4,
+  "resolution": {
+    "left": [2048, 1024],
+    "right": [2048, 1024],
+    "top": [1024, 2048],
+    "front": [1024, 512],
+    "rear": [1024, 512]
+  },
+  "limits": {
+    "scale": { "min": 0.02, "max": 12 },
+    "skew": { "min": -1.2, "max": 1.2 }
+  },
+  "defaults": {
+    "color": "#ffffff",
+    "scale": [1, 1]
+  }
+}

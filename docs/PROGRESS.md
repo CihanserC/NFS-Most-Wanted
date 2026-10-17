@@ -1,6 +1,49 @@
 # İlerleme
 
-## Aktif faz: Faz 5 — Vinil Editörü (Temel)
+## Aktif faz: Faz 6 — Vinil Editörü (Gelişmiş)
+
+## Faz 5 — Vinil Editörü (Temel) ✅ (2026-10-17)
+
+**Yapılanlar**
+
+- **Kutu projeksiyonu (§7.1):** 5 yüzey (sol, sağ, üst, ön, arka); her biri ayrı canvas + doku (sol/sağ 2048×1024, üst 1024×2048, ön/arka 1024×512, `data/vinyl/config.json`).
+  - Boya shader'ı car-space konum/normal ile 5 dokudan normal ağırlıklı (triplanar mantığı, keskinlik 4) örnekler. Kapı, kaput ve tampon gibi ayrı mesh'lerde desen kesintisiz devam eder; aşağı bakan yüzlerde vinil yumuşakça kaybolur.
+  - Vinil taban renge karışır ve vernik (clearcoat) üstte kalır; vinil altında metal pullar ve metalik etki bastırılır.
+- **Katman modeli (§7.2):** `VinylLayer` birebir. Saf işlemler: ekle, sil, çoğalt, sırala (yukarı/aşağı/en üst/en alt), güncelle, 500 katman limiti, kayıttan okurken sanitize.
+- **Dönüşüm:** konum (0..1), döndürme, ölçek (fiziksel metre; en-boy oranı yüzeye göre bozulmaz), eğme, yatay/dikey çevirme. Aynı afin dönüşüm canvas çizimi, gizmo ve seçim testi için kullanılır.
+- **Simetri:** sol ↔ sağ yüz aynalanır; üst/ön/arkada araç orta çizgisine göre aynı yüzde kopya oluşur.
+- **Araca tıklama:** raycast → yüz normali ile projeksiyon yüzü → (u, v). "Yerleştir" aracı seçili şekli koyar, "Seç" aracı en üstteki katmanı seçer (kilitli olanlar hariç; ayna kopyasına tıklamak kaynağı seçer). Boşluğa tıklamak seçimi bırakır.
+- **Gizmo (projeksiyon düzleminde, 3D):** taşıma (iç alan), köşelerden ölçek (Shift: oranı koru), turuncu halkadan döndürme (Shift: 15°), sarı elmaslardan yatay/dikey eğme. Tutamaklar ekranda sabit boyuttadır. Sürüklerken kamera kontrolü kapanır; kamera düzlemin arkasındaysa gizmo gizlenir.
+- **Geri al:** sürüklerken önizleme yapılır, bırakınca tek undo adımı yazılır (100 adım).
+- **Şekil kütüphanesi (temel):** daire, halka, kare, yuvarlak kare, üçgen, baklava, altıgen, yıldız, şerit, eğik şerit, ok, köşeli ok, şimşek; SVG path tabanlı, orijinal.
+- **UI:** Vinil kategorisi.
+  - Araç seçimi (Yerleştir/Seç), yüzey görünümleri (Sol/Sağ/Üst/Ön/Arka kamera preset'leri), şekil paleti, renk (hex + palet).
+  - Seçili katman: opaklık, döndürme, ölçek X/Y, eğme X/Y, çevirme, simetri, sıralama, çoğalt, sil.
+  - Katman listesi (görünürlük, kilit, seçim, sayaç). Delete tuşu seçili katmanı siler.
+- **BuildState v4:** `vinyl` eklendi; v3 → v4 migration yazıldı.
+- **Testler (136):** projeksiyon gidiş-dönüşü ve yön kuralları, sol/sağ u simetrisi, yüz seçimi, fiziksel ölçek, afin ters dönüşüm, canvas piksel dönüşümü, ayna örnekleri, katman işlemleri ve limit, sanitize, seçim testi, gizmo hesapları, kayıt/migration, ≥100 undo ve sürükleme = tek adım.
+
+**Performans** (Intel UHD entegre GPU, 200 katman, Orta kalite)
+
+- Boşta 60 FPS. Bir katmanı her karede sürüklerken 30–38 FPS. Sadece değişen yüzey yeniden çizilir; sürüklemede ayna kopyası varsa sadece iki yüz.
+- Bulunan ve düzeltilen darboğazlar:
+  1. **sRGB işaretli canvas dokusu:** her yüklemede ~70 ms sürüyordu (sürüklerken 13 FPS). Doku ham yükleniyor, sRGB → lineer dönüşümü shader'da yapılıyor.
+  2. **Gizmo:** her karede geometri yeniden oluşturuyordu; artık kalıcı geometri yerinde güncelleniyor.
+  3. **Editör:** 200 satırlık liste her karede yeniden çiziliyordu; liste memo'landı, seçili katman paneli sadece kendi katmanına abone.
+  4. **Önizleme:** immer olmadan yazılıyor, büyük liste her karede dondurulmuyor.
+- Kalan maliyet bu GPU'da doku yeniden çizimi + yükleme ile React güncellemesinin toplamı (her biri tek başına 60 FPS). Orta seviye masaüstü GPU'da sorun olmaması beklenir; hedef donanımda doğrulanmalı.
+
+**Notlar / kararlar**
+
+- **Geliştirme kancaları** (sadece `npm run dev`): `window.__muscleGarage` (store'lar), `__muscleGarageVinyl`, `__muscleGarageThree`. Performans ve hata ayıklama betikleri için; production build'den çıkarılır.
+- **Seçim (hit test):** şeklin sınır kutusuna göre yapılır (şekil konturuna göre değil).
+- **Maske/cutout (`maskMode`):** saklanır ama çizimde yok sayılır (Faz 6).
+
+**Eksik / bilinen sorunlar**
+
+- Gizmo zemin yansımasında da görünüyor (kozmetik).
+- Çok eğimli yüzeylerde (kaput-çamurluk geçişi, tavan kenarı) projeksiyon gerilmesi var; yumuşak geçiş uygulandı ama spesifikasyonda da bilinen kısıt.
+- Faz 6 kapsamı: gruplama, maske/cutout, yazı aracı, hazır setler, tam şekil kütüphanesi, vinil grubu içe/dışa aktarma, kısayollar.
 
 ## Faz 4 — Atölye Atmosferi ✅ (2026-10-17)
 

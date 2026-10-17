@@ -1,0 +1,100 @@
+.ve-tools {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.ve-shapes {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.ve-shapes button {
+  aspect-ratio: 1;
+  padding: 5px;
+  background: var(--gm-bg-item);
+  border: 1px solid var(--gm-line);
+}
+
+.ve-shapes button:hover {
+  border-color: var(--gm-accent);
+}
+
+.ve-shapes button.is-active {
+  border-color: var(--gm-accent);
+  background: rgba(255, 122, 24, 0.18);
+}
+
+.ve-shapes svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--gm-text);
+}
+
+.ve-checks {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ve-actions .gm-chip {
+  padding: 5px 10px;
+}
+
+.ve-count {
+  float: right;
+  font-style: normal;
+  color: var(--gm-dim);
+  letter-spacing: 0.05em;
+}
+
+.ve-layers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.ve-layers li {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--gm-line);
+}
+
+.ve-layers li.is-selected {
+  background: rgba(61, 242, 255, 0.1);
+  box-shadow: inset 2px 0 0 var(--gm-accent-2);
+}
+
+.ve-icon {
+  width: 26px;
+  padding: 5px 0;
+  background: none;
+  border: 0;
+  color: var(--gm-dim) !important;
+}
+
+.ve-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  text-align: left;
+  font-size: 12px !important;
+  background: none;
+  border: 0;
+}
+
+.ve-name i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}

@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import type { Group } from 'three';
 import { bodyLift } from '../core/wheels/fitment';
 import { useBuildStore, useEffectiveFitment, useEffectiveParts } from '../core/store/stores';
 import { getCar } from '../data/cars';
+import { useVinylPicking } from '../vinyl/editor/useVinylPicking';
+import { VinylGizmo } from '../vinyl/editor/VinylGizmo';
+import { VinylRuntime } from '../vinyl/render/VinylRuntime';
 import { CarMaterialsProvider } from './materials/CarMaterialsContext';
 import { PaintSync } from './materials/PaintSync';
 import { PlaceholderBody } from './procedural/PlaceholderBody';
@@ -23,6 +27,10 @@ export function CarRig() {
     { front: wheels.FL.position[1], rear: wheels.RL.position[1] },
     dimensions.wheelbase,
   );
+  /** Car-space kökü: vinil projeksiyonu ve gizmo bu grubun koordinatlarında çalışır. */
+  const root = useRef<Group>(null);
+  const box = car.vinylBox;
+  const vinylPicking = useVinylPicking(root, box);
 
   useEffect(() => {
     if (car.manifest.model !== null)
@@ -34,9 +42,17 @@ export function CarRig() {
   }, [car]);
 
   return (
-    <CarMaterialsProvider paintZones={car.manifest.paintZones}>
+    <CarMaterialsProvider paintZones={car.manifest.paintZones} dimensions={dimensions}>
       <PaintSync />
-      <group name={car.manifest.id} position-y={lift} rotation-x={pitch}>
+      <VinylRuntime root={root} />
+      <group
+        ref={root}
+        name={car.manifest.id}
+        position-y={lift}
+        rotation-x={pitch}
+        onClick={vinylPicking.onClick}
+        onPointerMissed={vinylPicking.onPointerMissed}
+      >
         <PlaceholderBody car={car} parts={parts} />
         <ProceduralWheels car={car} fitment={fitment} />
         {slotIds.filter(isRenderedSlot).map((slotId) => {
@@ -45,6 +61,7 @@ export function CarRig() {
           if (option === undefined) return null;
           return <Renderer key={slotId} option={option} parts={parts} car={car} />;
         })}
+        <VinylGizmo root={root} box={box} />
       </group>
     </CarMaterialsProvider>
   );
