@@ -31,6 +31,9 @@
   border-left: 3px solid var(--gm-accent);
   clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
   backdrop-filter: blur(6px);
+  /* Kendi katmanı: arkadaki 3B sahne yenilenirken metin yeniden rasterlanmasın (titreme) */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .gm-header {
@@ -226,16 +229,6 @@
   }
 }
 
-@keyframes gm-glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(255, 122, 24, 0);
-  }
-  50% {
-    box-shadow: 0 0 16px rgba(255, 122, 24, 0.35);
-  }
-}
-
 .gm-panel {
   animation: gm-slide-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -272,18 +265,12 @@
 .gm-item {
   transition:
     background-color 0.12s ease,
-    color 0.12s ease,
-    transform 0.12s ease;
-}
-
-.gm-item.is-active {
-  animation: gm-glow-pulse 1.6s ease-in-out infinite;
+    color 0.12s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gm-panel,
   .gm-list > li,
-  .gm-item.is-active,
   .gm-notice {
     animation: none;
   }
