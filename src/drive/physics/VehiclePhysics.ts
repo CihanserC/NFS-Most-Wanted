@@ -14,6 +14,7 @@ import {
   type Track,
   type TrackSample,
 } from '../../core/drive/track';
+import { combinedScale, lateralForce, slipAngle } from '../../core/drive/tire';
 import type { VehicleSpec } from '../../core/drive/vehicleSpec';
 import type { Rapier } from './rapier';
 
@@ -24,7 +25,16 @@ const CONNECTION_Y = 0.1;
 /** Şasi kutusu (yarı ölçüler) ve orijine göre konumu */
 const CHASSIS_HALF = [0.88, 0.32, 2.25] as const;
 const CHASSIS_CENTER_Y = 0.12;
+/** Boyuna tutuş (Rapier frictionSlip): çekiş/fren sınırı */
 const FRICTION_BASE = 1.25;
+/** Yanal tepe tutuş (lastik modeli): sokak lastiği ≈ 1.05 g */
+const LATERAL_MU = 1.05;
+/** Lastik gevşeme uzunluğu (m): yanal kuvvet kayma açısını bu yolda yakalar */
+const TIRE_RELAX_LENGTH = 0.5;
+/** Yanal kuvvetin yatış momentine katkısı: 0 = ağırlık merkezinden, 1 = zeminden */
+const ROLL_INFLUENCE = 0.15;
+/** Arka lastik kayma açısı çarpanı: arkayı biraz daha tepkisel yapar (kontrollü kuyruk) */
+const REAR_SLIP_SCALE = 1.3;
 const ROLLING_RESISTANCE = 0.015;
 const FRONT_BRAKE_BIAS = 0.65;
 const HANDBRAKE_REAR_GRIP = 0.45;
@@ -155,7 +165,8 @@ export class VehiclePhysics {
       this.controller.setWheelSuspensionRelaxation(i, spec.relaxation);
       this.controller.setWheelMaxSuspensionForce(i, MAX_SUSPENSION_FORCE);
       this.controller.setWheelFrictionSlip(i, FRICTION_BASE * spec.lateralGrip[axle]);
-      this.controller.setWheelSideFrictionStiffness(i, 1);
+      // Yanal kuvvet kendi lastik modelimizle (kayma açısı eğrisi) uygulanır; Rapier'ınki kapalı.
+      this.controller.setWheelSideFrictionStiffness(i, 0.0001);
     }
     this.drivetrain = initialDrivetrain(spec.engine.idleRpm);
   }
@@ -191,6 +202,7 @@ export class VehiclePhysics {
     this.time = 0;
     this.drivetrain = initialDrivetrain(this.spec.engine.idleRpm);
     this.slipSpeed = 0;
+    this.slipAngles = [0, 0, 0, 0];
     this.steer = 0;
   }
 
@@ -218,6 +230,7 @@ export class VehiclePhysics {
     this.chassis.setLinvel({ x: 0, y: 0, z: 0 }, true);
     this.chassis.setAngvel({ x: 0, y: 0, z: 0 }, true);
     this.slipSpeed = 0;
+    this.slipAngles = [0, 0, 0, 0];
     this.flipTime = 0;
     this.drivetrain = initialDrivetrain(this.spec.engine.idleRpm);
   }
@@ -304,6 +317,7 @@ export class VehiclePhysics {
 
     // Gövde kuvvetleri: aerodinamik sürtünme, bastırma, yuvarlanma direnci
     chassis.resetForces(true);
+    chassis.resetTorques(true);
     const hSpeed = Math.hypot(vel.x, vel.z);
     if (hSpeed > 0.01) {
       const drag = spec.dragCoefficient * hSpeed;
@@ -316,6 +330,56 @@ export class VehiclePhysics {
       chassis.addForce({ x: (-vel.x / hSpeed) * f, y: 0, z: (-vel.z / hSpeed) * f }, true);
     }
     chassis.addForce({ x: 0, y: -spec.downforceCoefficient * hSpeed * hSpeed, z: 0 }, true);
+
+    // Yanal lastik kuvvetleri: tekerlek başına kayma açısı -> kuvvet, temas noktasına uygulanır
+    const com = chassis.worldCom();
+    const ang = chassis.angvel();
+    for (let i = 0; i < 4; i++) {
+      const info = wheels[i];
+      if (!info?.contact) {
+        this.slipAngles[i] = 0;
+        continue;
+      }
+      const axle = AXLE_OF[i] as 'front' | 'rear';
+      const cp = controller.wheelContactPoint(i);
+      const fz = Math.min(controller.wheelSuspensionForce(i) ?? 0, (spec.massKg * GRAVITY) / 2);
+      if (!cp || fz <= 0) continue;
+      const rx = cp.x - com.x;
+      const ry = cp.y - com.y;
+      const rz = cp.z - com.z;
+      // Temas noktasının hızı: v + ω × r
+      const px = vel.x + (ang.y * rz - ang.z * ry);
+      const pz = vel.z + (ang.x * ry - ang.y * rx);
+      const steerHere = axle === 'front' ? steerRad : 0;
+      const sn = Math.sin(steerHere);
+      const cs = Math.cos(steerHere);
+      // Tekerlek ekseni (yatay): ileri = fwd·cos + left·sin, sol = left·cos − fwd·sin
+      const wfx = fwd.x * cs + left.x * sn;
+      const wfz = fwd.z * cs + left.z * sn;
+      const wlx = left.x * cs - fwd.x * sn;
+      const wlz = left.z * cs - fwd.z * sn;
+      const vLong = px * wfx + pz * wfz;
+      const vLat = px * wlx + pz * wlz;
+      // Gevşeme: lastik kuvveti kayma açısını RELAX_LENGTH metrelik yolda yakalar (anlık doyma yok)
+      const raw = slipAngle(vLat, vLong);
+      const follow = Math.min(1, (Math.max(Math.abs(vLong), 3) * dt) / TIRE_RELAX_LENGTH);
+      const prevAlpha = this.slipAngles[i] ?? 0;
+      const alpha = prevAlpha + (raw - prevAlpha) * follow;
+      this.slipAngles[i] = alpha;
+      const surfaceGrip = this.track.config.gripBySurface[info.surface];
+      const rearBoost = axle === 'rear' && input.handbrake ? HANDBRAKE_REAR_GRIP : 1;
+      const mu = LATERAL_MU * spec.lateralGrip[axle] * surfaceGrip * rearBoost;
+      const fxUsed = Math.abs(controller.wheelForwardImpulse(i) ?? 0) / dt;
+      const usage = fxUsed / (FRICTION_BASE * spec.longitudinalGrip[axle] * fz + 1);
+      // Kararlılık: kuvvet, tekerleğin yanal hızını tek adımda sıfırlayandan büyük olamaz
+      const fyMax = (0.3 * (spec.massKg / 4) * Math.abs(vLat)) / dt;
+      const fyRaw = lateralForce(alpha * (axle === 'rear' ? REAR_SLIP_SCALE : 1), fz, mu) * combinedScale(usage);
+      const fy = Math.max(-fyMax, Math.min(fyMax, fyRaw));
+      // Yanal kuvvet, ağırlık merkezi yüksekliğine yakın bir noktadan uygulanır (Rapier roll influence gibi);
+      // yerden uygulanırsa gövde aşırı yatar ve tekerlekler yerden kalkar.
+      const pointY = com.y + ry * ROLL_INFLUENCE;
+      chassis.addForceAtPoint({ x: wlx * fy, y: 0, z: wlz * fy }, { x: cp.x, y: pointY, z: cp.z }, true);
+    }
 
     controller.updateVehicle(dt);
     this.world.step();
@@ -345,6 +409,8 @@ export class VehiclePhysics {
     this.lastBrake = o.brake;
   }
 
+  /** Tekerlek başına son kayma açısı (rad) */
+  private slipAngles = [0, 0, 0, 0];
   private lastWheels: { surface: Surface; contact: boolean }[] = [];
   private lastInput: DriveInput = { throttle: 0, brake: 0, steer: 0, handbrake: false };
   private lastForward = 0;

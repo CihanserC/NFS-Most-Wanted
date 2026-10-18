@@ -4,3 +4,4 @@ dist
 *.tsbuildinfo
 coverage
 .vite
+.claude/settings.local.json

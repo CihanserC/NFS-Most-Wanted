@@ -33,9 +33,10 @@ function autopilot(v: VehiclePhysics, lateralG = 7): DriveInput {
   const t = track.samples[(s.trackIndex + ahead) % n] as TrackSample;
   const desired = Math.atan2(t.x - s.position[0], t.z - s.position[2]);
   const steer = Math.max(-1, Math.min(1, wrap(desired - heading) * 2.2));
-  // Önündeki 70 m içindeki en dar virajdan hedef hız
+  // Önündeki en dar virajdan hedef hız; bakış mesafesi frenleme mesafesiyle büyür
   let rmin = Infinity;
-  for (let k = 0; k < Math.round(70 / spacing); k++)
+  const lookahead = Math.max(70, 20 + (s.speed * s.speed) / 12);
+  for (let k = 0; k < Math.round(lookahead / spacing); k++)
     rmin = Math.min(rmin, (track.samples[(s.trackIndex + k) % n] as TrackSample).radius);
   const target = Math.max(11, Math.min(85, Math.sqrt(lateralG * rmin)));
   return {
