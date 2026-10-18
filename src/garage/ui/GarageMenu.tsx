@@ -93,7 +93,7 @@ export function GarageMenu() {
           disabled: !isCategoryEnabled(c, Object.keys(car.manifest.slots)),
           meta: isCategoryEnabled(c, Object.keys(car.manifest.slots))
             ? undefined
-            : t('ui.comingSoon'),
+            : t(c.slots.length > 0 ? 'ui.notAvailable' : 'ui.comingSoon'),
         }));
       case 'slots':
         return (category?.slots ?? [])

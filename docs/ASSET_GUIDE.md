@@ -52,6 +52,25 @@ Boyutlar manifestteki `dimensions` ile uyumlu olmalıdır (Vanta Stallion: 4,75 
 
 `engine__*` nesneleri yalnızca kaput `blower_cutout` iken görünür (kaput altında kalmasın). Kaputun kesik seçeneği `hood__blower_cutout` olarak modelde bulunmalı ve motor bölmesi görünmelidir.
 
+## 3b. Model eşleme (`modelMap.json`): kurallara uymayan hazır modeller
+
+Blender'da yeniden adlandırma yapmadan, araç başına `src/data/cars/<id>/modelMap.json` ile yükleme sırasında adlar kurallara çevrilir (örnek: `ford_mustang_gt_2013`). Eşleme modelin klonuna uygulanır; sonrasında hat (analiz, yedek parça, paylaşılan materyaller) aynen çalışır.
+
+| Alan        | Anlamı                                                                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scale`     | Modele uygulanan ölçek (model metre değilse; Mustang: 100)                                                                                     |
+| `offset`    | Ölçekten sonra `[x, y, z]` öteleme (zemini y = 0'a oturtmak için; Mustang: `[0, 0.176, 0]`)                                                    |
+| `hide`      | Adında (kendi ya da üst düğümünde) bu parçalardan biri geçen mesh'ler kaldırılır; jant, lastik, disk, kaliper gibi prosedürel üretilenler için |
+| `paint`     | `{ material, nodes?, zone }` kuralları, ilk eşleşen kazanır: `material` adlı materyal, `nodes` (regex) eşleşen yerlerde `paint_<zone>` olur    |
+| `materials` | Materyal adı → paylaşılan ad (ör. cam: `"fMAT_Glass1": "mat_glass"`)                                                                           |
+
+Notlar:
+
+- Eşlemede tüm model `body__main` grubu altına alınır (gövde sayılır). Modelde ayrı seçenek nesneleri yoksa, seçenekler **overlay** olarak prosedürel çizilir; modelin kendi stok parçası için manifestte `modelEmptyOptions` verilir (ör. `"hood": ["stock"]`).
+- Boya bölgeleri mesh düzeyinde ayrılabildiği kadarıyla tanımlanır (Mustang'te ön/arka kit tek mesh olduğu için yalnızca `body` ve `hood`).
+- Tekerlek çapası gerekmez (eşlemeli modellerde `anchor_missing` uyarısı verilmez); tekerlek konumları manifestten alınır, modelden ölçülür.
+- Aracın stok jant/lastik kurulumu `manifest.defaultFitment` ile verilir.
+
 ## 4. Materyal isimleri
 
 Aşağıdaki adlara sahip materyaller oyunun paylaşılan materyalleriyle **değiştirilir**; böylece boya, cam filmi, vinil ve far rengi modele de uygulanır. Başka adlar modelin kendi materyali olarak kalır.

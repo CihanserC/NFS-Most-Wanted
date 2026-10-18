@@ -371,6 +371,7 @@ export const tr: Record<string, string> = {
   'car.ford_mustang_gt_2013.tagline': 'Modern pony car',
   'credits.nonCommercial':
     'Ticari olmayan kullanım ve aynı lisansla paylaşım koşulu (CC BY-NC-SA).',
+  'ui.notAvailable': 'Bu araçta yok',
   'fitment.ok': 'Uyum sorunu yok.',
   'fitment.arch_rub': 'lastik çamurluk kemerine sürtüyor',
   'fitment.fender_poke': 'lastik çamurluktan taşıyor',

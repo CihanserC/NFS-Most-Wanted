@@ -188,12 +188,12 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 
 ### V2-2 — Mustang entegrasyonu
 
-- [ ] GLB'yi `public/assets/cars/` altına al, `modelMap.json` (ölçek, zemin, gizle, boya bölgeleri, cam)
-- [ ] `applyModelMap` + testler (gerçek GLB düğüm adlarıyla)
-- [ ] Mustang manifest/parça kataloğu/`placeholder.json`/`fitment`/kamera ön ayarları/çeviriler
-- [ ] Overlay parçalar Mustang gövdesine oturur (spoyler, etekler, çene, scoop, egzoz uçları, roll cage)
-- [ ] Kredi (CC-BY-NC-SA uyarısı) ve `credits` doğrulayıcı güncellemesi
-- [ ] Tarayıcı doğrulama: boya, vinil, jant, duruş, ışık, kayıt, sürüş
+- [x] GLB'yi `public/assets/cars/` altına al, `modelMap.json` (ölçek, zemin, gizle, boya bölgeleri, cam)
+- [x] `applyModelMap` + testler (gerçek GLB düğüm adlarıyla)
+- [x] Mustang manifest/parça kataloğu/`placeholder.json`/`fitment`/kamera ön ayarları/çeviriler
+- [x] Overlay parçalar Mustang gövdesine oturur (spoyler, etekler, çene, scoop, egzoz uçları, roll cage)
+- [x] Kredi (CC-BY-NC-SA uyarısı) ve `credits` doğrulayıcı güncellemesi
+- [x] Tarayıcı doğrulama: boya, duruş, overlay parçalar, sürüş (Mustang modelinde ön/arka kit tek mesh: boya bölgeleri yalnız body ve hood; tampon ayrı bölge olamadı)
 
 ### V2-3 — Sürüş göstergeleri ve sürüş mekaniği
 
