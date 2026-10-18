@@ -1,6 +1,34 @@
 # İlerleme
 
-## Aktif faz: Faz 10 — Gerçek Model Entegrasyonu (BAŞLANMADI)
+## Aktif faz: Faz 11 — Optimizasyon ve Cila (BAŞLANMADI)
+
+## Faz 10 — Gerçek Model Entegrasyonu ✅ (2026-10-18)
+
+**Yapılanlar**
+
+- **GLB hattı** (`car/model/modelLoader.ts`): GLTFLoader + Draco (geometri) + KTX2/Basis (doku) + Meshopt. Çözücüler `public/assets/decoders/` altında (CDN gerekmez; three güncellenince `npm run assets:decoders`). Aynı URL önbellekten gelir.
+- **Manifest:** `model` alanı `public/` köküne göre GLB yolu (null = placeholder). Yeni opsiyonel alanlar: `modelEmptyOptions` (geometri gerektirmeyen seçenekler), `fitment` (gerçek modelde çamurluk ölçüleri; `axleBodies` varsa bunu kullanır). Doğrulayıcı ikisini de kontrol eder.
+- **İsimlendirme kuralları** (`core/model/modelRules.ts`, saf mantık): `body__*` (her zaman görünür), `<slot>__<seçenek>`, `wheel_anchor_FL/FR/RL/RR`; Blender `.001` ekleri yok sayılır; adlandırılmış nesnenin çocukları onunla birlikte yönetilir. `engine__*` yalnızca blower kesik kaputta görünür.
+- **Analiz ve yedekleme:** gövde yoksa model reddedilir (tamamen placeholder); modelde olmayan seçenek için yalnızca o slot placeholder çizer; bilinmeyen slot/seçenek, eksik/uzak tekerlek çapası, tanınmayan `paint_/mat_` adları uyarı verir. Uyarılar yükleme başına bir kez, slot başına özetlenmiş tek `console.warn` çıktısıdır.
+- **Paylaşılan materyaller:** modeldeki `paint_<bölge>`, `mat_chrome`, `mat_glass`... oyunun materyalleriyle değiştirilir; boya tipleri, bölgesel boya, vinil, cam filmi ve far rengi modele de uygulanır.
+- **`CarShell`:** model ya da placeholder + yedek slotları (CarRig'den ayrıldı); atölye ve test sürüşü aynı yolu kullanır.
+- **Geliştirme:** `?model=assets/cars/x.glb` manifesti değiştirmeden model dener; `npm run assets:demo-model` kurallara uyan kutulardan örnek GLB üretir (`core/model/glbWriter.ts`).
+- **Belgeler:** `docs/ASSET_GUIDE.md` (kurallar, materyal tablosu, sıkıştırma, yedekleme tablosu, kontrol listesi), `public/assets/CREDITS.json` + doğrulayıcı (`core/credits`).
+- **Testler (299):** isim çözümleme, sentetik ve **gerçek GLB** (kendi GLB yazıcımızla üretilip GLTFLoader ile ayrıştırılan) analizleri, görünürlük/yedek kararları, materyal bağlama, model URL, hazırlama uyarıları, manifest alanları, fitment geçersiz kılma, credits doğrulama.
+
+**Doğrulama:** tip kontrolü, lint, 299 test, build yeşil. Tarayıcıda örnek GLB yüklendi (gövde/kaput/tavan GLB'den, eksik parçalar placeholder'dan), bölgesel boya (mavi gövde / yeşil kaput / sarı tavan) modele uygulandı, bulunmayan dosya konsola uyarı yazıp placeholder'a düştü.
+
+**Notlar / kararlar**
+
+- Gerçek model henüz yok; varsayılan araç `model: null` ile placeholder çiziyor. Kabul kriteri, kurallara uygun GLB'nin kod değişmeden devreye girmesi ve eksik parçada yedeğe düşmesi, örnek GLB ve testlerle gösterildi.
+- Tekerlek konumu ve fizik manifesti esas alır; çapalar sadece doğrulama içindir.
+- Draco/KTX2 ile **sıkıştırılmış** gerçek bir GLB tarayıcıda denenmedi (çözücü dosyalarının 200 ile servis edildiği doğrulandı).
+
+**Eksik / bilinen sorunlar**
+
+- Vite, three'nin içindeki varsayılan Draco/Basis kopyalarını da paketliyor (`dist/assets`, ≈3 MB kullanılmayan); Faz 11'de dışarıda tutulacak.
+- Sürüşte egzoz alevi/uç efektleri placeholder yerleşimini kullanıyor; gerçek modelde uç konumları için manifest alanı gerekecek.
+- Kamera/fitment ölçüleri `fitment` verilmezse hâlâ placeholder gövdesinden geliyor.
 
 ## Faz 9 — Kaydet/Yükle ve Fotoğraf Modu ✅ (2026-10-18)
 

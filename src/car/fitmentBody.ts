@@ -14,7 +14,7 @@ export function axleBodies(
 ): Record<Axle, AxleBody> {
   const fenderOption = parts.fenders;
   const outset = fenderOption ? (car.parts.fenders?.[fenderOption]?.fenderOutsetMm ?? 0) : 0;
-  const { wheels } = car.manifest;
+  const { wheels, fitment } = car.manifest;
   const [frontArch, rearArch] = car.body.wheelArches;
   const make = (pos: readonly number[], archRadius: number): AxleBody => {
     const [x = 0, y = 0, z = 0] = pos;
@@ -26,9 +26,25 @@ export function axleBodies(
       wellInnerX: car.body.profile.wellInnerX,
     };
   };
+  const measured = (axle: 'front' | 'rear', pos: readonly number[]): AxleBody | null => {
+    const m = fitment?.[axle];
+    return m
+      ? {
+          hubX: Math.abs(pos[0] ?? 0),
+          stockRadius: pos[1] ?? 0,
+          archRadius: m.archRadius,
+          fenderX: m.fenderX + outset * MM,
+          wellInnerX: m.wellInnerX,
+        }
+      : null;
+  };
   return {
-    front: make(wheels.FL.position, frontArch?.radius ?? wheels.FL.position[1]),
-    rear: make(wheels.RL.position, rearArch?.radius ?? wheels.RL.position[1]),
+    front:
+      measured('front', wheels.FL.position) ??
+      make(wheels.FL.position, frontArch?.radius ?? wheels.FL.position[1]),
+    rear:
+      measured('rear', wheels.RL.position) ??
+      make(wheels.RL.position, rearArch?.radius ?? wheels.RL.position[1]),
   };
 }
 

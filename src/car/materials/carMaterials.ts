@@ -1,5 +1,5 @@
 import { glassOpacity, type GlassConfig, type LightingConfig } from '../../core/stance/stance';
-import { BackSide, Color, MeshPhysicalMaterial, MeshStandardMaterial, type Material } from 'three';
+import { BackSide, Color, Material, MeshPhysicalMaterial, MeshStandardMaterial } from 'three';
 import { DEFAULT_PAINT } from '../../core/paint/paint';
 import { createCarPaintMaterial, type CarPaintMaterial } from './carPaintMaterial';
 import { materialConfig as c } from './materialConfig';
@@ -65,6 +65,22 @@ export function disposeCarMaterials(m: CarMaterials): void {
     if ('dispose' in value && typeof value.dispose === 'function') value.dispose();
     else for (const mat of Object.values(value)) mat.dispose();
   }
+}
+
+/**
+ * Materyal adı -> paylaşılan materyal (gerçek modeldeki adlı materyallerin yerine konur):
+ * paint_<bölge>, mat_chrome, mat_glass, mat_rubber, mat_headlight_lens, ...
+ */
+export function sharedMaterialMap(m: CarMaterials): Map<string, Material> {
+  const map = new Map<string, Material>();
+  const add = (material: Material) => {
+    if (material.name) map.set(material.name, material);
+  };
+  for (const value of Object.values(m)) {
+    if (value instanceof Material) add(value);
+    else for (const material of Object.values(value)) add(material);
+  }
+  return map;
 }
 
 /** Boya bölgesi manifestte yoksa gövde boyasına düşer. */

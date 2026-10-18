@@ -16,11 +16,10 @@ import { trackLimitMm } from './fitmentBody';
 import type { WheelPose } from './wheelPose';
 import { Underglow } from './lighting/Underglow';
 import { LookSync } from './materials/LookSync';
+import { CarShell } from './CarShell';
 import { CarMaterialsProvider } from './materials/CarMaterialsContext';
 import { PaintSync } from './materials/PaintSync';
-import { PlaceholderBody } from './procedural/PlaceholderBody';
 import { ProceduralWheels } from './procedural/wheels/ProceduralWheels';
-import { slotRenderers } from './slots/registry';
 import { isRenderedSlot } from './slots/slotIds';
 
 /** Manifest + BuildState -> 3D araç. */
@@ -30,7 +29,6 @@ export function CarRig({ drive }: { drive?: { poses: RefObject<WheelPose[]> } })
   const parts = useEffectiveParts();
   const fitment = useEffectiveFitment();
   const { stance, lighting } = useEffectiveLook();
-  const slotIds = Object.keys(car.manifest.slots);
   const { wheels, dimensions } = car.manifest;
   // Lastik büyüdükçe gövde yükselir; ön/arka farkı eğim (rake) verir.
   const { lift, pitch } = bodyLift(
@@ -46,10 +44,6 @@ export function CarRig({ drive }: { drive?: { poses: RefObject<WheelPose[]> } })
   const vinylPicking = useVinylPicking(root, box);
 
   useEffect(() => {
-    if (car.manifest.model !== null)
-      console.warn(
-        `[CarRig] ${car.manifest.id}: GLB modeli Faz 10'da desteklenecek, placeholder çiziliyor.`,
-      );
     const missing = Object.keys(car.manifest.slots).filter((id) => !isRenderedSlot(id));
     if (missing.length > 0) console.warn(`[CarRig] Çizimi olmayan slotlar: ${missing.join(', ')}`);
   }, [car]);
@@ -76,13 +70,7 @@ export function CarRig({ drive }: { drive?: { poses: RefObject<WheelPose[]> } })
           onClick={drive ? undefined : vinylPicking.onClick}
           onPointerMissed={drive ? undefined : vinylPicking.onPointerMissed}
         >
-          <PlaceholderBody car={car} parts={parts} />
-          {slotIds.filter(isRenderedSlot).map((slotId) => {
-            const Renderer = slotRenderers[slotId];
-            const option = parts[slotId];
-            if (option === undefined) return null;
-            return <Renderer key={slotId} option={option} parts={parts} car={car} />;
-          })}
+          <CarShell car={car} parts={parts} />
           {!drive && <VinylGizmo root={root} box={box} />}
         </group>
       </group>

@@ -10,7 +10,9 @@
     "test": "node node_modules/vitest/vitest.mjs run",
     "test:watch": "node node_modules/vitest/vitest.mjs",
     "lint": "node node_modules/eslint/bin/eslint.js .",
-    "format": "node node_modules/prettier/bin/prettier.cjs --write ."
+    "format": "node node_modules/prettier/bin/prettier.cjs --write .",
+    "assets:decoders": "node scripts/copy-decoders.mjs",
+    "assets:demo-model": "node scripts/make-demo-glb.mjs"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0",

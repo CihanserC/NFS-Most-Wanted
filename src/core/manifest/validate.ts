@@ -172,6 +172,35 @@ export function validateManifest(input: unknown): ValidationResult<CarManifest> 
         err(`${p}.camera`, `"${String(s.camera)}" cameraPresets içinde tanımlı değil`);
     }
 
+  // Gerçek model: geometri gerektirmeyen seçenekler ve çamurluk ölçüleri (opsiyonel)
+  if (m.modelEmptyOptions !== undefined) {
+    const empty = m.modelEmptyOptions;
+    if (!isObj(empty)) err('modelEmptyOptions', 'nesne olmalı');
+    else
+      for (const [slotId, options] of Object.entries(empty)) {
+        const slot = isObj(slots) ? slots[slotId] : undefined;
+        const slotOptions: unknown = isObj(slot) ? slot.options : undefined;
+        if (!Array.isArray(slotOptions)) {
+          err(`modelEmptyOptions.${slotId}`, 'manifestte tanımlı bir slot olmalı');
+          continue;
+        }
+        if (!Array.isArray(options) || options.some((o) => !slotOptions.includes(o)))
+          err(`modelEmptyOptions.${slotId}`, 'slotun seçeneklerinden oluşan dizi olmalı');
+      }
+  }
+  if (m.fitment !== undefined) {
+    const fit = m.fitment;
+    if (!isObj(fit)) err('fitment', 'nesne olmalı');
+    else
+      for (const axle of ['front', 'rear'] as const) {
+        const f = fit[axle];
+        if (!isObj(f) || !isNum(f.fenderX) || !isNum(f.archRadius) || !isNum(f.wellInnerX))
+          err(`fitment.${axle}`, 'fenderX, archRadius ve wellInnerX sayıları gerekli');
+        else if (f.fenderX <= 0 || f.archRadius <= 0 || f.wellInnerX <= 0)
+          err(`fitment.${axle}`, 'değerler pozitif olmalı');
+      }
+  }
+
   if (errors.length > 0) return { ok: false, errors };
   return { ok: true, value: input as CarManifest };
 }

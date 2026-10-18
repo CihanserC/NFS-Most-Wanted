@@ -6,6 +6,16 @@ export type WheelId = (typeof WHEEL_IDS)[number];
 export const DRIVETRAINS = ['RWD', 'FWD', 'AWD'] as const;
 export type Drivetrain = (typeof DRIVETRAINS)[number];
 
+/** Bir aks için çamurluk ölçüleri (stok, flare hariç). */
+export type FitmentMeasure = {
+  /** Çamurluk dudağının |x| konumu */
+  fenderX: number;
+  /** Kemer yarıçapı (tekerlek merkezinden) */
+  archRadius: number;
+  /** Tekerlek davlumbazı iç duvarı |x| */
+  wellInnerX: number;
+};
+
 export type CameraPreset = { position: Vec3; target: Vec3 };
 
 export type SlotDefinition = {
@@ -37,6 +47,13 @@ export type CarManifest = {
   vinylCameras?: Partial<Record<'left' | 'right' | 'top' | 'front' | 'rear', string>>;
   /** Menü kategorisi -> kamera preset'i (Duruş, Işıklar & Camlar gibi slotsuz editörler). */
   categoryCameras?: Record<string, string>;
+  /** slot -> geometri gerektirmeyen seçenekler ("none" dışında): gerçek modelde nesne aranmaz. */
+  modelEmptyOptions?: Record<string, string[]>;
+  /**
+   * Gerçek modelde çamurluk ölçüleri (m, tekerlek merkezi yüksekliğinde). Yoksa placeholder
+   * gövde örnekleyicisinden okunur (fitment kontrolü için).
+   */
+  fitment?: { front: FitmentMeasure; rear: FitmentMeasure };
   defaultCamera: string;
   cameraPresets: Record<string, CameraPreset>;
   slots: Record<string, SlotDefinition>;
