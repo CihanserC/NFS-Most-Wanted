@@ -4,7 +4,8 @@ import { immer } from 'zustand/middleware/immer';
 import type { VinylSide } from '../vinyl/types';
 import type { Axle } from '../wheels/types';
 
-export type AppMode = 'garage' | 'drive';
+/** select: araç seçim ekranı · garage: atölye (modifiye) · drive: test sürüşü */
+export type AppMode = 'select' | 'garage' | 'drive';
 
 export type AppState = {
   mode: AppMode;
@@ -34,6 +35,8 @@ export type AppState = {
   /** Son kullanılan vinil rengi (yeni katmanlara uygulanır) */
   vinylColor: string;
   creditsOpen: boolean;
+  settingsOpen: boolean;
+  setSettingsOpen: (open: boolean) => void;
   setCreditsOpen: (open: boolean) => void;
   setMode: (mode: AppMode) => void;
   toggleTurntable: () => void;
@@ -55,8 +58,13 @@ export type AppState = {
 export const createAppStore = () =>
   create<AppState>()(
     immer((set) => ({
-      mode: 'garage',
+      mode: 'select',
       creditsOpen: false,
+      settingsOpen: false,
+      setSettingsOpen: (open) =>
+        set((s) => {
+          s.settingsOpen = open;
+        }),
       setCreditsOpen: (open) =>
         set((s) => {
           s.creditsOpen = open;

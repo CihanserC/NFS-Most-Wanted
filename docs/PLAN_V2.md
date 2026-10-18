@@ -9,34 +9,37 @@ Tarih: 2026-10-18 · Bu belge, mevcut oyunun analizini, istenen yeni özellikler
 ## 1. Mevcut durumun analizi
 
 ### 1.1 Güçlü yanlar
+
 - Saf mantık (`src/core`) ile sahne kodu ayrı; 319 test, fizik dahil başsız çalışıyor.
 - Veri odaklı yapı: manifest + parça kataloğu + JSON verileri; yeni araç **teoride** yalnız veri + model.
 - `BuildState` sürümlü, migration'lı, IndexedDB'de kalıcı.
 - Model hattı (GLB, yedek parça, paylaşılan materyaller) hazır.
 
 ### 1.2 Zayıf yanlar (bu planın hedefleri)
-| # | Gözlem | Kaynak |
-|---|---|---|
-| A | **Tek araç varsayımı kodda gömülü:** `useBuildStore = createBuildStore(getCar(DEFAULT_CAR_ID).manifest)`, otomatik kayıt tek slot, garaj yüklemesi `store.manifest` kullanıyor, kamera/HUD/ses `DEFAULT_CAR_ID` okuyor. İkinci araç eklemek için önce çok araçlı mimari şart. | `core/store/stores.ts`, `buildStore.ts`, `persistence.ts` |
-| B | **Açılış doğrudan modifiye ekranı;** araç seçimi yok. | `App.tsx` |
-| C | **Üst çubukta 9 düğme** (geri al, yinele, döner tabla, grafik, ton, oto kalite, ses, kredi, FPS): kalabalık, mobilde sığmaz. | `TopBar.tsx` |
-| D | **Mobil uyumsuz:** klavye/fare varsayımı (sürüşte W/A/S/D), sabit piksel panel genişliği (≈ 340–460 px), dokunmatik sürüş girişi yok, `touch-action` ayarı yok, mobil GPU için varsayılan kalite yok. | `drive/input.ts`, `garageMenu.css` |
-| E | **Sürüş hissi ayarlanmamış:** direksiyon yalnız hıza duyarlı açı; yardımcı sistemler (ABS, çekiş kontrolü, direksiyon yardımı) yok; yan yatma (roll) kontrolü yok; kamera sabit mesafe; çarpışmada sert duruş; tek fizik profili (araca özel değil). | `VehiclePhysics.ts`, `drivetrain.ts` |
-| F | **Sürüş göstergeleri sade:** büyük hız rakamı + segmentli devir çubuğu + vites kutusu; gaz/fren, kayma, boost, vites ışığı yok; sağ altta yığılmış; mobilde ayrı yerleşim yok. | `DriveOverlay.tsx` |
-| G | **Vanta iç mekanı ilkel:** kutu koltuklar, kutu torpido, tek halka direksiyon; kapı paneli, gösterge, konsol, pedal, tavan döşemesi yok. | `slots/mechanical.tsx` (`Interior`) |
+
+| #   | Gözlem                                                                                                                                                                                                                                                                        | Kaynak                                                    |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| A   | **Tek araç varsayımı kodda gömülü:** `useBuildStore = createBuildStore(getCar(DEFAULT_CAR_ID).manifest)`, otomatik kayıt tek slot, garaj yüklemesi `store.manifest` kullanıyor, kamera/HUD/ses `DEFAULT_CAR_ID` okuyor. İkinci araç eklemek için önce çok araçlı mimari şart. | `core/store/stores.ts`, `buildStore.ts`, `persistence.ts` |
+| B   | **Açılış doğrudan modifiye ekranı;** araç seçimi yok.                                                                                                                                                                                                                         | `App.tsx`                                                 |
+| C   | **Üst çubukta 9 düğme** (geri al, yinele, döner tabla, grafik, ton, oto kalite, ses, kredi, FPS): kalabalık, mobilde sığmaz.                                                                                                                                                  | `TopBar.tsx`                                              |
+| D   | **Mobil uyumsuz:** klavye/fare varsayımı (sürüşte W/A/S/D), sabit piksel panel genişliği (≈ 340–460 px), dokunmatik sürüş girişi yok, `touch-action` ayarı yok, mobil GPU için varsayılan kalite yok.                                                                         | `drive/input.ts`, `garageMenu.css`                        |
+| E   | **Sürüş hissi ayarlanmamış:** direksiyon yalnız hıza duyarlı açı; yardımcı sistemler (ABS, çekiş kontrolü, direksiyon yardımı) yok; yan yatma (roll) kontrolü yok; kamera sabit mesafe; çarpışmada sert duruş; tek fizik profili (araca özel değil).                          | `VehiclePhysics.ts`, `drivetrain.ts`                      |
+| F   | **Sürüş göstergeleri sade:** büyük hız rakamı + segmentli devir çubuğu + vites kutusu; gaz/fren, kayma, boost, vites ışığı yok; sağ altta yığılmış; mobilde ayrı yerleşim yok.                                                                                                | `DriveOverlay.tsx`                                        |
+| G   | **Vanta iç mekanı ilkel:** kutu koltuklar, kutu torpido, tek halka direksiyon; kapı paneli, gösterge, konsol, pedal, tavan döşemesi yok.                                                                                                                                      | `slots/mechanical.tsx` (`Interior`)                       |
 
 ### 1.3 Gelen girdi: Mustang modeli
+
 `assets/2013_ford_mustang_gt.glb` (5,4 MB, Sketchfab, Ddiaz Design) incelendi:
 
-| Özellik | Değer |
-|---|---|
-| Yapı | 313 düğüm, 154 mesh, ≈ 86 bin üçgen, 12 materyal, 25 doku (gömülü), uzantılar: `KHR_materials_specular`, `KHR_materials_transmission` (Draco yok) |
+| Özellik       | Değer                                                                                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Yapı          | 313 düğüm, 154 mesh, ≈ 86 bin üçgen, 12 materyal, 25 doku (gömülü), uzantılar: `KHR_materials_specular`, `KHR_materials_transmission` (Draco yok)                                                                                                      |
 | Ölçek / eksen | Düğüm matrisleri sonrası geometri **metre/100** ölçeğinde (×100 → 4,77 m uzunluk × 2,03 m genişlik × 1,40 m yükseklik). Önü **+Z**, yukarı **+Y**, solu **+X**: bizim koordinatlarla uyumlu. Zemin y = −0,176 m'de (araç 0,176 m yukarı kaydırılmalı). |
-| Tekerlekler | Hub/disk/fren düğümleri var (`SM_Hub_*`, `SM_Disk_*`, `SM_Brake_*`); merkezler: ön (±0,727; 0,345; 1,473), arka (±0,745; 0,354; −1,246) → aks mesafesi 2,72 m. **Jant/lastik yok** (yalnız hub+disk+kaliper). |
-| İsimler | Bizim kurallara **uymuyor**: `D_Body_xx`, `ANC_Door_L/R_xx`, `SM_Hood`, `SM_FrontKit`, `SM_RearKit`, `SM_Interior`, `ANC_SteeringWheel_xx`, `SM_Base`, `…undercover` (tüm alt plaka). Ayrı seçenek nesneleri (spoyler, tampon alternatifleri…) yok. |
-| Materyaller | `MAT_Ford_Mustang_2014_Base1` (kaporta boyası), `MAT_Glass1`, `MAT_Lights1`, `MAT_Details_{MAT1,INT1,EXT1,Chassis,Grid02,Brake1,Hub1}`, `MAT_Disk1`, `phong9SG1` |
-| **Lisans** | **CC-BY-NC-SA-4.0** (ticari olmayan + benzer paylaşım). Proje kuralı (`PROJECT_SPEC §13`) CC-BY veya daha serbest istiyor → **bilinçli istisna** (bkz. §6 Kararlar). |
-| Aynı klasörde | `assets/2001_bmw_m3_gtr.glb` (18,9 MB). **İstenmedi, bu planda kullanılmıyor**; ileride 3. araç adayı. |
+| Tekerlekler   | Hub/disk/fren düğümleri var (`SM_Hub_*`, `SM_Disk_*`, `SM_Brake_*`); merkezler: ön (±0,727; 0,345; 1,473), arka (±0,745; 0,354; −1,246) → aks mesafesi 2,72 m. **Jant/lastik yok** (yalnız hub+disk+kaliper).                                          |
+| İsimler       | Bizim kurallara **uymuyor**: `D_Body_xx`, `ANC_Door_L/R_xx`, `SM_Hood`, `SM_FrontKit`, `SM_RearKit`, `SM_Interior`, `ANC_SteeringWheel_xx`, `SM_Base`, `…undercover` (tüm alt plaka). Ayrı seçenek nesneleri (spoyler, tampon alternatifleri…) yok.    |
+| Materyaller   | `MAT_Ford_Mustang_2014_Base1` (kaporta boyası), `MAT_Glass1`, `MAT_Lights1`, `MAT_Details_{MAT1,INT1,EXT1,Chassis,Grid02,Brake1,Hub1}`, `MAT_Disk1`, `phong9SG1`                                                                                       |
+| **Lisans**    | **CC-BY-NC-SA-4.0** (ticari olmayan + benzer paylaşım). Proje kuralı (`PROJECT_SPEC §13`) CC-BY veya daha serbest istiyor → **bilinçli istisna** (bkz. §6 Kararlar).                                                                                   |
+| Aynı klasörde | `assets/2001_bmw_m3_gtr.glb` (18,9 MB). **İstenmedi, bu planda kullanılmıyor**; ileride 3. araç adayı.                                                                                                                                                 |
 
 ---
 
@@ -57,7 +60,7 @@ Kabul: iki araç arasında geçiş yapılır, her birinin modifiyesi ayrı sakla
 
 ### 2.2 Ayarlar (dişli çark) penceresi — üst çubuk sadeleştirme
 
-- Üst çubukta yalnızca: **[Araç seç]  [↶ Geri al] [↷ Yinele]  [⚙ Ayarlar]**. (Geri al/yinele düzenleme eylemi olduğu için üstte kalır; mobilde yalnız ikon.)
+- Üst çubukta yalnızca: **[Araç seç] [↶ Geri al] [↷ Yinele] [⚙ Ayarlar]**. (Geri al/yinele düzenleme eylemi olduğu için üstte kalır; mobilde yalnız ikon.)
 - **Ayarlar** açılır penceresi (modal, Esc/dışarı tıklama kapatır, klavye ve gamepad ile gezilir), bölümler:
   - **Grafik:** kalite (Düşük/Orta/Yüksek/Ultra), oto kalite, ton eşleme (ACES/AgX), FPS göstergesi.
   - **Ses:** ana ses seviyesi kaydırıcısı (menü sesleri, motor).
@@ -72,15 +75,15 @@ Kabul: üst çubukta ≤ 4 öğe (masaüstü), ≤ 3 ikon (mobil); eski tüm aya
 
 Hedef: modern telefon/tabletlerde (Chrome Android, Safari iOS) **yatay** konumda atölye ve sürüş kullanılabilir; dikeyde "cihazı döndür" uyarısı (sürüş) ya da kullanılabilir düzen (menüler).
 
-| Alan | Tasarım |
-|---|---|
-| **Algılama** | `pointer: coarse` / dar ekran → `isMobile`; ilk açılışta kalite **Düşük/Orta**, `dpr ≤ 1.5`, gölge/AO/yansıma kapalı (kalite ön ayarına eklenir). |
-| **Atölye düzeni** | Sol panel yerine **alt çekmece (bottom sheet)**: kategori listesi yatay kaydırmalı şerit, editör içeriği açılır çekmecede; tuval görünür kalır. Dokunma hedefleri ≥ 44 px, kaydırıcılar büyük. |
-| **Kamera/vinil** | OrbitControls zaten dokunmatik (tek parmak döndür, iki parmak yakınlaş/kaydır); tuvale `touch-action: none`. Vinil gizmo işaretçi olaylarıyla çalışıyor → dokunmatikte doğrulanır, tutamaçlar büyütülür. |
-| **Sürüş girişi** | Ekranda dokunmatik kontroller: sol altta **direksiyon** (sol/sağ büyük düğmeler ya da sanal çubuk), sağ altta **gaz** ve **fren** pedalları, el freni, kamera ve duraklat düğmeleri. İsteğe bağlı **eğim (gyro) direksiyonu** (ayarlarda). Çoklu dokunma desteklenir. |
-| **HUD** | Dar ekranda küçük yerleşim: hız + vites + devir yayı alt ortada; minimap/tur bilgisi küçülür. |
-| **Güvenlik** | `viewport-fit=cover`, safe-area boşlukları, çift dokunma/yakınlaştırma/çekerek-yenileme kapalı, ekran uyanık tut (Wake Lock, varsa), ses ilk dokunuşla açılır. |
-| **Performans** | Uyarlanabilir kalite mobilde daha agresif; sürüşte parçacık/iz sayıları ölçeklenir; Rapier WASM tembel yüklü kalır. |
+| Alan              | Tasarım                                                                                                                                                                                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Algılama**      | `pointer: coarse` / dar ekran → `isMobile`; ilk açılışta kalite **Düşük/Orta**, `dpr ≤ 1.5`, gölge/AO/yansıma kapalı (kalite ön ayarına eklenir).                                                                                                                     |
+| **Atölye düzeni** | Sol panel yerine **alt çekmece (bottom sheet)**: kategori listesi yatay kaydırmalı şerit, editör içeriği açılır çekmecede; tuval görünür kalır. Dokunma hedefleri ≥ 44 px, kaydırıcılar büyük.                                                                        |
+| **Kamera/vinil**  | OrbitControls zaten dokunmatik (tek parmak döndür, iki parmak yakınlaş/kaydır); tuvale `touch-action: none`. Vinil gizmo işaretçi olaylarıyla çalışıyor → dokunmatikte doğrulanır, tutamaçlar büyütülür.                                                              |
+| **Sürüş girişi**  | Ekranda dokunmatik kontroller: sol altta **direksiyon** (sol/sağ büyük düğmeler ya da sanal çubuk), sağ altta **gaz** ve **fren** pedalları, el freni, kamera ve duraklat düğmeleri. İsteğe bağlı **eğim (gyro) direksiyonu** (ayarlarda). Çoklu dokunma desteklenir. |
+| **HUD**           | Dar ekranda küçük yerleşim: hız + vites + devir yayı alt ortada; minimap/tur bilgisi küçülür.                                                                                                                                                                         |
+| **Güvenlik**      | `viewport-fit=cover`, safe-area boşlukları, çift dokunma/yakınlaştırma/çekerek-yenileme kapalı, ekran uyanık tut (Wake Lock, varsa), ses ilk dokunuşla açılır.                                                                                                        |
+| **Performans**    | Uyarlanabilir kalite mobilde daha agresif; sürüşte parçacık/iz sayıları ölçeklenir; Rapier WASM tembel yüklü kalır.                                                                                                                                                   |
 
 Kabul: 390×844 ve 844×390 (iPhone), 360×800 (Android), 1024×768 (tablet) boyutlarında düzen bozulmaz, yatay kaydırma yok, tüm editörlere erişilir, dokunmatikle sürüş mümkündür. (Doğrulama: tarayıcıda pencere boyutlandırma + dokunma olayı simülasyonu; gerçek cihaz testi yapılamazsa raporda belirtilir.)
 
@@ -103,6 +106,7 @@ Kabul: yeni ölçülebilir hedefler testte yeşil; el freniyle kontrollü drift 
 ### 2.5 Sürüş göstergeleri (HUD) yenileme
 
 Sağ alt **gösterge kümesi** yeniden tasarlanır (Most Wanted/Forza karışımı, orijinal tasarım):
+
 - **Devir saati:** SVG yay, redline bölgesi, iğne/yay dolgusu, **vites değiştirme ışığı** (redline yakınında yanıp söner).
 - **Hız:** büyük dijital rakam (km/s), altında birim; hız değişiminde yumuşak rakam geçişi.
 - **Vites göstergesi:** büyük harf (N/R/1–6), vites geçişinde kısa vurgu.
@@ -117,6 +121,7 @@ Kabul: göstergeler tüm çözünürlüklerde taşmaz/çakışmaz; değerler fiz
 ### 2.6 Vanta Stallion iç mekanı (daha detaylı)
 
 Mevcut: kutu koltuk/torpido/direksiyon. Hedef: **kokpit içi bakıldığında inandırıcı** prosedürel iç mekân (orijinal tasarım, markasız):
+
 - **Torpido:** kıvrımlı üst yüzey (extrude profil), **gösterge kümesi** (canvas dokusuyla analog kadranlar: hız, devir, yakıt/sıcaklık; hız/devire bağlı iğneler sürüşte canlı), klima ızgaraları, orta konsol, **vites kolu** (boyun + topuz), el freni.
 - **Direksiyon:** ince çember (torus) + 3 kol + merkez kapak, doğru eğim, **direksiyon simidi sürüşte döner**.
 - **Koltuklar:** yuvarlatılmış minderler, sırt desteği, **kafalık**, dikiş çizgileri (normal/çizgi dokusu), arkada bench.
@@ -151,6 +156,7 @@ Kabul: Mustang seçilip modifiye edilebilir (boya, vinil, jant, duruş, ışık,
 ## 3. Teknik tasarım özeti
 
 ### 3.1 Çok araçlı mimari (V2-1'in temeli)
+
 - `data/cars/index.ts`: `CAR_IDS`, `getCar(id)`, `listCars()`; her araç: `manifest.json`, `placeholder.json`, parça kataloğu, `driving.json`, `modelMap.json` (opsiyonel), kart metni (i18n anahtarları).
 - `buildStore`: `manifest` **durum** olur; `selectCar(carId)` → manifest + yeni (ya da kayıtlı) build, geçmiş ve önizlemeler sıfırlanır. İçerideki `manifest` kapanışları `get().manifest` okur.
 - `useBuildStore.getState().manifest` kullanan her yer (garaj servisi, persistence, store) araç bağımsız hale gelir. `DEFAULT_CAR_ID` yalnız ilk açılış/yedek için.
@@ -158,9 +164,11 @@ Kabul: Mustang seçilip modifiye edilebilir (boya, vinil, jant, duruş, ışık,
 - `appStore.screen`: `'select' | 'garage' | 'drive'` (mevcut `mode` genişletilir).
 
 ### 3.2 Model eşleme katmanı
+
 `core/model/modelMap.ts`: `applyModelMap(root, map)` yüklenen modelin **klonunda** düğüm adlarını `body__*`, `<slot>__<seçenek>`, materyalleri `paint_<bölge>`/`mat_*` olarak yeniden adlandırır, dönüşümü uygular, gizlenecek düğümleri kaldırır. Mevcut `analyzeModel`/`bindSharedMaterials` değişmeden çalışır. Saf mantık, sentetik ve gerçek GLB ile testli.
 
 ### 3.3 Mobil altyapı
+
 `core/platform/device.ts` (algılama, saf), CSS tasarım değişkenleri + `@media (pointer: coarse), (max-width: …)`, `TouchControls` bileşeni (çoklu dokunma → `DriveInput`), düzen `useLayout()` (masaüstü/mobil). Girişler tek `InputSource`ta birleşir (klavye + gamepad + dokunmatik + gyro).
 
 ---
@@ -170,14 +178,16 @@ Kabul: Mustang seçilip modifiye edilebilir (boya, vinil, jant, duruş, ışık,
 Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` + bu belgede kutuları işaretle → commit. Fazlar arasında onay beklenmez ([[phase-autonomy]] kararı).
 
 ### V2-1 — Çok araçlı mimari, araç seçim ekranı, ayarlar penceresi
-- [ ] `buildStore` manifest'i durum yapma, `selectCar`, araç bağımsız garaj/persistence (+ eski kayıt göçü)
-- [ ] `data/cars` kayıt defteri (`listCars`), araç kartı verisi (stok istatistik)
-- [ ] `screen` akışı: Araç Seç → Atölye → Sürüş; "Araç seç" geri dönüşü; son araç hatırlama
-- [ ] Araç seçim ekranı (klavye/gamepad/dokunma, kartlar, kayıtlı proje göstergesi)
-- [ ] Ayarlar penceresi + üst çubuk sadeleştirme (≤ 4 öğe)
-- [ ] Testler: araç değiştirme, araç başına oturum, göç, ayarlar kalıcılığı
+
+- [x] `buildStore` manifest'i durum yapma, `selectCar`, araç bağımsız garaj/persistence (+ eski kayıt göçü)
+- [x] `data/cars` kayıt defteri (`listCars`), araç kartı verisi (stok istatistik)
+- [x] `screen` akışı: Araç Seç → Atölye → Sürüş; "Araç seç" geri dönüşü; son araç hatırlama
+- [x] Araç seçim ekranı (klavye/gamepad/dokunma, kartlar, kayıtlı proje göstergesi)
+- [x] Ayarlar penceresi + üst çubuk sadeleştirme (≤ 4 öğe)
+- [x] Testler: araç değiştirme, araç başına oturum, göç, ayarlar kalıcılığı
 
 ### V2-2 — Mustang entegrasyonu
+
 - [ ] GLB'yi `public/assets/cars/` altına al, `modelMap.json` (ölçek, zemin, gizle, boya bölgeleri, cam)
 - [ ] `applyModelMap` + testler (gerçek GLB düğüm adlarıyla)
 - [ ] Mustang manifest/parça kataloğu/`placeholder.json`/`fitment`/kamera ön ayarları/çeviriler
@@ -186,6 +196,7 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [ ] Tarayıcı doğrulama: boya, vinil, jant, duruş, ışık, kayıt, sürüş
 
 ### V2-3 — Sürüş göstergeleri ve sürüş mekaniği
+
 - [ ] HUD yenileme (devir yayı, vites ışığı, pedallar, kayma/boost, ara zaman farkı)
 - [ ] Yardımcı sistemler (ABS, TC, direksiyon yardımı) + ayarlar
 - [ ] Direksiyon modeli, anti-roll, tutuş eğrisi, çarpışma yumuşatma, kamera iyileştirme
@@ -193,6 +204,7 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [ ] Başsız test paketi: skidpad, slalom, 100→0, 0–100, drift, devrilme, otopilot turu (her iki araç)
 
 ### V2-4 — Mobil uyumluluk
+
 - [ ] Cihaz algılama, mobil kalite varsayılanları, viewport/safe-area/dokunma ayarları
 - [ ] Atölye düzeni (alt çekmece), büyük dokunma hedefleri, editörlerin mobil düzeltmeleri
 - [ ] Dokunmatik sürüş kontrolleri (+ isteğe bağlı gyro), mobil HUD yerleşimi
@@ -200,12 +212,14 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [ ] Çoklu boyutta tarayıcı doğrulaması (390×844, 844×390, 360×800, 1024×768)
 
 ### V2-5 — Vanta iç mekân v2 + kokpit kamerası
+
 - [ ] Torpido, gösterge kümesi (canlı iğneler), konsol, vites kolu, direksiyon (döner)
 - [ ] Koltuk, kapı paneli, tavan döşemesi, pedallar, ışıklandırma
 - [ ] Kokpit kamerası (atölye iç kamerası + sürüş)
 - [ ] LOD ve üçgen bütçesi ölçümü
 
 ### V2-6 — Genel cila ve rapor
+
 - [ ] Mustang iç mekân/aksesuar iyileştirmeleri (modelin kendi iç mekânı korunur)
 - [ ] Performans ölçümü (iki araç, kalite kademeleri), `ANALYSIS.md`/`PROGRESS.md` güncelleme
 - [ ] Bu belgenin sonuç bölümü
@@ -214,22 +228,23 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 
 ## 5. Ek öneriler (istenmeyen, değerlendirilecek)
 
-| Öneri | Değer | Maliyet | Durum |
-|---|---|---|---|
-| Araç başına **ghost/en iyi tur** kaydı ve tur karşılaştırması | Yüksek (tekrar oynanabilirlik) | Orta | V2-6 sonrası aday |
-| **Gün/gece + hava** seçeneğinin pist öncesi seçimi | Orta | Düşük | Aday |
-| Gerçek model dokularının **KTX2/WebP** sıkıştırması (`gltf-transform`) | Yüksek (yükleme) | Düşük | V2-2'de ölçüme göre |
-| **Paylaşım görseli** (build JSON'u PNG metaverisine göm) | Orta | Düşük | Aday |
-| Üçüncü araç (BMW M3 GTR dosyası mevcut, 18,9 MB, lisansı bilinmiyor) | Orta | Orta | Lisans/boyut doğrulanınca |
-| Erişilebilirlik: renk körü paleti, yazı ölçeği, tek elle oynanış | Orta | Düşük | Mobil ile birlikte kısmen |
-| Çoklu dil (İngilizce) — i18n altyapısı hazır | Orta | Düşük | Aday |
-| Otomatik **görsel regresyon** (ekran görüntüsü karşılaştırma) | Orta | Orta | Aday |
+| Öneri                                                                  | Değer                          | Maliyet | Durum                     |
+| ---------------------------------------------------------------------- | ------------------------------ | ------- | ------------------------- |
+| Araç başına **ghost/en iyi tur** kaydı ve tur karşılaştırması          | Yüksek (tekrar oynanabilirlik) | Orta    | V2-6 sonrası aday         |
+| **Gün/gece + hava** seçeneğinin pist öncesi seçimi                     | Orta                           | Düşük   | Aday                      |
+| Gerçek model dokularının **KTX2/WebP** sıkıştırması (`gltf-transform`) | Yüksek (yükleme)               | Düşük   | V2-2'de ölçüme göre       |
+| **Paylaşım görseli** (build JSON'u PNG metaverisine göm)               | Orta                           | Düşük   | Aday                      |
+| Üçüncü araç (BMW M3 GTR dosyası mevcut, 18,9 MB, lisansı bilinmiyor)   | Orta                           | Orta    | Lisans/boyut doğrulanınca |
+| Erişilebilirlik: renk körü paleti, yazı ölçeği, tek elle oynanış       | Orta                           | Düşük   | Mobil ile birlikte kısmen |
+| Çoklu dil (İngilizce) — i18n altyapısı hazır                           | Orta                           | Düşük   | Aday                      |
+| Otomatik **görsel regresyon** (ekran görüntüsü karşılaştırma)          | Orta                           | Orta    | Aday                      |
 
 ---
 
 ## 6. Kararlar, varsayımlar, riskler
 
 **Kararlar (kullanıcıya sorulmadan verildi, gerekçeli):**
+
 1. **Lisans istisnası:** Mustang modeli CC-BY-NC-SA-4.0. Proje kuralı CC-BY+ istiyordu; kullanıcı dosyayı bilerek sağladığı için kullanılır. Sonuçlar: oyun **ticari olmayan** kullanımla sınırlı kalmalı; modelden türetilen çıktılar (kullanılan dönüştürülmüş GLB) aynı lisansla paylaşılmalı; **atıf zorunlu** (kredi ekranı). Ticari yayın düşünülürse model değiştirilmeli.
 2. **Gerçek marka adı:** kullanıcı modeli sağladığı için Mustang adı kullanılır (spec §1 kurgusal-isim kuralına istisna). Kurgusal olan Vanta aynen kalır.
 3. **Overlay parçalar:** Mustang'te parçalar modelden sökülmez, üstüne eklenir (modelde ayrı nesne yok); sökme gerektirenler (ör. blower kaput kesiği) Mustang'te sunulmaz.
@@ -238,22 +253,24 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 6. BMW dosyası bu planın dışında.
 
 **Riskler:**
-| Risk | Etki | Önlem |
-|---|---|---|
-| Mustang 5,4 MB / 86 bin üçgen mobil GPU'da ağır | Yüksek | Mobil kalite ön ayarı, dokuları küçültme, LOD/üçgen kısma (gerekirse `gltf-transform simplify`) |
-| Model parçaları tek tek ayrılamıyor (kaporta tek mesh grubu) | Orta | Boya bölgeleri düğüm adlarına göre; ayrılamayan bölgeler birleşik kalır |
-| `KHR_materials_transmission` camlar pahalı/yanlış görünür | Orta | Camı paylaşılan `mat_glass` ile değiştir (transmission kapalı) |
-| Doku renk uzayı / çift sRGB | Düşük | Doku yönetimi GLTFLoader'da doğru; boya materyali kendi parametreleriyle |
-| iOS Safari: Web Audio/AudioContext kısıtları, `100vh`, yön kilidi | Orta | İlk dokunuşla sesi aç, `dvh`, yatay uyarısı |
-| Çok araçlı geçişte bellek sızıntısı (materyal/doku) | Orta | `CarMaterialsProvider` unmount dispose zaten var; araç değişiminde sınama |
-| Fizik değişikliği mevcut testleri/otopilot turunu bozabilir | Orta | Yeni hedefler testle korunur, eski ölçümler tolerans aralığıyla güncellenir |
-| Dokunmatik sürüşte gecikme/çoklu dokunma | Orta | `pointer` olayları + `touch-action:none`, gerçek cihaz testi önerilir |
+
+| Risk                                                              | Etki   | Önlem                                                                                           |
+| ----------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| Mustang 5,4 MB / 86 bin üçgen mobil GPU'da ağır                   | Yüksek | Mobil kalite ön ayarı, dokuları küçültme, LOD/üçgen kısma (gerekirse `gltf-transform simplify`) |
+| Model parçaları tek tek ayrılamıyor (kaporta tek mesh grubu)      | Orta   | Boya bölgeleri düğüm adlarına göre; ayrılamayan bölgeler birleşik kalır                         |
+| `KHR_materials_transmission` camlar pahalı/yanlış görünür         | Orta   | Camı paylaşılan `mat_glass` ile değiştir (transmission kapalı)                                  |
+| Doku renk uzayı / çift sRGB                                       | Düşük  | Doku yönetimi GLTFLoader'da doğru; boya materyali kendi parametreleriyle                        |
+| iOS Safari: Web Audio/AudioContext kısıtları, `100vh`, yön kilidi | Orta   | İlk dokunuşla sesi aç, `dvh`, yatay uyarısı                                                     |
+| Çok araçlı geçişte bellek sızıntısı (materyal/doku)               | Orta   | `CarMaterialsProvider` unmount dispose zaten var; araç değişiminde sınama                       |
+| Fizik değişikliği mevcut testleri/otopilot turunu bozabilir       | Orta   | Yeni hedefler testle korunur, eski ölçümler tolerans aralığıyla güncellenir                     |
+| Dokunmatik sürüşte gecikme/çoklu dokunma                          | Orta   | `pointer` olayları + `touch-action:none`, gerçek cihaz testi önerilir                           |
 
 **Doğrulanamayacaklar (baştan not):** gerçek mobil cihaz testi (Chrome'da pencere/dokunma simülasyonuyla yetinilir), gerçek gamepad, hedef donanımda 60 FPS.
 
 ---
 
 ## 7. Başarı ölçütleri (tüm plan)
+
 - İki araç seçilip modifiye edilebiliyor, ayrı saklanıyor, pistte sürülüyor.
 - Üst çubuk ≤ 4 öğe; ayarlar tek pencerede.
 - Telefon yatayında atölye + sürüş dokunmatikle kullanılabiliyor.

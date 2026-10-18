@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { createDefaultBuild } from '../build/build';
+import { getCar, isCarId } from '../../data/cars';
 import {
+  buildFromSlot,
   deleteBuildSlot,
   GarageError,
+  type AutosaveEntry,
   importBuildJson,
   listBuilds,
-  loadBuildSlot,
   saveBuild,
 } from '../storage/garageService';
 import {
@@ -28,6 +30,9 @@ export type GarageState = {
   /** Depo açıldı ve slot listesi okundu mu */
   ready: boolean;
   slots: GarageSlot[];
+  /** Araç başına son oturum (araç seçim ekranı ve geri yükleme için) */
+  autosaves: Record<string, AutosaveEntry>;
+  setAutosave: (entry: AutosaveEntry) => void;
   /** Çalışma build'inin yazıldığı slot (kaydet = üzerine yaz); yeni/yüklenmemişse null */
   currentSlotId: string | null;
   notice: GarageNotice | null;
@@ -58,6 +63,9 @@ export const useGarageStore = create<GarageState>()((set, get) => {
     storage: createMemoryStorage(),
     ready: false,
     slots: [],
+    autosaves: {},
+    setAutosave: (entry) =>
+      set((s) => ({ autosaves: { ...s.autosaves, [entry.build.carId]: entry } })),
     currentSlotId: null,
     notice: null,
 
@@ -98,7 +106,10 @@ export const useGarageStore = create<GarageState>()((set, get) => {
 
     load: async (id) => {
       try {
-        const build = await loadBuildSlot(get().storage, id, manifest());
+        const slot = await get().storage.getSlot(id);
+        if (!slot) throw new GarageError('not_found', 'Kayıt bulunamadı');
+        if (!isCarId(slot.carId)) throw new GarageError('corrupt', 'Bilinmeyen araç');
+        const build = buildFromSlot(slot, getCar(slot.carId).manifest);
         useBuildStore.getState().loadBuild(build);
         set({
           currentSlotId: id,
@@ -124,7 +135,9 @@ export const useGarageStore = create<GarageState>()((set, get) => {
 
     importText: (text) => {
       try {
-        const build = importBuildJson(text, manifest());
+        const build = importBuildJson(text, (carId) =>
+          isCarId(carId) ? getCar(carId).manifest : undefined,
+        );
         useBuildStore.getState().loadBuild(build);
         set({
           currentSlotId: null,

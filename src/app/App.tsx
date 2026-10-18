@@ -6,6 +6,8 @@ import { useDriveStore } from '../core/store/driveStore';
 import { AutoQuality } from './AutoQuality';
 import { BootDismiss } from './BootDismiss';
 import { CreditsScreen } from '../garage/ui/CreditsScreen';
+import { SettingsDialog } from '../garage/ui/SettingsDialog';
+import { CarSelect } from '../garage/ui/select/CarSelect';
 import { GarageMenu } from '../garage/ui/GarageMenu';
 import { TopBar } from '../garage/ui/TopBar';
 import { DriveOverlay } from '../drive/ui/DriveOverlay';
@@ -61,7 +63,7 @@ function useGamepad() {
   useEffect(
     () =>
       startGamepadBridge(() =>
-        useAppStore.getState().mode === 'garage' || useDriveStore.getState().paused
+        useAppStore.getState().mode !== 'drive' || useDriveStore.getState().paused
           ? 'menu'
           : 'drive',
       ),
@@ -76,6 +78,7 @@ export function App() {
   const photoMode = useAppStore((s) => categoryKind(s.categoryId) === 'photo');
   const hideUi = usePhotoStore((s) => s.hideUi);
   const creditsOpen = useAppStore((s) => s.creditsOpen);
+  const settingsOpen = useAppStore((s) => s.settingsOpen);
   const { fov, near, far } = sceneConfig.camera;
   return (
     <>
@@ -90,24 +93,28 @@ export function App() {
         camera={{ position: initialCamera?.position, fov, near, far }}
       >
         <BootDismiss />
-        <Suspense fallback={null}>{mode === 'garage' ? <GarageScene /> : <DriveScene />}</Suspense>
+        <Suspense fallback={null}>{mode === 'drive' ? <DriveScene /> : <GarageScene />}</Suspense>
       </Canvas>
       <AutoQuality />
       {creditsOpen && <CreditsScreen />}
+      {settingsOpen && <SettingsDialog />}
       {mode === 'garage' && photoMode && <PhotoShortcuts />}
       {mode === 'garage' && photoMode && hideUi && (
         <div className="ge-hint">{t('photo.showUi')}</div>
       )}
-      {mode === 'garage' ? (
-        !(photoMode && hideUi) && (
-          <>
-            <GarageMenu />
-            <TopBar />
-          </>
-        )
-      ) : (
-        <DriveOverlay />
+      {mode === 'select' && (
+        <>
+          <CarSelect />
+          <TopBar />
+        </>
       )}
+      {mode === 'garage' && !(photoMode && hideUi) && (
+        <>
+          <GarageMenu />
+          <TopBar />
+        </>
+      )}
+      {mode === 'drive' && <DriveOverlay />}
     </>
   );
 }

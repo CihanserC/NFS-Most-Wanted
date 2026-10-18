@@ -28,6 +28,7 @@ export type PartPreview = { slotId: string; optionId: string };
 export type PaintPreview = Record<string, PaintConfig>;
 
 export type BuildStoreState = {
+  /** Şu an düzenlenen aracın manifesti (araç değişince güncellenir) */
   manifest: CarManifest;
   build: BuildState;
   history: History<BuildState>;
@@ -66,15 +67,27 @@ export type BuildStoreState = {
   setName: (name: string) => void;
   undo: () => void;
   redo: () => void;
+  /** Başka bir aracın build'ini yükler: manifest, geçmiş ve önizlemeler sıfırlanır. */
+  setCar: (build: BuildState) => void;
   loadBuild: (build: BuildState) => void;
 };
 
 const samePaint = (a: PaintConfig | undefined, b: PaintConfig) =>
   a !== undefined && JSON.stringify(a) === JSON.stringify(b);
 
-export const createBuildStore = (manifest: CarManifest) => {
+/**
+ * resolveManifest: araç kimliğinden manifest (çok araçlı oyunda araç değişimi için); verilmezse
+ * yalnızca ilk manifestin aracı desteklenir.
+ */
+export const createBuildStore = (
+  initialManifest: CarManifest,
+  resolveManifest: (carId: string) => CarManifest = (id) => {
+    if (id === initialManifest.id) return initialManifest;
+    throw new Error(`Bilinmeyen araç: ${id}`);
+  },
+) => {
   /** Manifestte olmayan bölgeleri atar, değerleri sanitize eder. */
-  const cleanPaint = (paint: Record<string, PaintConfig>) =>
+  const cleanPaint = (paint: Record<string, PaintConfig>, manifest: CarManifest) =>
     Object.fromEntries(
       Object.entries(paint)
         .filter(([zone]) => manifest.paintZones.includes(zone))
@@ -83,8 +96,8 @@ export const createBuildStore = (manifest: CarManifest) => {
 
   return create<BuildStoreState>()(
     immer((set, get) => ({
-      manifest,
-      build: createDefaultBuild(manifest),
+      manifest: initialManifest,
+      build: createDefaultBuild(initialManifest),
       history: emptyHistory<BuildState>(),
       preview: null,
       paintPreview: null,
@@ -93,7 +106,7 @@ export const createBuildStore = (manifest: CarManifest) => {
       lookPreview: null,
 
       setPart: (slotId, optionId) => {
-        const { build, history } = get();
+        const { build, history, manifest } = get();
         if (!isValidPart(manifest, slotId, optionId))
           throw new Error(`Geçersiz parça: ${slotId}/${optionId}`);
         if (build.parts[slotId] === optionId) {
@@ -110,7 +123,7 @@ export const createBuildStore = (manifest: CarManifest) => {
       },
 
       previewPart: (slotId, optionId) => {
-        if (!isValidPart(manifest, slotId, optionId)) return;
+        if (!isValidPart(get().manifest, slotId, optionId)) return;
         set((s) => {
           s.preview = { slotId, optionId };
         });
@@ -123,7 +136,7 @@ export const createBuildStore = (manifest: CarManifest) => {
 
       setPaint: (paint) => {
         const { build, history } = get();
-        const clean = cleanPaint(paint);
+        const clean = cleanPaint(paint, get().manifest);
         const changed = Object.entries(clean).some(([z, p]) => !samePaint(build.paint[z], p));
         set((s) => {
           s.paintPreview = null;
@@ -135,7 +148,7 @@ export const createBuildStore = (manifest: CarManifest) => {
 
       previewPaint: (paint) =>
         set((s) => {
-          s.paintPreview = cleanPaint(paint);
+          s.paintPreview = cleanPaint(paint, get().manifest);
         }),
 
       commitPaintPreview: () => {
@@ -263,8 +276,24 @@ export const createBuildStore = (manifest: CarManifest) => {
         });
       },
 
+      setCar: (build) => {
+        const nextManifest = resolveManifest(build.carId);
+        set((s) => {
+          s.manifest = nextManifest;
+          s.build = build;
+          s.history = emptyHistory();
+          s.preview = null;
+          s.paintPreview = null;
+          s.fitmentPreview = null;
+          s.vinylPreview = null;
+          s.lookPreview = null;
+        });
+      },
+
       loadBuild: (build) =>
         set((s) => {
+          // Başka araca ait build ise manifest de değişir
+          if (build.carId !== s.manifest.id) s.manifest = resolveManifest(build.carId);
           s.build = build;
           s.history = emptyHistory();
           s.preview = null;

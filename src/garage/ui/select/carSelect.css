@@ -1,0 +1,220 @@
+.cs-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 22px 28px calc(22px + env(safe-area-inset-bottom));
+  pointer-events: none;
+  color: #f2efe8;
+  font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
+}
+
+.cs-root > * {
+  pointer-events: auto;
+}
+
+.cs-title {
+  align-self: flex-start;
+  padding: 10px 22px 10px 18px;
+  background: linear-gradient(90deg, rgba(8, 9, 12, 0.85), rgba(8, 9, 12, 0.35));
+  border-left: 5px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.cs-title span {
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  color: #ff7a18;
+  text-transform: uppercase;
+}
+
+.cs-title h1 {
+  margin: 2px 0 0;
+  font-size: 34px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.cs-panel {
+  align-self: center;
+  margin-top: auto;
+  width: min(760px, 100%);
+  padding: 16px 22px 18px;
+  background: linear-gradient(180deg, rgba(8, 9, 12, 0.78), rgba(8, 9, 12, 0.92));
+  border-top: 3px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  animation: gm-slide-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cs-nav {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-nav button {
+  height: 52px;
+  font-size: 34px;
+  line-height: 1;
+  color: #f2efe8;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.cs-nav button:hover:not(:disabled) {
+  border-color: #ff7a18;
+  color: #ff9a3c;
+}
+
+.cs-nav button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.cs-name {
+  text-align: center;
+  display: grid;
+  gap: 2px;
+}
+
+.cs-name small {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #a9a6a0;
+}
+
+.cs-name strong {
+  font-size: 32px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cs-name em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #2fd8ff;
+  text-transform: uppercase;
+}
+
+.cs-stats {
+  list-style: none;
+  margin: 14px 0 6px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 22px;
+}
+
+.cs-stats li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+}
+
+.cs-stats span {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a9a6a0;
+}
+
+.cs-stats strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-stats i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  transform: skewX(-18deg);
+}
+
+.cs-stats b {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff7a18, #ffb35a);
+  transition: width 0.3s ease;
+}
+
+.cs-dots {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cs-dots button {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a9a6a0;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+
+.cs-dots button.is-active {
+  color: #0b0c0e;
+  background: #ff7a18;
+  border-color: #ff7a18;
+}
+
+.cs-go {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #0b0c0e;
+  background: #ff7a18;
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+
+.cs-go:hover {
+  background: #ff9a3c;
+}
+
+.cs-hint {
+  align-self: center;
+  margin: 10px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8c8a85;
+}
+
+@media (max-width: 640px), (max-height: 520px) {
+  .cs-root {
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+  .cs-title h1 {
+    font-size: 22px;
+  }
+  .cs-name strong {
+    font-size: 22px;
+  }
+  .cs-panel {
+    padding: 10px 12px 12px;
+  }
+  .cs-hint {
+    display: none;
+  }
+}

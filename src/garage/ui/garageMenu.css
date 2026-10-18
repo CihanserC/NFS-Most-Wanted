@@ -291,3 +291,29 @@
     transition: none;
   }
 }
+
+/* Üst çubuk: sade; ayarlar dişli çarkın penceresinde */
+.gm-icon {
+  min-width: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.gm-gear {
+  display: inline-grid;
+  place-items: center;
+}
+
+.gm-fps-readout {
+  align-self: center;
+  padding: 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #2fd8ff;
+}
+
+.gm-fps-readout.is-low {
+  color: #ff9a3c;
+}

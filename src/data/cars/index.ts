@@ -39,6 +39,18 @@ const definitions: Record<string, CarDefinition> = {};
 for (const car of [defineCar(stallionManifest, stallionPlaceholder, stallionParts)])
   definitions[car.manifest.id] = car;
 
+/** Kayıtlı tüm araçlar (seçim ekranı sırası). */
+export function listCars(): CarDefinition[] {
+  return Object.values(definitions);
+}
+
+/** Test/geliştirme: çalışma zamanında ek araç kaydeder (ör. çok araçlı akış testleri). */
+export function registerCarForTests(car: CarDefinition): void {
+  definitions[car.manifest.id] = car;
+}
+
+export const isCarId = (id: string): boolean => id in definitions;
+
 export const DEFAULT_CAR_ID = 'vanta_stallion_70';
 
 export function getCar(id: string): CarDefinition {

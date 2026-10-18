@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { createAppStore } from './appStore';
 
 describe('appStore', () => {
-  it('starts in garage mode with turntable on', () => {
+  it('starts on the car-select screen with turntable on', () => {
     const store = createAppStore();
-    expect(store.getState().mode).toBe('garage');
+    expect(store.getState().mode).toBe('select');
     expect(store.getState().turntable).toBe(true);
   });
 

@@ -1,0 +1,121 @@
+.st-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 4, 6, 0.7);
+  animation: cr-fade 0.18s ease-out;
+}
+
+.st-panel {
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  color: #f2efe8;
+  font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
+  background: rgba(10, 11, 14, 0.97);
+  border-left: 5px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+  animation: cr-rise 0.22s ease-out;
+}
+
+.st-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px 8px;
+}
+
+.st-panel h2 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.st-panel header button {
+  width: 38px;
+  height: 38px;
+  font-size: 16px;
+  color: #f2efe8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.st-rows {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+}
+
+.st-rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 4px 22px;
+  border-left: 3px solid transparent;
+}
+
+.st-rows li.is-active {
+  background: rgba(255, 122, 24, 0.12);
+  border-left-color: #ff7a18;
+}
+
+.st-label {
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #d8d5ce;
+}
+
+.st-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.st-value strong {
+  min-width: 86px;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: #ff9a3c;
+}
+
+.st-value button,
+.st-action {
+  min-width: 40px;
+  min-height: 36px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  color: #f2efe8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.st-value button:hover,
+.st-action:hover {
+  border-color: #ff7a18;
+}
+
+.st-panel footer {
+  padding: 8px 22px 16px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #8c8a85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-backdrop,
+  .st-panel {
+    animation: none;
+  }
+}

@@ -4,8 +4,14 @@ import type { BuildState } from '../build/types';
 import type { CarManifest } from '../manifest/types';
 import type { GarageSlot, GarageStorage } from './garageStorage';
 
-/** Otomatik kayıt slotu: listede görünmez, sayfa yenilenince son durumu geri getirir. */
+/**
+ * Otomatik kayıt slotları (araç başına bir tane): listede görünmez, aracı yeniden seçince
+ * son oturumu geri getirir. Eski sürümün tek slotu (AUTOSAVE_ID) açılışta araç başına slota taşınır.
+ */
 export const AUTOSAVE_ID = '__autosave__';
+export const AUTOSAVE_PREFIX = AUTOSAVE_ID;
+export const autosaveId = (carId: string): string => `${AUTOSAVE_PREFIX}:${carId}`;
+export const isAutosaveId = (id: string): boolean => id.startsWith(AUTOSAVE_PREFIX);
 export const SLOT_LIMIT = 24;
 export const BUILD_FILE_FORMAT = 'muscle-garage-build';
 const NAME_LIMIT = 40;
@@ -33,7 +39,7 @@ export const cleanName = (name: string): string =>
 export async function listBuilds(storage: GarageStorage): Promise<GarageSlot[]> {
   const all = await storage.listSlots();
   return all
-    .filter((s) => s.id !== AUTOSAVE_ID)
+    .filter((s) => !isAutosaveId(s.id))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
@@ -91,7 +97,7 @@ export const deleteBuildSlot = (storage: GarageStorage, id: string) => storage.r
 
 export async function saveAutosave(storage: GarageStorage, build: BuildState): Promise<void> {
   const slot: GarageSlot = {
-    id: AUTOSAVE_ID,
+    id: autosaveId(build.carId),
     name: build.name,
     carId: build.carId,
     updatedAt: new Date().toISOString(),
@@ -106,13 +112,51 @@ export async function loadAutosave(
   storage: GarageStorage,
   manifest: CarManifest,
 ): Promise<BuildState | null> {
-  const slot = await storage.getSlot(AUTOSAVE_ID);
+  const slot =
+    (await storage.getSlot(autosaveId(manifest.id))) ??
+    // Eski sürümün tek slotu: yalnızca bu araca aitse kullanılır
+    (await storage
+      .getSlot(AUTOSAVE_ID)
+      .then((legacy) => (legacy?.carId === manifest.id ? legacy : null)));
   if (!slot) return null;
   try {
     return buildFromSlot(slot, manifest);
   } catch {
     return null;
   }
+}
+
+export type AutosaveEntry = { build: BuildState; updatedAt: string };
+
+/**
+ * Tüm araçların otomatik kayıtları (araç kimliği -> kayıt). Bozuk ya da tanınmayan araca ait
+ * kayıtlar atlanır. Eski tek slot, ait olduğu araca taşınır (yeni slota yazılır, eski silinir).
+ */
+export async function loadAllAutosaves(
+  storage: GarageStorage,
+  resolveManifest: (carId: string) => CarManifest | undefined,
+): Promise<Record<string, AutosaveEntry>> {
+  const result: Record<string, AutosaveEntry> = {};
+  const slots = (await storage.listSlots()).filter((s) => isAutosaveId(s.id));
+  // Yeni biçim önce, eski tek slot yalnızca boşluğu doldurur
+  slots.sort((x, y) => Number(x.id === AUTOSAVE_ID) - Number(y.id === AUTOSAVE_ID));
+  for (const slot of slots) {
+    const manifest = resolveManifest(slot.carId);
+    if (!manifest) continue;
+    try {
+      const build = buildFromSlot(slot, manifest);
+      if (slot.id === AUTOSAVE_ID) {
+        if (!result[manifest.id]) {
+          result[manifest.id] = { build, updatedAt: slot.updatedAt };
+          await storage.putSlot({ ...slot, id: autosaveId(manifest.id) });
+        }
+        await storage.removeSlot(AUTOSAVE_ID);
+      } else result[manifest.id] = { build, updatedAt: slot.updatedAt };
+    } catch {
+      // bozuk kayıt: atla
+    }
+  }
+  return result;
 }
 
 /** Paylaşım için JSON: küçük bir zarf (format + build). */
@@ -136,7 +180,10 @@ export function exportFileName(build: BuildState): string {
 }
 
 /** JSON metninden build: zarflı ya da çıplak BuildState kabul edilir. */
-export function importBuildJson(text: string, manifest: CarManifest): BuildState {
+export function importBuildJson(
+  text: string,
+  manifestOrResolver: CarManifest | ((carId: string) => CarManifest | undefined),
+): BuildState {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -149,8 +196,15 @@ export function importBuildJson(text: string, manifest: CarManifest): BuildState
   if (typeof inner !== 'object' || inner === null)
     throw new GarageError('corrupt', 'Build verisi bulunamadı');
   const carId = (inner as Record<string, unknown>).carId;
-  if (carId !== manifest.id)
-    throw new GarageError('wrong_car', `Bu build "${String(carId)}" aracına ait`);
+  const manifest =
+    typeof manifestOrResolver === 'function'
+      ? typeof carId === 'string'
+        ? manifestOrResolver(carId)
+        : undefined
+      : manifestOrResolver.id === carId
+        ? manifestOrResolver
+        : undefined;
+  if (!manifest) throw new GarageError('wrong_car', `Bu build "${String(carId)}" aracına ait`);
   try {
     return deserializeBuild(JSON.stringify(inner), manifest);
   } catch (error) {

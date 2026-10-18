@@ -102,18 +102,20 @@ describe('garaj deposu (store)', () => {
 });
 
 describe('kalıcılık (açılışta geri yükleme)', () => {
-  it('otomatik kayıt: değişiklik yazılır, "sayfa yenilenince" geri gelir', async () => {
+  it('otomatik kayıt: değişiklik yazılır, "sayfa yenilenince" son oturum özetinde geri gelir', async () => {
     const factory = new IDBFactory();
     await initPersistence(createIdbStorage(factory));
     useBuildStore.getState().setPart('grille', 'billet');
     await flushAutosave();
+    expect(garage().autosaves[manifest.id]?.build.parts.grille).toBe('billet');
 
     // Sayfa yenileme: stor sıfırlanır, aynı veritabanı yeniden açılır
     resetPersistenceForTests();
+    useGarageStore.setState({ autosaves: {} });
     useBuildStore.getState().loadBuild(createDefaultBuild(manifest));
     expect(build().parts.grille).toBe('stock');
     await initPersistence(createIdbStorage(factory));
-    expect(build().parts.grille).toBe('billet');
+    expect(garage().autosaves[manifest.id]?.build.parts.grille).toBe('billet');
   });
 
   it("boya presetleri IndexedDB'ye yazılır ve açılışta yüklenir", async () => {

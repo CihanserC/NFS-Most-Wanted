@@ -7,7 +7,10 @@ import type { VinylLayer } from '../vinyl/types';
 import type { FitmentState } from '../wheels/types';
 import { createBuildStore } from './buildStore';
 
-export const useBuildStore = createBuildStore(getCar(DEFAULT_CAR_ID).manifest);
+export const useBuildStore = createBuildStore(
+  getCar(DEFAULT_CAR_ID).manifest,
+  (id) => getCar(id).manifest,
+);
 
 /** Kayıtlı parçalar + (varsa) önizlenen parça. */
 export function useEffectiveParts(): Record<string, string> {

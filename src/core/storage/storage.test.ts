@@ -5,6 +5,7 @@ import { createDefaultBuild, withLook, withPart, withPerformance } from '../buil
 import { createLayer } from '../vinyl/layers';
 import {
   AUTOSAVE_ID,
+  autosaveId,
   BUILD_FILE_FORMAT,
   buildFromSlot,
   cleanName,
@@ -103,6 +104,8 @@ describe.each(backends)('garaj depolama (%s)', (_name, make) => {
     expect(await loadAutosave(storage, manifest)).toBeNull();
     await saveAutosave(storage, withPart(base, 'spoiler_rear', 'ducktail'));
     expect((await loadAutosave(storage, manifest))?.parts.spoiler_rear).toBe('ducktail');
+    // Araç başına slot silinip bozuk eski tek slot bırakılırsa null döner
+    await storage.removeSlot(autosaveId(manifest.id));
     await storage.putSlot({
       id: AUTOSAVE_ID,
       name: 'x',
