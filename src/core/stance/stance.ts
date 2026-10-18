@@ -121,3 +121,8 @@ export function stanceBodyOffset(
   const r = stance.rideHeightMm.rear / 1000;
   return { lift: (f + r) / 2, pitch: -Math.atan((f - r) / wheelbase) };
 }
+
+/** Cam filmi koyuluğundan (0..0.95) cam opaklığı; 0.2 varsayılan stok görünümü korur. */
+export function glassOpacity(tint: number): number {
+  return 0.18 + tint * 0.8;
+}

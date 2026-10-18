@@ -1,9 +1,34 @@
 # İlerleme
 
-## Aktif faz: Faz 7 — Diğer Görsel Modifiyeler (DEVAM EDİYOR)
+## Aktif faz: Faz 8 — Test Sürüşü (BAŞLANMADI)
 
-**Faz 7 durumu (yarım):** Veri ve mantık katmanı hazır: `data/stance/stance.json` (sınırlar, varsayılanlar, Rake/Slammed/Gasser/Pro-Touring presetleri, renk paletleri), `core/stance/stance.ts` (normalize, preset, spacer limiti, gövde yükselmesi/eğimi), BuildState v5 (`stance`, `glass`, `lighting`) + v4→v5 migration, store `setLook/previewLook/commitLookPreview`, `useEffectiveLook`.
-**Kalan:** CarRig hiyerarşisi (gövde süspansiyonla hareket, tekerlek yerde; kök vinil grubu gövdeye taşınacak), tekerlekte kamber + spacer, checkFitment'e kamber/spacer, cam filmi ve far rengi senkronu, underglow (zemin parlaması + marşpiyel neonu + nokta ışıklar), Duruş editörü ve Işıklar & Camlar editörü, kategori kameraları, testler, tarayıcı doğrulaması.
+## Faz 7 — Diğer Görsel Modifiyeler ✅ (2026-10-18)
+
+**Yapılanlar**
+
+- **CarRig hiyerarşisi:** dış grup lastik büyüklüğüyle yükselir/eğilir; içinde tekerlekler (yerde kalır) ve gövde grubu (süspansiyonla hareket eder). Vinil kökü, gizmo ve slot parçaları gövde grubunda; vinil projeksiyonu gövdeyle birlikte hareket eder.
+- **Duruş (§5.5):** ön/arka sürüş yüksekliği (-80…+100 mm), kamber (-8…+2°), spacer (0–40 mm, çamurluk tipinin katalogdaki spacer sınırıyla kesilir). Tekerlekte kamber (dönüş) ve spacer (dışarı kayma) görsel olarak uygulanır. Hazır duruşlar: Stok, Rake, Slammed, Gasser, Pro-Touring.
+- **Fitment:** checkFitment artık sürüş yüksekliği, spacer ve kamberi hesaba katar (negatif kamber iç davlumbaza, pozitif kamber dış taşmaya ekler). Duruş editöründe canlı uyarı.
+- **Cam filmi:** koyuluk %0–95 + renk tonu; materyale yerinde uygulanır (applyLook).
+- **Far rengi:** lens ve LED halo emisyonu senkron.
+- **Underglow:** zeminde parlama dokusu, araç altı neon tüpleri ve 4 nokta ışık; renk ve yoğunluk ayarlı, gövde alçalınca neon da iner.
+- **UI:** Duruş editörü, Işıklar & Camlar editörü (far/stop seçenekleri dahil); ortak kontroller garage/ui/controls.tsx dosyasına taşındı. Manifest categoryCameras ile slotsuz kategorilere kamera.
+- **Motor görünümü / roll cage / blower cutout:** Faz 1'den beri çalışıyor; kabul kriteri (blower cutout kaputla motor görünür) sağlanıyor.
+- **Testler (177):** duruş sınırları/preset/sanitize, gövde yükselmesi ve eğimi, spacer limiti, fitment spacer/kamber, v4→v5 migration, store sürükleme = tek undo adımı.
+
+**Doğrulama:** tip kontrolü, lint, 177 test, build yeşil. Tarayıcıda (dev) slammed duruş + kamber + spacer, cam filmi, mavi far, underglow ve iki editör gözle doğrulandı; konsol hatası yok.
+
+**Notlar / kararlar**
+
+- Gövde eğimi (pitch) pivotu araç orijini (iki aks ortası); rake görünümü kabaca doğru, ince ayar gerçek modelle (Faz 10).
+- Kamber tekerleği tekerlek merkezi etrafında döndürür; fren/kaliper tekerlekle birlikte yatar (kaliper hâlâ göbeğe bağlı, kozmetik fark).
+- Underglow nokta ışıkları gölge atmaz; Düşük kalitede ayrıca kapatılmadı (Faz 11 optimizasyonu).
+- Duruş fiziğe (süspansiyon, tutuş) Faz 8'de aktarılacak.
+
+**Eksik / bilinen sorunlar**
+
+- Underglow zemin parlaması zemin yansımasında çift görünmez (yansıma sadece neon tüplerini gösterir).
+- Duruş editöründe ön/arka bağlama kutusu yok (preset veya iki aks ayrı ayar).
 
 ## Faz 6 — Vinil Editörü (Gelişmiş) ✅ (2026-10-17)
 

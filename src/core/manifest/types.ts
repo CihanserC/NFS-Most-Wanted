@@ -35,6 +35,8 @@ export type CarManifest = {
   wheelCameras?: { front: string; rear: string };
   /** Vinil editöründe yüzey görünümü -> kamera preset'i (opsiyonel). */
   vinylCameras?: Partial<Record<'left' | 'right' | 'top' | 'front' | 'rear', string>>;
+  /** Menü kategorisi -> kamera preset'i (Duruş, Işıklar & Camlar gibi slotsuz editörler). */
+  categoryCameras?: Record<string, string>;
   defaultCamera: string;
   cameraPresets: Record<string, CameraPreset>;
   slots: Record<string, SlotDefinition>;

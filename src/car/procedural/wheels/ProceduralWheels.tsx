@@ -8,6 +8,7 @@ import type {
   WheelConfig,
 } from '../../../core/wheels/types';
 import { effectiveDiscMm } from '../../../core/wheels/wheels';
+import { effectiveTrackMm, type StanceConfig } from '../../../core/stance/stance';
 import type { CarDefinition } from '../../../data/cars';
 import { getBrakeGeometry } from './brakeGeometry';
 import { getRimGeometry } from './rimGeometry';
@@ -81,15 +82,29 @@ function Wheel({
 }
 
 /** Manifestteki tekerlek konumlarına prosedürel jant + lastik + fren. */
-export function ProceduralWheels({ car, fitment }: { car: CarDefinition; fitment: FitmentState }) {
+export function ProceduralWheels({
+  car,
+  fitment,
+  stance,
+  trackLimitMm,
+}: {
+  car: CarDefinition;
+  fitment: FitmentState;
+  stance: StanceConfig;
+  trackLimitMm: number;
+}) {
   const discMm = effectiveDiscMm(fitment);
   return (
     <group>
       {WHEEL_IDS.map((id) => {
         const axle = axleOf(id);
         const [x, y, z] = car.manifest.wheels[id].position;
+        const sign = x >= 0 ? 1 : -1;
+        // Spacer tekerleği dışarı iter; negatif kamberde üst kenar içeri yatar.
+        const spacer = effectiveTrackMm(stance, axle, trackLimitMm) / 1000;
+        const camber = (stance.camberDeg[axle] * Math.PI) / 180;
         return (
-          <group key={id} position={[x, y, z]}>
+          <group key={id} position={[x + sign * spacer, y, z]} rotation-z={-sign * camber}>
             <Wheel
               wheel={fitment.wheels[axle]}
               tire={fitment.tires[axle]}

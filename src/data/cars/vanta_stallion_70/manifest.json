@@ -42,6 +42,10 @@
     "front": "wheel_front",
     "rear": "wheel_rear"
   },
+  "categoryCameras": {
+    "stance": "side",
+    "lights_glass": "front_three_quarter"
+  },
   "vinylCameras": {
     "left": "vinyl_left",
     "right": "vinyl_right",

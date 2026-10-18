@@ -5,6 +5,8 @@ import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
+import { LookEditor } from './look/LookEditor';
+import { StanceEditor } from './stance/StanceEditor';
 import { WheelsEditor } from './wheels/WheelsEditor';
 import { VinylEditor } from '../../vinyl/editor/VinylEditor';
 import './garageMenu.css';
@@ -17,10 +19,11 @@ type Item = { id: string; label: string; disabled?: boolean; meta?: string; inst
  *            -> (jant kategorisi) wheels (editör)
  *            -> (vinil kategorisi) vinyl (editör)
  */
-type Level = 'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels' | 'vinyl';
+type Level =
+  'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels' | 'vinyl' | 'stance' | 'look';
 
 /** Kendi kontrolleri olan (liste olmayan) seviyeler. */
-const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels', 'vinyl'];
+const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels', 'vinyl', 'stance', 'look'];
 
 const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
 
@@ -42,13 +45,15 @@ export function GarageMenu() {
       ? 'wheels'
       : category.kind === 'vinyl'
         ? 'vinyl'
-        : category.kind === 'paint'
-          ? paintZone
-            ? 'paint'
-            : 'zones'
-          : slotId
-            ? 'options'
-            : 'slots';
+        : category.kind === 'stance' || category.kind === 'look'
+          ? category.kind
+          : category.kind === 'paint'
+            ? paintZone
+              ? 'paint'
+              : 'zones'
+            : slotId
+              ? 'options'
+              : 'slots';
 
   const items: Item[] = useMemo(() => {
     switch (level) {
@@ -81,6 +86,8 @@ export function GarageMenu() {
       case 'paint':
       case 'wheels':
       case 'vinyl':
+      case 'stance':
+      case 'look':
         return [];
     }
   }, [level, category, slotId, car, parts, paint]);
@@ -138,10 +145,11 @@ export function GarageMenu() {
     clearPaintPreview();
     clearFitmentPreview();
     useBuildStore.getState().clearVinylPreview();
+    useBuildStore.getState().clearLookPreview();
     setHl({ key: '', index: 0 });
     if (level === 'options') selectSlot(null);
     else if (level === 'paint') selectPaintZone(null);
-    else if (level === 'slots' || level === 'zones' || level === 'wheels' || level === 'vinyl')
+    else if (EDITOR_LEVELS.includes(level) || level === 'slots' || level === 'zones')
       selectCategory(null);
   }, [
     level,
@@ -201,7 +209,7 @@ export function GarageMenu() {
   const title =
     level === 'categories'
       ? car.manifest.displayName
-      : level === 'slots' || level === 'zones' || level === 'wheels' || level === 'vinyl'
+      : level !== 'options' && level !== 'paint'
         ? categoryLabel(categoryId as string)
         : level === 'paint'
           ? t(`paintZone.${paintZone}`)
@@ -226,7 +234,11 @@ export function GarageMenu() {
             </div>
           </div>
         </div>
-        {level === 'vinyl' ? (
+        {level === 'stance' ? (
+          <StanceEditor />
+        ) : level === 'look' ? (
+          <LookEditor />
+        ) : level === 'vinyl' ? (
           <VinylEditor />
         ) : level === 'wheels' ? (
           <WheelsEditor />

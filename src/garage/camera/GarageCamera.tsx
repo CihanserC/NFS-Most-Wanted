@@ -26,12 +26,15 @@ function usePresetId(): string {
   const wheelAxle = useAppStore((s) => s.wheelAxle);
   const vinyl = useAppStore((s) => categoryKind(s.categoryId) === 'vinyl');
   const vinylView = useAppStore((s) => s.vinylView);
+  const categoryId = useAppStore((s) => s.categoryId);
   const carId = useBuildStore((s) => s.build.carId);
   const { manifest } = getCar(carId);
   if (vinyl) return manifest.vinylCameras?.[vinylView] ?? manifest.defaultCamera;
   if (wheels) return manifest.wheelCameras?.[wheelAxle] ?? manifest.defaultCamera;
   if (paintZone) return manifest.paintZoneCameras?.[paintZone] ?? manifest.defaultCamera;
-  return (slotId && manifest.slots[slotId]?.camera) || manifest.defaultCamera;
+  const slotCamera = slotId && manifest.slots[slotId]?.camera;
+  const categoryCamera = categoryId ? manifest.categoryCameras?.[categoryId] : undefined;
+  return slotCamera || categoryCamera || manifest.defaultCamera;
 }
 
 export function GarageCamera() {

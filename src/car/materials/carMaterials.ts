@@ -1,4 +1,5 @@
-import { BackSide, MeshPhysicalMaterial, MeshStandardMaterial, type Material } from 'three';
+import { glassOpacity, type GlassConfig, type LightingConfig } from '../../core/stance/stance';
+import { BackSide, Color, MeshPhysicalMaterial, MeshStandardMaterial, type Material } from 'three';
 import { DEFAULT_PAINT } from '../../core/paint/paint';
 import { createCarPaintMaterial, type CarPaintMaterial } from './carPaintMaterial';
 import { materialConfig as c } from './materialConfig';
@@ -71,4 +72,13 @@ export function paintFor(m: CarMaterials, zone: string): CarPaintMaterial {
   const mat = m.paint[zone] ?? m.paint.body ?? Object.values(m.paint)[0];
   if (!mat) throw new Error('Araçta hiç boya bölgesi yok');
   return mat;
+}
+
+/** Cam filmi ve far rengini materyallere uygular (paylaşılan materyaller yerinde güncellenir). */
+export function applyLook(m: CarMaterials, glass: GlassConfig, lighting: LightingConfig): void {
+  m.glass.opacity = glassOpacity(glass.tint);
+  m.glass.color.set(glass.color);
+  const headlight = new Color(lighting.headlightColor);
+  m.headlightLens.emissive.copy(headlight);
+  m.ledHalo.emissive.copy(headlight);
 }

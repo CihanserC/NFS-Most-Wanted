@@ -42,6 +42,10 @@ export function checkFitment(
   f: FitmentState,
   body: Record<Axle, AxleBody>,
   rideHeightMm: Record<Axle, number> = { front: 0, rear: 0 },
+  stance: { trackMm: Record<Axle, number>; camberDeg: Record<Axle, number> } = {
+    trackMm: { front: 0, rear: 0 },
+    camberDeg: { front: 0, rear: 0 },
+  },
 ): FitmentIssue[] {
   const issues: FitmentIssue[] = [];
   const push = (axle: Axle, code: FitmentIssueCode, meters: number) => {
@@ -56,10 +60,14 @@ export function checkFitment(
     const archClearance = b.archRadius + rideHeightMm[axle] / 1000;
     push(axle, 'arch_rub', radius - archClearance);
 
-    const centerX = b.hubX - wheel.offsetMm / 1000;
+    // Spacer tekerleği dışarı iter.
+    const centerX = b.hubX - wheel.offsetMm / 1000 + stance.trackMm[axle] / 1000;
     const half = tireHalfWidth(f, axle);
-    push(axle, 'fender_poke', centerX + half - b.fenderX);
-    push(axle, 'inner_rub', b.wellInnerX - (centerX - half));
+    // Negatif kamberde lastiğin üstü içeri yatar (davlumbaza yaklaşır), alt kısmı dışarı çıkar.
+    const camber = stance.camberDeg[axle];
+    const tilt = Math.sin((Math.abs(camber) * Math.PI) / 180) * radius;
+    push(axle, 'fender_poke', centerX + half - b.fenderX + (camber < 0 ? 0 : tilt));
+    push(axle, 'inner_rub', b.wellInnerX - (centerX - half) + (camber < 0 ? tilt : 0));
   }
   return issues;
 }
