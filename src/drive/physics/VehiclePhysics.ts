@@ -134,7 +134,7 @@ export class VehiclePhysics {
         .setTranslation(0, CHASSIS_CENTER_Y, 0)
         .setMass(spec.massKg)
         .setFriction(0.2)
-        .setRestitution(0.1),
+        .setRestitution(0),
       this.chassis,
     );
 
@@ -176,7 +176,7 @@ export class VehiclePhysics {
           .setTranslation(seg.x, 0.6, seg.z)
           .setRotation({ x: 0, y: Math.sin(seg.yaw / 2), z: 0, w: Math.cos(seg.yaw / 2) })
           .setFriction(0.1)
-          .setRestitution(0.15),
+          .setRestitution(0),
       );
     }
   }

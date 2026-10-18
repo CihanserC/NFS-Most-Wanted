@@ -121,3 +121,29 @@ describe.each(listCars().map((c) => c.manifest.id))('sürüş testleri: %s', (id
     v.dispose();
   });
 });
+
+describe('bariyer çarpışması', () => {
+  it('bariyere yandan sürtünce geri sekmez, devrilmez', () => {
+    const track = buildTrack();
+    const car = getCar('vanta_stallion_70');
+    const spec = deriveVehicleSpec(
+      createDefaultBuild(car.manifest),
+      car.manifest,
+      car.parts,
+      car.driving,
+    );
+    const v = VehiclePhysics.create(R, spec, track);
+    // Düzlükte tam gaz + sola tam direksiyon: bariyere girer
+    let hit = false;
+    let maxBounce = 0;
+    for (let t = 0; t < 12; t += PHYSICS_STEP) {
+      v.step(PHYSICS_STEP, input({ throttle: 1, steer: t > 2 ? 0.35 : 0 }));
+      const s = v.snapshot();
+      if (s.speed > 8 && Math.abs(s.lateralSpeed) > 0.5) hit = true;
+      if (hit) maxBounce = Math.max(maxBounce, -s.forwardSpeed);
+    }
+    expect(v.snapshot().upY).toBeGreaterThan(0.7);
+    expect(maxBounce).toBeLessThan(1);
+    v.dispose();
+  });
+});
