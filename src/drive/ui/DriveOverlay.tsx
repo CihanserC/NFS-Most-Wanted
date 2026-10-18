@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatLapTime } from '../../core/drive/lap';
 import { getDefaultTrack } from '../../core/drive/track';
 import { useAppStore } from '../../core/store/appStore';
+import { useAudioStore } from '../../core/store/audioStore';
+import { playUiSound } from '../../audio/uiSound';
+import { volumeLabel } from '../../audio/volumeLabel';
 import { DRIVE_CAMERAS, useDriveStore } from '../../core/store/driveStore';
 import { useGraphicsStore } from '../../core/store/graphicsStore';
 import { t } from '../../i18n';
@@ -113,7 +116,7 @@ type PauseItem = { id: string; label: string };
 
 function PauseMenu() {
   const timeOfDay = useDriveStore((s) => s.timeOfDay);
-  const muted = useDriveStore((s) => s.muted);
+  const volume = useAudioStore((s) => s.volume);
   const [index, setIndex] = useState(0);
 
   const leave = () => {
@@ -126,7 +129,7 @@ function PauseMenu() {
     { id: 'resume', label: t('drive.pause.resume') },
     { id: 'restart', label: t('drive.pause.restart') },
     { id: 'time', label: `${t('drive.pause.time')}: ${t(`timeOfDay.${timeOfDay}`)}` },
-    { id: 'sound', label: `${t('drive.pause.sound')}: ${muted ? t('ui.off') : t('ui.on')}` },
+    { id: 'sound', label: `${t('drive.pause.sound')}: ${volumeLabel(volume)}` },
     { id: 'garage', label: t('drive.pause.garage') },
   ];
 
@@ -137,16 +140,22 @@ function PauseMenu() {
       s.restart();
       s.setPaused(false);
     } else if (id === 'time') s.toggleTimeOfDay();
-    else if (id === 'sound') s.toggleMuted();
+    else if (id === 'sound') useAudioStore.getState().cycleVolume();
     else if (id === 'garage') leave();
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown') setIndex((i) => (i + 1) % items.length);
-      else if (e.key === 'ArrowUp') setIndex((i) => (i - 1 + items.length) % items.length);
-      else if (e.key === 'Enter') activate(items[index]?.id ?? 'resume');
-      else return;
+      if (e.key === 'ArrowDown') {
+        playUiSound('move');
+        setIndex((i) => (i + 1) % items.length);
+      } else if (e.key === 'ArrowUp') {
+        playUiSound('move');
+        setIndex((i) => (i - 1 + items.length) % items.length);
+      } else if (e.key === 'Enter') {
+        playUiSound('confirm');
+        activate(items[index]?.id ?? 'resume');
+      } else return;
       e.preventDefault();
     };
     window.addEventListener('keydown', onKey);
@@ -187,7 +196,7 @@ function useDriveKeys() {
       else if (e.code === 'KeyC') s.cycleCamera();
       else if (e.code === 'KeyR') s.respawn();
       else if (e.code === 'KeyN') s.toggleTimeOfDay();
-      else if (e.code === 'KeyM') s.toggleMuted();
+      else if (e.code === 'KeyM') useAudioStore.getState().cycleVolume();
       else return;
       e.preventDefault();
     };

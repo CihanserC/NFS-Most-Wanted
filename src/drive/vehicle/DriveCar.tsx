@@ -6,6 +6,7 @@ import type { WheelPose } from '../../car/wheelPose';
 import { initialLap, updateLap, type LapState } from '../../core/drive/lap';
 import type { Track } from '../../core/drive/track';
 import { deriveVehicleSpec } from '../../core/drive/vehicleSpec';
+import { useAudioStore } from '../../core/store/audioStore';
 import { useDriveStore } from '../../core/store/driveStore';
 import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
@@ -211,7 +212,7 @@ export function DriveCar({
       speed: snap.speed,
       slip: Math.max(...snap.wheels.map((w) => w.slip)),
       supercharged,
-      muted: store.muted,
+      volume: useAudioStore.getState().volume,
       paused: store.paused,
     });
 

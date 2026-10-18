@@ -195,3 +195,99 @@
 .gm-fps.is-low {
   color: #ffb347;
 }
+
+.gm-notice {
+  align-self: center;
+  max-width: 320px;
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #ffb35a;
+  background: rgba(8, 9, 12, 0.7);
+  border-left: 3px solid #ff7a18;
+  /* Birkaç saniye görünür, sonra kendiliğinden söner (state gerekmez) */
+  animation:
+    gm-slide-in 0.25s ease-out,
+    gm-fade-out 0.5s ease-in 6s forwards;
+}
+
+@keyframes gm-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Giriş animasyonları (Most Wanted tarzı hızlı kayma); hareket azaltma tercihine saygı duyar. */
+@keyframes gm-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+
+@keyframes gm-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(255, 122, 24, 0);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 122, 24, 0.35);
+  }
+}
+
+.gm-panel {
+  animation: gm-slide-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gm-list > li {
+  animation: gm-slide-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.gm-list > li:nth-child(2) {
+  animation-delay: 0.02s;
+}
+.gm-list > li:nth-child(3) {
+  animation-delay: 0.04s;
+}
+.gm-list > li:nth-child(4) {
+  animation-delay: 0.06s;
+}
+.gm-list > li:nth-child(5) {
+  animation-delay: 0.08s;
+}
+.gm-list > li:nth-child(6) {
+  animation-delay: 0.1s;
+}
+.gm-list > li:nth-child(7) {
+  animation-delay: 0.12s;
+}
+.gm-list > li:nth-child(8) {
+  animation-delay: 0.14s;
+}
+.gm-list > li:nth-child(n + 9) {
+  animation-delay: 0.16s;
+}
+
+.gm-item {
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.gm-item.is-active {
+  animation: gm-glow-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-panel,
+  .gm-list > li,
+  .gm-item.is-active,
+  .gm-notice {
+    animation: none;
+  }
+  .gm-item {
+    transition: none;
+  }
+}

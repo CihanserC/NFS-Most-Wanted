@@ -17,7 +17,8 @@ export type AudioFrame = {
   /** 0..1 lastik kayması */
   slip: number;
   supercharged: boolean;
-  muted: boolean;
+  /** 0..1 ana ses seviyesi (0 = sessiz) */
+  volume: number;
   paused: boolean;
 };
 
@@ -158,10 +159,10 @@ export class EngineAudio {
     if (!ctx) return;
     const t = ctx.currentTime;
     const voice = EXHAUST_VOICE[this.exhaust] ?? DEFAULT_VOICE;
-    const silent = f.muted || f.paused;
+    const silent = f.volume <= 0 || f.paused;
     const set = (p: AudioParam, v: number) => p.setTargetAtTime(v, t, TWO_PI_SMOOTH);
 
-    set(this.master.gain, silent ? 0 : MASTER_GAIN);
+    set(this.master.gain, silent ? 0 : MASTER_GAIN * f.volume);
     const fire = (Math.max(f.rpm, 600) / 60) * FIRINGS_PER_REV;
     set(this.oscA.frequency, fire);
     set(this.oscB.frequency, fire / 2);

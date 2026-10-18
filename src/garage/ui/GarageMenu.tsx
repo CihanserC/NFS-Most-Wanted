@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { categoryLabel, hasTranslation, partLabel, slotLabel, t } from '../../i18n';
 import { useAppStore } from '../../core/store/appStore';
+import { playUiSound } from '../../audio/uiSound';
 import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
@@ -128,7 +129,9 @@ export function GarageMenu() {
     items.findIndex((i) => i.installed),
   );
   // Seviye değişince vurgu takılı parçaya / son ziyaret edilen öğeye döner.
-  const levelKey = `${level}|${categoryId ?? ''}|${slotId ?? ''}`;
+  // Takılı parça değişince (geri al/yinele dahil) vurgu yeni takılı öğeye döner.
+  const installedOption = level === 'options' && slotId ? (parts[slotId] ?? '') : '';
+  const levelKey = `${level}|${categoryId ?? ''}|${slotId ?? ''}|${installedOption}`;
   const lastId =
     level === 'categories'
       ? app.lastCategoryId
@@ -162,6 +165,7 @@ export function GarageMenu() {
     (index: number) => {
       const item = items[index];
       if (!item || item.disabled) return;
+      playUiSound('confirm');
       if (level !== 'options') setHl({ key: '', index: 0 });
       if (level === 'categories') {
         // Test Sürüşü bir editör değil, mod geçişidir.
@@ -178,6 +182,7 @@ export function GarageMenu() {
   );
 
   const back = useCallback(() => {
+    playUiSound('back');
     clearPreview();
     clearPaintPreview();
     clearFitmentPreview();
@@ -207,6 +212,7 @@ export function GarageMenu() {
         i = (i + delta + items.length) % items.length;
         if (!items[i]?.disabled) break;
       }
+      if (i !== highlight) playUiSound('move');
       setHighlight(i);
       preview(i);
     },
@@ -302,6 +308,7 @@ export function GarageMenu() {
                   disabled={item.disabled}
                   onMouseEnter={() => {
                     if (item.disabled) return;
+                    if (i !== highlight) playUiSound('move');
                     setHighlight(i);
                     preview(i);
                   }}

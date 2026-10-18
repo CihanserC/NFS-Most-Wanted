@@ -74,12 +74,14 @@ describe('grafik kalite ayarları', () => {
         quality: DEFAULT_QUALITY,
         toneMapping: DEFAULT_TONE_MAPPING,
         showFps: true,
+        autoQuality: true,
       },
     );
     expect(sanitizeGraphics({ quality: 'low', toneMapping: 'aces', showFps: false })).toEqual({
       quality: 'low',
       toneMapping: 'aces',
       showFps: false,
+      autoQuality: true,
     });
   });
 });

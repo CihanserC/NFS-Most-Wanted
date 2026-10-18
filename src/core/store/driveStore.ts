@@ -31,7 +31,6 @@ export type DriveState = {
   paused: boolean;
   cameraIndex: number;
   timeOfDay: TimeOfDay;
-  muted: boolean;
   hud: DriveHud;
   /** Her artışta sürücü aracı pist başlangıcına yeniden yerleştirir */
   restartTick: number;
@@ -42,7 +41,6 @@ export type DriveState = {
   setPaused: (paused: boolean) => void;
   cycleCamera: () => void;
   toggleTimeOfDay: () => void;
-  toggleMuted: () => void;
   restart: () => void;
   respawn: () => void;
   /** Atölyeden pite girerken sıfırlar (en iyi tur oturum boyunca korunur) */
@@ -68,7 +66,6 @@ export const useDriveStore = create<DriveState>()((set) => ({
   paused: false,
   cameraIndex: 0,
   timeOfDay: 'sunset',
-  muted: false,
   hud: initialHud(),
   restartTick: 0,
   respawnTick: 0,
@@ -77,7 +74,6 @@ export const useDriveStore = create<DriveState>()((set) => ({
   setPaused: (paused) => set({ paused }),
   cycleCamera: () => set((s) => ({ cameraIndex: (s.cameraIndex + 1) % DRIVE_CAMERAS.length })),
   toggleTimeOfDay: () => set((s) => ({ timeOfDay: s.timeOfDay === 'sunset' ? 'night' : 'sunset' })),
-  toggleMuted: () => set((s) => ({ muted: !s.muted })),
   restart: () => set((s) => ({ restartTick: s.restartTick + 1, hud: initialHud() })),
   respawn: () => set((s) => ({ respawnTick: s.respawnTick + 1 })),
   begin: () => set({ paused: false, ready: false, hud: initialHud() }),

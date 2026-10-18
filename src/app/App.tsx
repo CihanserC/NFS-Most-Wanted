@@ -1,6 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GarageScene } from '../garage/scene/GarageScene';
+import { startGamepadBridge } from '../core/input/gamepadBridge';
+import { useDriveStore } from '../core/store/driveStore';
+import { AutoQuality } from './AutoQuality';
+import { BootDismiss } from './BootDismiss';
+import { CreditsScreen } from '../garage/ui/CreditsScreen';
 import { GarageMenu } from '../garage/ui/GarageMenu';
 import { TopBar } from '../garage/ui/TopBar';
 import { DriveOverlay } from '../drive/ui/DriveOverlay';
@@ -51,11 +56,26 @@ function PhotoShortcuts() {
   return null;
 }
 
+/** Gamepad: menüde gezinti, sürüşte kısayollar (klavye olaylarına çevrilir). */
+function useGamepad() {
+  useEffect(
+    () =>
+      startGamepadBridge(() =>
+        useAppStore.getState().mode === 'garage' || useDriveStore.getState().paused
+          ? 'menu'
+          : 'drive',
+      ),
+    [],
+  );
+}
+
 export function App() {
+  useGamepad();
   const q = useQualityPreset();
   const mode = useAppStore((s) => s.mode);
   const photoMode = useAppStore((s) => categoryKind(s.categoryId) === 'photo');
   const hideUi = usePhotoStore((s) => s.hideUi);
+  const creditsOpen = useAppStore((s) => s.creditsOpen);
   const { fov, near, far } = sceneConfig.camera;
   return (
     <>
@@ -69,8 +89,11 @@ export function App() {
         gl={{ antialias: false, powerPreference: 'high-performance' }}
         camera={{ position: initialCamera?.position, fov, near, far }}
       >
+        <BootDismiss />
         <Suspense fallback={null}>{mode === 'garage' ? <GarageScene /> : <DriveScene />}</Suspense>
       </Canvas>
+      <AutoQuality />
+      {creditsOpen && <CreditsScreen />}
       {mode === 'garage' && photoMode && <PhotoShortcuts />}
       {mode === 'garage' && photoMode && hideUi && (
         <div className="ge-hint">{t('photo.showUi')}</div>

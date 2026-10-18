@@ -33,6 +33,8 @@ export type AppState = {
   vinylView: VinylSide;
   /** Son kullanılan vinil rengi (yeni katmanlara uygulanır) */
   vinylColor: string;
+  creditsOpen: boolean;
+  setCreditsOpen: (open: boolean) => void;
   setMode: (mode: AppMode) => void;
   toggleTurntable: () => void;
   selectCategory: (categoryId: string | null) => void;
@@ -54,6 +56,11 @@ export const createAppStore = () =>
   create<AppState>()(
     immer((set) => ({
       mode: 'garage',
+      creditsOpen: false,
+      setCreditsOpen: (open) =>
+        set((s) => {
+          s.creditsOpen = open;
+        }),
       turntable: true,
       categoryId: null,
       slotId: null,

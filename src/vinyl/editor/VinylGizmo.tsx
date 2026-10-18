@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import {
   BufferAttribute,
@@ -75,13 +75,47 @@ export function VinylGizmo({ root, box }: { root: RefObject<Group | null>; box: 
   const visible = selected.filter((l) => l.visible);
   if (visible.length === 0) return null;
   if (visible.length === 1)
-    return <SingleGizmo layer={visible[0] as VinylLayer} root={root} box={box} />;
+    return (
+      <ReflectionHidden>
+        <SingleGizmo layer={visible[0] as VinylLayer} root={root} box={box} />
+      </ReflectionHidden>
+    );
   const side = commonSide(
     visible,
     visible.map((l) => l.id),
   );
   if (!side) return null;
-  return <GroupGizmo layers={visible} side={side} root={root} box={box} />;
+  return (
+    <ReflectionHidden>
+      <GroupGizmo layers={visible} side={side} root={root} box={box} />
+    </ReflectionHidden>
+  );
+}
+
+/**
+ * Gizmo yalnızca ana kamerada çizilir: zemin yansıması aynalanmış (zemin altındaki) sanal kamerayla
+ * çizildiği için orada renk/derinlik yazımı kapatılır. Meshler her commit'te taranır (seçim değişince
+ * yenileri oluşur).
+ */
+function ReflectionHidden({ children }: { children: ReactNode }) {
+  const ref = useRef<Group>(null);
+  useLayoutEffect(() => {
+    ref.current?.traverse((object) => {
+      if (!('isMesh' in object) || !object.isMesh || object.userData.reflectionHidden) return;
+      const mesh = object as Mesh;
+      mesh.userData.reflectionHidden = true;
+      mesh.onBeforeRender = (_renderer, _scene, camera) => {
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const mirrored = camera.position.y < 0;
+        for (const material of materials) {
+          material.userData.depthWrite ??= material.depthWrite;
+          material.colorWrite = !mirrored;
+          material.depthWrite = !mirrored && (material.userData.depthWrite as boolean);
+        }
+      };
+    });
+  });
+  return <group ref={ref}>{children}</group>;
 }
 
 /** İmleç -> projeksiyon düzlemi -> (u, v) ve sürükleme yaşam döngüsü. */

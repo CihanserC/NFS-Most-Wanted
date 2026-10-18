@@ -38,11 +38,19 @@ export type GraphicsState = {
   quality: QualityLevel;
   toneMapping: ToneMappingChoice;
   showFps: boolean;
+  /** Yavaş çalışırken kaliteyi otomatik düşür */
+  autoQuality: boolean;
+  /** Otomatik düşürmenin bildirimi (UI gösterir; yeni düşüşte yenilenir) */
+  autoNotice: { level: QualityLevel; id: number } | null;
   /** Ölçülen kare hızı ve son karenin çizim istatistikleri (kalıcı değil) */
   fps: number;
   drawCalls: number;
   triangles: number;
+  /** Kullanıcı seçimi: otomatik kaliteyi kapatır (seçimi geri düşürmesin) */
   setQuality: (q: QualityLevel) => void;
+  /** Otomatik düşürme: kullanıcı seçimi sayılmaz, otomatik kaliteyi kapatmaz */
+  lowerQualityAuto: (q: QualityLevel) => void;
+  setAutoQuality: (on: boolean) => void;
   setToneMapping: (t: ToneMappingChoice) => void;
   setShowFps: (v: boolean) => void;
   setStats: (s: { fps: number; drawCalls: number; triangles: number }) => void;
@@ -54,12 +62,13 @@ const oneOf = <T>(list: readonly T[], v: unknown, fallback: T): T =>
 /** Kayıtlı ayarları her durumda geçerli değerlere çevirir. */
 export function sanitizeGraphics(
   input: unknown,
-): Pick<GraphicsState, 'quality' | 'toneMapping' | 'showFps'> {
+): Pick<GraphicsState, 'quality' | 'toneMapping' | 'showFps' | 'autoQuality'> {
   const src = (typeof input === 'object' && input !== null ? input : {}) as Record<string, unknown>;
   return {
     quality: oneOf(QUALITY_LEVELS, src.quality, DEFAULT_QUALITY),
     toneMapping: oneOf(TONE_MAPPINGS, src.toneMapping, DEFAULT_TONE_MAPPING),
     showFps: typeof src.showFps === 'boolean' ? src.showFps : true,
+    autoQuality: typeof src.autoQuality === 'boolean' ? src.autoQuality : true,
   };
 }
 
@@ -68,10 +77,14 @@ export const useGraphicsStore = create<GraphicsState>()(
   persist(
     (set) => ({
       ...sanitizeGraphics({}),
+      autoNotice: null,
       fps: 0,
       drawCalls: 0,
       triangles: 0,
-      setQuality: (quality) => set({ quality }),
+      setQuality: (quality) => set({ quality, autoQuality: false, autoNotice: null }),
+      lowerQualityAuto: (quality) =>
+        set((s) => ({ quality, autoNotice: { level: quality, id: (s.autoNotice?.id ?? 0) + 1 } })),
+      setAutoQuality: (autoQuality) => set({ autoQuality, autoNotice: null }),
       setToneMapping: (toneMapping) => set({ toneMapping }),
       setShowFps: (showFps) => set({ showFps }),
       setStats: (stats) => set(stats),
@@ -79,7 +92,12 @@ export const useGraphicsStore = create<GraphicsState>()(
     {
       name: 'muscle-garage.graphics',
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ quality: s.quality, toneMapping: s.toneMapping, showFps: s.showFps }),
+      partialize: (s) => ({
+        quality: s.quality,
+        toneMapping: s.toneMapping,
+        showFps: s.showFps,
+        autoQuality: s.autoQuality,
+      }),
       merge: (persisted, current) => ({ ...current, ...sanitizeGraphics(persisted) }),
     },
   ),

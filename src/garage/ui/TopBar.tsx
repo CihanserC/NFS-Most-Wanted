@@ -1,7 +1,10 @@
 import { t } from '../../i18n';
 import { useAppStore } from '../../core/store/appStore';
 import { QUALITY_LEVELS, TONE_MAPPINGS, useGraphicsStore } from '../../core/store/graphicsStore';
+import { useAudioStore } from '../../core/store/audioStore';
 import { useBuildStore } from '../../core/store/stores';
+import { playUiSound } from '../../audio/uiSound';
+import { volumeLabel } from '../../audio/volumeLabel';
 
 const next = <T,>(list: readonly T[], v: T): T => list[(list.indexOf(v) + 1) % list.length] as T;
 
@@ -11,11 +14,18 @@ export function TopBar() {
   const { undo, redo } = useBuildStore.getState();
   const turntable = useAppStore((s) => s.turntable);
   const toggleTurntable = useAppStore((s) => s.toggleTurntable);
-  const { quality, toneMapping, showFps, fps, drawCalls, triangles } = useGraphicsStore();
+  const { quality, toneMapping, showFps, fps, drawCalls, triangles, autoQuality, autoNotice } =
+    useGraphicsStore();
+  const volume = useAudioStore((s) => s.volume);
   const { setQuality, setToneMapping, setShowFps } = useGraphicsStore.getState();
 
   return (
     <div className="gm-topbar">
+      {autoNotice && (
+        <span key={autoNotice.id} className="gm-notice" role="status">
+          {t('ui.autoQualityNotice').replace('{level}', t(`quality.${autoNotice.level}`))}
+        </span>
+      )}
       <button type="button" className="gm-chip" onClick={undo} disabled={!canUndo}>
         {t('ui.undo')}
       </button>
@@ -38,6 +48,30 @@ export function TopBar() {
         onClick={() => setToneMapping(next(TONE_MAPPINGS, toneMapping))}
       >
         {t('ui.toneMapping')}: {t(`toneMapping.${toneMapping}`)}
+      </button>
+      <button
+        type="button"
+        className="gm-chip"
+        onClick={() => useGraphicsStore.getState().setAutoQuality(!autoQuality)}
+      >
+        {t('ui.autoQuality')}: {autoQuality ? t('ui.on') : t('ui.off')}
+      </button>
+      <button
+        type="button"
+        className="gm-chip"
+        onClick={() => {
+          useAudioStore.getState().cycleVolume();
+          playUiSound('confirm');
+        }}
+      >
+        {t('ui.sound')}: {volumeLabel(volume)}
+      </button>
+      <button
+        type="button"
+        className="gm-chip"
+        onClick={() => useAppStore.getState().setCreditsOpen(true)}
+      >
+        {t('ui.credits')}
       </button>
       <button
         type="button"

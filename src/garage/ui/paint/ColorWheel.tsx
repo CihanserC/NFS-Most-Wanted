@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { hexToHsv, hsvToHex, hsvToRgb, type HSV } from '../../../core/color/color';
 import { t } from '../../../i18n';
 
 const SIZE = 168;
+/** Klavye adımları: ton ve doygunluk (Shift ile büyük adım) */
+const HUE_STEP = 0.01;
+const SAT_STEP = 0.02;
+const BIG = 5;
 const RADIUS = SIZE / 2;
 
 type Props = {
@@ -69,6 +73,20 @@ export function ColorWheel({ hex, onChange, onCommit }: Props) {
     });
   };
 
+  const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const k = e.shiftKey ? BIG : 1;
+    let next: HSV | null = null;
+    if (e.key === 'ArrowLeft') next = { ...hsv, h: (hsv.h - HUE_STEP * k + 1) % 1 };
+    else if (e.key === 'ArrowRight') next = { ...hsv, h: (hsv.h + HUE_STEP * k) % 1 };
+    else if (e.key === 'ArrowUp') next = { ...hsv, s: Math.min(1, hsv.s + SAT_STEP * k) };
+    else if (e.key === 'ArrowDown') next = { ...hsv, s: Math.max(0, hsv.s - SAT_STEP * k) };
+    if (!next) return;
+    e.preventDefault();
+    // Menü ok tuşlarıyla gezinmesin
+    e.stopPropagation();
+    update(next);
+  };
+
   const end = () => {
     if (!dragging) return;
     setDragging(false);
@@ -81,7 +99,15 @@ export function ColorWheel({ hex, onChange, onCommit }: Props) {
 
   return (
     <div className="cw">
-      <div className="cw-disc">
+      <div
+        className="cw-disc"
+        tabIndex={0}
+        role="group"
+        aria-label={t('paint.wheel')}
+        onKeyDown={onKey}
+        onKeyUp={(e) => e.key.startsWith('Arrow') && onCommit()}
+        onBlur={onCommit}
+      >
         <canvas
           ref={canvas}
           width={SIZE}

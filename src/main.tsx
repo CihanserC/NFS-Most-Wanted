@@ -4,13 +4,14 @@ import { App } from './app/App';
 import './app/global.css';
 import { useAppStore } from './core/store/appStore';
 import { useGarageStore } from './core/store/garageStore';
+import { useGraphicsStore } from './core/store/graphicsStore';
 import { useBuildStore } from './core/store/stores';
 import { initPersistence } from './core/storage/persistence';
 import { captureCanvas } from './garage/photo/capture';
 
 if (import.meta.env.DEV)
   Object.assign(window, {
-    __muscleGarage: { useBuildStore, useAppStore, useGarageStore },
+    __muscleGarage: { useBuildStore, useAppStore, useGarageStore, useGraphicsStore },
     // Geliştirme: indirme yapmadan kare yakalamayı denemek için
     __muscleGaragePhoto: { captureCanvas },
   });

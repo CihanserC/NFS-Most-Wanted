@@ -1,4 +1,5 @@
 import type { DriveInput } from '../core/drive/drivetrain';
+import { readGamepadDrive } from '../core/input/gamepadBridge';
 
 const KEYS = {
   throttle: ['KeyW', 'ArrowUp'],
@@ -32,11 +33,20 @@ export function createInputSource(): InputSource {
   return {
     read: () => {
       if (forced) return forced;
-      return {
+      const keyboard: DriveInput = {
         throttle: any(KEYS.throttle) ? 1 : 0,
         brake: any(KEYS.brake) ? 1 : 0,
         steer: (any(KEYS.left) ? 1 : 0) - (any(KEYS.right) ? 1 : 0),
         handbrake: any(KEYS.handbrake),
+      };
+      // Gamepad varsa analog değerlerle birleştirilir (daha büyük olan kazanır)
+      const pad = readGamepadDrive();
+      if (!pad) return keyboard;
+      return {
+        throttle: Math.max(keyboard.throttle, pad.throttle),
+        brake: Math.max(keyboard.brake, pad.brake),
+        steer: Math.max(-1, Math.min(1, keyboard.steer + pad.steer)),
+        handbrake: keyboard.handbrake || pad.handbrake,
       };
     },
     override: (input) => {

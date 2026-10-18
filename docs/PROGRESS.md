@@ -1,6 +1,44 @@
 # İlerleme
 
-## Aktif faz: Faz 11 — Optimizasyon ve Cila (BAŞLANMADI)
+## Durum: Tüm fazlar (0–11) tamamlandı — bkz. `docs/ANALYSIS.md` (analiz raporu, açık işler)
+
+## Faz 11 — Optimizasyon ve Cila ✅ (2026-10-18)
+
+**Yapılanlar**
+
+- **Yükleme:** index.html'de anında görünen yükleme ekranı (ilk 5 kare çizilince söner). Paket 4 parçaya bölündü (`vite.config.ts`, `codeSplitting.groups`): uygulama 243 KB, three 878 KB, r3f 654 KB, react 219 KB (toplam ≈ 640 KB gzip, vendor parçaları uygulama değişince yeniden inmez); Rapier + sürüş kodu (4,4 MB) yalnızca Test Sürüşü'nde yüklenir.
+- **Ölçüm düzeltmesi:** FPS göstergesinin "çizim çağrısı / üçgen" değerleri yalnızca son efekt geçişini sayıyordu; artık kare başında sıfırlanıp kare sonunda okunuyor (tüm geçişler dahil).
+- **Uyarlanabilir kalite** (`core/graphics/autoQuality.ts`): ısınmadan (6 sn) sonra art arda 4 ölçüm (≈2 sn) < 42 FPS ise kalite bir kademe düşer (yukarı çıkmaz). Sekme gizliyken/duraklatılmışken/fotoğraf çekilirken ölçüm yok sayılır. Üst çubukta "Oto kalite" düğmesi ve düşüş bildirimi; elle kalite seçimi otomatiği kapatır. Test makinesinde yavaşlayınca kendiliğinden "Düşük"e indi.
+- **Ses:** kalıcı ses seviyesi (%100 / %50 / Kapalı; üst çubuk, duraklat menüsü, M tuşu) motor, lastik ve menü seslerine uygulanır. Menü sesleri (hareket, onay, geri) Web Audio ile sentezlenir.
+- **Menü animasyonları:** panel girişi, kademeli liste, seçili öğe parlaması, ipucu bildirimi; `prefers-reduced-motion` ile kapanır.
+- **Kredi ekranı:** açık kaynak yazılımlar (lisansları paketlerden doğrulanmış) + `CREDITS.json` üçüncü taraf varlıkları (doğrulanır; şu an boş, her şey prosedürel). Esc/dışarı tıklama kapatır.
+- **Gamepad** (§9): menüde D-pad/sol çubuk (ilk gecikme + tekrar), A onay, B/Start geri; sürüşte sol çubuk direksiyon, RT gaz, LT fren, A/X el freni, Y kamera, B pistte düzelt, Start duraklat. Gamepad klavye olaylarına çevrilir, sürüşte analog değerler klavyeyle birleşir.
+- **Bilinen sorunlar giderildi:** gizmo zemin yansımasında görünmüyor; renk tekerleği klavyeyle kullanılabiliyor (←/→ ton, ↑/↓ doygunluk, Shift büyük adım); geri al/yinele sonrası menü vurgusu takılı parçaya dönüyor; gamepad navigasyonu eklendi; "kayıtlar yenilenince kaybolur" (Faz 9) ve "gerçek modelde fitment ölçüleri" (Faz 10) zaten çözülmüştü.
+- **Testler (319):** uyarlanabilir kalite, ses ayarı, gamepad eşlemesi (ölü bölge, tuş tekrarı, kenar algılama, sürüş eşlemesi), grafik ayar temizleme.
+- Test zaman aşımı 60 sn (otopilot turu ve jant üretimi testleri paralel çalışırken 5 sn'yi aşabiliyordu).
+
+**Ölçümler** (Intel UHD entegre GPU, 1280×575; çizim çağrısı/üçgen donanımdan bağımsızdır)
+
+| Sahne  | Kalite | Çizim çağrısı | Üçgen   | FPS |
+| ------ | ------ | ------------- | ------- | --- |
+| Atölye | Düşük  | 147           | 75 bin  | ≈60 |
+| Atölye | Orta   | 354           | 207 bin | –   |
+| Atölye | Yüksek | 479           | 508 bin | –   |
+| Sürüş  | Düşük  | 120           | 91 bin  | 60  |
+| Sürüş  | Orta   | 192           | 161 bin | 52  |
+| Sürüş  | Yüksek | 219           | 210 bin | 34  |
+
+- Atölye sahnesi: 168 mesh, 113 bin üçgen (araç ≈ 22 bin gövde; 2 hacimli spot konisi 2 × 16 bin). Yüksek kalitede sahne gölge, yansıma ve AO geçişleriyle birkaç kez çizilir; maliyet geometriden çok dolgu oranıdır, kalite kademeleri bunu yönetir.
+- İlk yükleme (üretim derlemesi, entegre GPU): ilk çizilen kareye kadar **2,67 sn**, DOM hazır 0,4 sn, toplam aktarım 635 KB (hedef < 3 sn).
+- Vinil: 500 katmanda boşta 59 FPS, sürüklemede ≈17,5 ms/kare (200 katmanla aynı; yalnızca etkilenen yüzey yeniden çizilir) — §14 hedefi.
+- **Hedef donanımda (orta seviye masaüstü GPU, 1080p) ≥ 60 FPS ölçülemedi**: test makinesi entegre GPU. Bu donanımda bile sürüş Düşük'te 60 FPS.
+
+**Notlar / kararlar**
+
+- Geometri birleştirme/LOD yapılmadı: ölçümler darboğazın geometri değil dolgu oranı olduğunu gösteriyor (entegre GPU'da Düşük kalite 60 FPS); uyarlanabilir kalite pratik çözümdür.
+- Vite, three'nin varsayılan Draco/Basis kopyalarını da pakete alıyor (`dist/assets`, ≈3 MB, hiç indirilmez); yalnızca dağıtım boyutunu etkiler.
+
+**Eksik / bilinen sorunlar:** bkz. `docs/ANALYSIS.md`.
 
 ## Faz 10 — Gerçek Model Entegrasyonu ✅ (2026-10-18)
 
