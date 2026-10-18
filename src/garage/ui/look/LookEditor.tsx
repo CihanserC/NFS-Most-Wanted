@@ -81,19 +81,23 @@ export function LookEditor() {
 
   return (
     <div className="pe we">
-      <Section title={t('slot.headlights')}>
-        {slotChoice('headlights')}
-        <h3>{t('look.headlightColor')}</h3>
-        <Swatches
-          colors={stanceData.headlightColors}
-          value={lighting.headlightColor}
-          onPreview={(c) => previewLook({ lighting: { ...saved.lighting, headlightColor: c } })}
-          onPick={(c) => setLook({ lighting: { ...saved.lighting, headlightColor: c } })}
-          onLeave={clearLookPreview}
-        />
-      </Section>
+      {car.manifest.slots.headlights && (
+        <Section title={t('slot.headlights')}>
+          {slotChoice('headlights')}
+          <h3>{t('look.headlightColor')}</h3>
+          <Swatches
+            colors={stanceData.headlightColors}
+            value={lighting.headlightColor}
+            onPreview={(c) => previewLook({ lighting: { ...saved.lighting, headlightColor: c } })}
+            onPick={(c) => setLook({ lighting: { ...saved.lighting, headlightColor: c } })}
+            onLeave={clearLookPreview}
+          />
+        </Section>
+      )}
 
-      <Section title={t('slot.taillights')}>{slotChoice('taillights')}</Section>
+      {car.manifest.slots.taillights && (
+        <Section title={t('slot.taillights')}>{slotChoice('taillights')}</Section>
+      )}
 
       <Section title={t('look.glass')}>
         <Slider

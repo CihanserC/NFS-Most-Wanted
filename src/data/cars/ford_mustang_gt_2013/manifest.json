@@ -1,0 +1,227 @@
+{
+  "id": "ford_mustang_gt_2013",
+  "displayName": "2013 Ford Mustang GT",
+  "units": "meters",
+  "forwardAxis": "+Z",
+  "dimensions": {
+    "length": 4.77,
+    "width": 1.92,
+    "height": 1.4,
+    "wheelbase": 2.719
+  },
+  "massKg": 1650,
+  "drivetrain": "RWD",
+  "model": "assets/cars/ford_mustang_gt_2013.glb",
+  "wheels": {
+    "FL": {
+      "position": [0.727, 0.345, 1.473]
+    },
+    "FR": {
+      "position": [-0.727, 0.345, 1.473]
+    },
+    "RL": {
+      "position": [0.745, 0.354, -1.246]
+    },
+    "RR": {
+      "position": [-0.745, 0.354, -1.246]
+    },
+    "wellClearanceMm": {
+      "front": 55,
+      "rear": 65
+    }
+  },
+  "paintZones": ["body", "hood"],
+  "paintZoneCameras": {
+    "body": "paint_side",
+    "hood": "hood_top"
+  },
+  "wheelCameras": {
+    "front": "wheel_front",
+    "rear": "wheel_rear"
+  },
+  "categoryCameras": {
+    "stance": "side",
+    "lights_glass": "front_three_quarter",
+    "photo_mode": "front_three_quarter"
+  },
+  "vinylCameras": {
+    "left": "vinyl_left",
+    "right": "vinyl_right",
+    "top": "vinyl_top",
+    "front": "vinyl_front",
+    "rear": "vinyl_rear"
+  },
+  "defaultCamera": "overview",
+  "cameraPresets": {
+    "overview": {
+      "position": [5.2, 1.6, 6],
+      "target": [0, 0.6, 0]
+    },
+    "front_three_quarter": {
+      "position": [3.2, 1.2, 4.8],
+      "target": [0, 0.55, 1.4]
+    },
+    "front_low": {
+      "position": [1.2, 0.55, 4.6],
+      "target": [0, 0.5, 2]
+    },
+    "hood_top": {
+      "position": [1.8, 2.5, 3.8],
+      "target": [0, 0.9, 1.3]
+    },
+    "side": {
+      "position": [5.4, 1, 0],
+      "target": [0, 0.55, 0]
+    },
+    "wheel_front": {
+      "position": [2.6, 0.75, 3.2],
+      "target": [0.75, 0.38, 1.6]
+    },
+    "mirror": {
+      "position": [2.4, 1.4, 1.8],
+      "target": [0.9, 1, 0.45]
+    },
+    "roof_top": {
+      "position": [3, 3.2, 0.6],
+      "target": [0, 1.1, -0.5]
+    },
+    "rear_three_quarter": {
+      "position": [3.4, 1.3, -4.8],
+      "target": [0, 0.55, -1.4]
+    },
+    "rear_low": {
+      "position": [1.2, 0.55, -4.6],
+      "target": [0, 0.5, -2]
+    },
+    "rear_low_side": {
+      "position": [2.9, 0.55, -3.9],
+      "target": [0.4, 0.35, -1.6]
+    },
+    "rear_top": {
+      "position": [2, 2.6, -4],
+      "target": [0, 1, -1.4]
+    },
+    "engine_bay": {
+      "position": [1.2, 2.5, 2.9],
+      "target": [0, 0.9, 1.25]
+    },
+    "interior": {
+      "position": [1.9, 2, -0.4],
+      "target": [0, 0.8, 0.1]
+    },
+    "paint_side": {
+      "position": [5.4, 1.6, 3.6],
+      "target": [0, 0.6, 1.2]
+    },
+    "wheel_rear": {
+      "position": [3.6, 0.9, 0.4],
+      "target": [0.6, 0.4, -1.2]
+    },
+    "vinyl_left": {
+      "position": [6.4, 1.4, 1.1],
+      "target": [0, 0.65, 1.1]
+    },
+    "vinyl_right": {
+      "position": [-6.4, 1.4, -1.1],
+      "target": [0, 0.65, -1.1]
+    },
+    "vinyl_top": {
+      "position": [-0.6, 6, -1.4],
+      "target": [0, 0.6, -1.4]
+    },
+    "vinyl_front": {
+      "position": [-0.9, 1.3, 6.2],
+      "target": [-0.9, 0.6, 0]
+    },
+    "vinyl_rear": {
+      "position": [0.9, 1.3, -6.2],
+      "target": [0.9, 0.6, 0]
+    },
+    "select": {
+      "position": [5.4, 1.5, 6.4],
+      "target": [0, -0.55, 0]
+    }
+  },
+  "slots": {
+    "hood": {
+      "options": ["stock", "shaker_scoop", "cowl_induction"],
+      "default": "stock",
+      "camera": "hood_top"
+    },
+    "hood_pins": {
+      "options": ["none", "chrome", "black"],
+      "default": "none",
+      "camera": "hood_top"
+    },
+    "chin_spoiler": {
+      "options": ["none", "classic", "carbon_splitter"],
+      "default": "none",
+      "camera": "front_low"
+    },
+    "side_skirts": {
+      "options": ["none", "slim", "pro_touring"],
+      "default": "none",
+      "camera": "side"
+    },
+    "spoiler_rear": {
+      "options": ["none", "ducktail", "classic_wing", "high_wing"],
+      "default": "none",
+      "camera": "rear_three_quarter"
+    },
+    "interior": {
+      "options": ["stock", "roll_cage"],
+      "default": "stock",
+      "camera": "interior"
+    }
+  },
+  "modelEmptyOptions": {
+    "hood": ["stock"],
+    "interior": ["stock"]
+  },
+  "fitment": {
+    "front": {
+      "fenderX": 0.9,
+      "archRadius": 0.4,
+      "wellInnerX": 0.6
+    },
+    "rear": {
+      "fenderX": 0.93,
+      "archRadius": 0.41,
+      "wellInnerX": 0.62
+    }
+  },
+  "defaultFitment": {
+    "wheels": {
+      "front": {
+        "style": "modern_multispoke",
+        "diameterIn": 19,
+        "widthIn": 9,
+        "offsetMm": 35,
+        "finish": "gunmetal",
+        "spokes": 10
+      },
+      "rear": {
+        "style": "modern_multispoke",
+        "diameterIn": 19,
+        "widthIn": 9.5,
+        "offsetMm": 35,
+        "finish": "gunmetal",
+        "spokes": 10
+      }
+    },
+    "tires": {
+      "front": {
+        "widthMm": 255,
+        "aspect": 40,
+        "sidewall": "black",
+        "type": "street"
+      },
+      "rear": {
+        "widthMm": 275,
+        "aspect": 40,
+        "sidewall": "black",
+        "type": "street"
+      }
+    }
+  }
+}

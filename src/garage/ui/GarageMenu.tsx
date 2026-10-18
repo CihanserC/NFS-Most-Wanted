@@ -90,8 +90,10 @@ export function GarageMenu() {
         return menuCategories.map((c) => ({
           id: c.id,
           label: categoryLabel(c.id),
-          disabled: !isCategoryEnabled(c),
-          meta: isCategoryEnabled(c) ? undefined : t('ui.comingSoon'),
+          disabled: !isCategoryEnabled(c, Object.keys(car.manifest.slots)),
+          meta: isCategoryEnabled(c, Object.keys(car.manifest.slots))
+            ? undefined
+            : t('ui.comingSoon'),
         }));
       case 'slots':
         return (category?.slots ?? [])

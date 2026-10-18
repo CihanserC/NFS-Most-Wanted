@@ -36,6 +36,7 @@ function useCarModel(car: CarDefinition): PreparedModel | null {
           gltf.scene,
           car.manifest,
           shared as ReadonlyMap<string, Material>,
+          car.modelMap,
         );
         if (!warnedUrls.has(url)) {
           warnedUrls.add(url);

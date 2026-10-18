@@ -17,7 +17,10 @@ const text = (v: unknown): v is string => typeof v === 'string' && v.trim().leng
 
 /** Lisans gerektiren atıf: yalnızca atıfla kullanım izni veren (CC-BY, CC0, MIT...) lisanslar kabul edilir. */
 const ALLOWED_LICENSE =
-  /^(CC0|CC-BY(-4\.0|-3\.0)?|CC-BY-SA(-4\.0|-3\.0)?|MIT|Apache-2\.0|OFL-1\.1|Public Domain)$/i;
+  /^(CC0|CC-BY(-4\.0|-3\.0)?|CC-BY-SA(-4\.0|-3\.0)?|CC-BY-NC(-SA)?(-4\.0|-3\.0)?|MIT|Apache-2\.0|OFL-1\.1|Public Domain)$/i;
+
+/** Ticari kullanıma izin vermeyen lisans (kredi ekranında uyarı gösterilir). */
+export const isNonCommercial = (license: string): boolean => /-NC\b|-NC-/i.test(license);
 
 export type CreditsResult = { ok: true; value: CreditsFile } | { ok: false; errors: string[] };
 

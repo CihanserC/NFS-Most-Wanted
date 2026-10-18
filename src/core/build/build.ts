@@ -20,7 +20,7 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     name: DEFAULT_BUILD_NAME,
     parts: defaultParts(manifest),
     paint: normalizePaintMap({}, manifest.paintZones),
-    ...normalizeFitment({}),
+    ...normalizeFitment(manifest.defaultFitment ?? {}),
     vinyl: [],
     stance: normalizeStance({}),
     glass: normalizeGlass({}),

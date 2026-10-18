@@ -1,0 +1,19 @@
+{
+  "scale": 100,
+  "offset": [0, 0.176, 0],
+  "hide": ["SM_Hub_", "SM_Disk_", "SM_Brake_", "undercover"],
+  "paint": [
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "SM_Hood",
+      "zone": "hood"
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "zone": "body"
+    }
+  ],
+  "materials": {
+    "fMAT_Glass1": "mat_glass"
+  }
+}

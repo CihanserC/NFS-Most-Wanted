@@ -16,7 +16,9 @@ export type MenuCategory = { id: string; kind: MenuCategoryKind; slots: string[]
 
 export const menuCategories = categoriesJson as MenuCategory[];
 
-export const isCategoryEnabled = (c: MenuCategory) => c.kind !== 'parts' || c.slots.length > 0;
+/** Parça kategorisi, araçta o slotlardan en az biri varsa etkin (Mustang'te motor/far gibi slotlar yok). */
+export const isCategoryEnabled = (c: MenuCategory, slotIds?: readonly string[]) =>
+  c.kind !== 'parts' || (slotIds ? c.slots.some((s) => slotIds.includes(s)) : c.slots.length > 0);
 
 export const categoryKind = (id: string | null): MenuCategoryKind | null =>
   menuCategories.find((c) => c.id === id)?.kind ?? null;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { validateCredits, type CreditEntry } from '../../core/credits/credits';
+import { isNonCommercial, validateCredits, type CreditEntry } from '../../core/credits/credits';
 import { SOFTWARE_CREDITS } from '../../core/credits/software';
 import { useAppStore } from '../../core/store/appStore';
 import { t } from '../../i18n';
@@ -82,6 +82,9 @@ export function CreditsScreen() {
                       {a.usedFor ? ` · ${a.usedFor}` : ''}
                       {a.changes ? ` · ${a.changes}` : ''}
                     </small>
+                    {isNonCommercial(a.license) && (
+                      <small className="cr-warn">{t('credits.nonCommercial')}</small>
+                    )}
                     <a href={a.source} target="_blank" rel="noreferrer noopener">
                       {a.source}
                     </a>

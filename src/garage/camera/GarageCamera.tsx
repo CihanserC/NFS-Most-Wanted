@@ -32,7 +32,10 @@ function usePresetId(): string {
   const vinylView = useAppStore((s) => s.vinylView);
   const categoryId = useAppStore((s) => s.categoryId);
   const carId = useBuildStore((s) => s.build.carId);
+  const selecting = useAppStore((s) => s.mode === 'select');
   const { manifest } = getCar(carId);
+  // Araç seçim ekranı: vitrin kamerası
+  if (selecting && manifest.cameraPresets.select) return 'select';
   if (vinyl) return manifest.vinylCameras?.[vinylView] ?? manifest.defaultCamera;
   if (wheels) return manifest.wheelCameras?.[wheelAxle] ?? manifest.defaultCamera;
   if (paintZone) return manifest.paintZoneCameras?.[paintZone] ?? manifest.defaultCamera;

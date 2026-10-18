@@ -1,0 +1,92 @@
+{
+  "hood": {
+    "stock": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "shaker_scoop": {
+      "price": 1400,
+      "weightKg": 4
+    },
+    "cowl_induction": {
+      "price": 800,
+      "weightKg": 2
+    }
+  },
+  "hood_pins": {
+    "none": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "chrome": {
+      "price": 120,
+      "weightKg": 0
+    },
+    "black": {
+      "price": 120,
+      "weightKg": 0
+    }
+  },
+  "chin_spoiler": {
+    "none": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "classic": {
+      "price": 300,
+      "weightKg": 2,
+      "downforce": 0.03
+    },
+    "carbon_splitter": {
+      "price": 1100,
+      "weightKg": 1,
+      "downforce": 0.06
+    }
+  },
+  "side_skirts": {
+    "none": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "slim": {
+      "price": 500,
+      "weightKg": 3
+    },
+    "pro_touring": {
+      "price": 950,
+      "weightKg": 5,
+      "downforce": 0.02
+    }
+  },
+  "spoiler_rear": {
+    "none": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "ducktail": {
+      "price": 650,
+      "weightKg": 3,
+      "downforce": 0.05
+    },
+    "classic_wing": {
+      "price": 900,
+      "weightKg": 5,
+      "downforce": 0.08
+    },
+    "high_wing": {
+      "price": 1500,
+      "weightKg": 7,
+      "downforce": 0.14
+    }
+  },
+  "interior": {
+    "stock": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "roll_cage": {
+      "price": 2500,
+      "weightKg": 35
+    }
+  }
+}

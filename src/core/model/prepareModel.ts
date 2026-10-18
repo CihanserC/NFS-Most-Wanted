@@ -1,5 +1,6 @@
 import type { Material, Object3D } from 'three';
 import type { CarManifest } from '../manifest/types';
+import { applyModelMap, type ModelMap } from './modelMap';
 import {
   analyzeModel,
   bindSharedMaterials,
@@ -36,13 +37,17 @@ export function prepareModel(
   scene: Object3D,
   manifest: CarManifest,
   shared: ReadonlyMap<string, Material>,
+  map?: ModelMap,
 ): PreparedModel {
-  const root = scene.clone(true);
+  const cloned = scene.clone(true);
+  // Kurallara uymayan model: önce eşleme (dönüşüm, gizleme, boya bölgeleri, adlandırma)
+  const root = map ? applyModelMap(cloned, map) : cloned;
   const analysis = analyzeModel(root, manifest);
   const binding = bindSharedMaterials(root, shared);
   enableShadows(root);
 
-  const warnings = [...analysis.warnings];
+  // Eşlemeli modellerde tekerlek çapası zaten yoktur (manifest konumları esas): gürültü yapma
+  const warnings = analysis.warnings.filter((w) => !(map && w.code === 'anchor_missing'));
   for (const name of binding.unknown) {
     if (name.startsWith('paint_'))
       warnings.push({

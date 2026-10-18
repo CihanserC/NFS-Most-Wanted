@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import creditsJson from '../../../public/assets/CREDITS.json';
-import { validateCredits } from './credits';
+import { isNonCommercial, validateCredits } from './credits';
 
 const entry = {
   name: 'Örnek Model',
@@ -12,10 +12,14 @@ const entry = {
 };
 
 describe('CREDITS.json', () => {
-  it('depodaki dosya geçerli (şimdilik boş)', () => {
+  it('depodaki dosya geçerli; Mustang modeli ticari olmayan lisansla atıflı', () => {
     const result = validateCredits(creditsJson);
     expect(result.ok).toBe(true);
-    expect(result.ok && result.value.assets).toHaveLength(0);
+    const assets = result.ok ? result.value.assets : [];
+    const mustang = assets.find((a) => a.name.includes('Mustang'));
+    expect(mustang?.license).toBe('CC-BY-NC-SA-4.0');
+    expect(isNonCommercial(mustang?.license ?? '')).toBe(true);
+    expect(isNonCommercial('CC-BY-4.0')).toBe(false);
   });
 
   it('geçerli girdi kabul edilir', () => {
@@ -27,7 +31,7 @@ describe('CREDITS.json', () => {
     const result = validateCredits({
       version: 1,
       assets: [
-        { ...entry, author: '', license: 'CC-BY-NC-4.0' },
+        { ...entry, author: '', license: 'GPL-3.0' },
         { ...entry, source: 'dosya.txt' },
       ],
     });

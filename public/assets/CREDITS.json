@@ -1,4 +1,14 @@
 {
   "version": 1,
-  "assets": []
+  "assets": [
+    {
+      "name": "2013 Ford Mustang GT",
+      "author": "Ddiaz Design",
+      "source": "https://sketchfab.com/3d-models/2013-ford-mustang-gt-1368b104aa8148a3be15f4dfc8832045",
+      "license": "CC-BY-NC-SA-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "usedFor": "İkinci araç: Ford Mustang GT gövdesi ve iç mekânı",
+      "changes": "Ölçeklendi, tekerlek/lastik/fren parçaları oyunun prosedürel parçalarıyla değiştirildi, boya bölgelerine ayrıldı"
+    }
+  ]
 }

@@ -54,6 +54,13 @@ export type CarManifest = {
    * gövde örnekleyicisinden okunur (fitment kontrolü için).
    */
   fitment?: { front: FitmentMeasure; rear: FitmentMeasure };
+  /**
+   * Aracın stok jant/lastik kurulumu (kısmi; eksikler genel varsayılandan gelir).
+   * Örn. modern bir araç için 19" jant ve düşük profilli lastik.
+   */
+  defaultFitment?: Partial<
+    Record<'wheels' | 'tires', Partial<Record<'front' | 'rear', Record<string, unknown>>>>
+  >;
   defaultCamera: string;
   cameraPresets: Record<string, CameraPreset>;
   slots: Record<string, SlotDefinition>;
