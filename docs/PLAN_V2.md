@@ -201,7 +201,7 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [ ] Yardımcı sistemler (ABS, TC, direksiyon yardımı) + ayarlar
 - [ ] Direksiyon modeli, anti-roll, tutuş eğrisi, çarpışma yumuşatma, kamera iyileştirme
 - [ ] Araca özel `driving.json` (Vanta, Mustang)
-- [ ] Başsız test paketi: skidpad, slalom, 100→0, 0–100, drift, devrilme, otopilot turu (her iki araç)
+- [x] Başsız test paketi: skidpad, slalom, 100→0, 0–100, drift, devrilme (`handling.test.ts`, her iki araç); otopilot turu `lap.test.ts`'te (yalnız Vanta)
 
 ### V2-4 — Mobil uyumluluk
 
