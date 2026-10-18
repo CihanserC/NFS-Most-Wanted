@@ -1,3 +1,4 @@
+import { DEFAULT_DRIVING, type DrivingTuning } from './driving';
 import type { BuildState } from '../build/types';
 import type { PartsCatalog } from '../manifest/parts';
 import type { CarManifest } from '../manifest/types';
@@ -59,12 +60,15 @@ export type VehicleSpec = {
   supercharged: boolean;
   /** Egzoz tipi: ses tonunu etkiler */
   exhaust: string;
+  /** Araca özel sürüş ayarları */
+  driving: DrivingTuning;
 };
 
 export function deriveVehicleSpec(
   build: Pick<BuildState, 'parts' | 'wheels' | 'tires' | 'stance' | 'performance' | 'brakes'>,
   manifest: CarManifest,
   catalog: PartsCatalog,
+  driving: DrivingTuning = DEFAULT_DRIVING,
 ): VehicleSpec {
   const trackLimit = catalog.fenders?.[build.parts.fenders ?? '']?.trackWidthLimitMm;
   const limitMm = trackLimit ?? Number.POSITIVE_INFINITY;
@@ -121,5 +125,6 @@ export function deriveVehicleSpec(
     rollStiffness: susp.roll,
     supercharged,
     exhaust: build.parts.exhaust ?? 'rear_dual',
+    driving,
   };
 }

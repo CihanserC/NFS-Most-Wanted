@@ -27,7 +27,12 @@ const input = (p: Partial<DriveInput> = {}): DriveInput => ({
 /** Aracı verilen hızda, düz ileri bakacak şekilde yerleşik başlatır. */
 function launch(id: string, speed: number): VehiclePhysics {
   const car = getCar(id);
-  const spec = deriveVehicleSpec(createDefaultBuild(car.manifest), car.manifest, car.parts);
+  const spec = deriveVehicleSpec(
+    createDefaultBuild(car.manifest),
+    car.manifest,
+    car.parts,
+    car.driving,
+  );
   const v = VehiclePhysics.create(R, spec, flat);
   v.chassis.setTranslation({ x: -150, y: v.restHeight + 0.05, z: 0 }, true);
   const q = v.chassis.rotation();
@@ -83,7 +88,8 @@ describe.each(listCars().map((c) => c.manifest.id))('sürüş testleri: %s', (id
     let maxLat = 0;
     for (let t = 0; t < 8; t += PHYSICS_STEP) {
       v.step(PHYSICS_STEP, input({ throttle: t < 4 ? 0.6 : 0.3, steer: 0.5 }));
-      if (t > 3) maxLat = Math.max(maxLat, (v.snapshot().speed * Math.abs(v.chassis.angvel().y)) / G);
+      if (t > 3)
+        maxLat = Math.max(maxLat, (v.snapshot().speed * Math.abs(v.chassis.angvel().y)) / G);
     }
     expect(v.snapshot().upY).toBeGreaterThan(0.9);
     expect(maxLat).toBeGreaterThan(0.7);

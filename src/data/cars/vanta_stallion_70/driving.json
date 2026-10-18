@@ -1,0 +1,8 @@
+{
+  "lateralMu": 1.05,
+  "rearSlipScale": 1.3,
+  "tireRelaxLength": 0.5,
+  "rollInfluence": 0.15,
+  "frontBrakeBias": 0.65,
+  "handbrakeRearGrip": 0.45
+}

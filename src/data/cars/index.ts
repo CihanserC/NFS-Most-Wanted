@@ -1,3 +1,4 @@
+import { loadDriving, type DrivingTuning } from '../../core/drive/driving';
 import { loadManifest } from '../../core/manifest/load';
 import { loadPartsCatalog, type PartsCatalog } from '../../core/manifest/parts';
 import type { CarManifest } from '../../core/manifest/types';
@@ -8,9 +9,11 @@ import {
   type BodySampler,
 } from '../../car/procedural/profile';
 import stallionManifest from './vanta_stallion_70/manifest.json';
+import stallionDriving from './vanta_stallion_70/driving.json';
 import stallionPlaceholder from './vanta_stallion_70/placeholder.json';
 import stallionParts from '../parts/vanta_stallion_70.json';
 import mustangManifest from './ford_mustang_gt_2013/manifest.json';
+import mustangDriving from './ford_mustang_gt_2013/driving.json';
 import mustangMap from './ford_mustang_gt_2013/modelMap.json';
 import mustangPlaceholder from './ford_mustang_gt_2013/placeholder.json';
 import mustangParts from '../parts/ford_mustang_gt_2013.json';
@@ -21,6 +24,8 @@ export type CarDefinition = {
   parts: PartsCatalog;
   /** Prosedürel placeholder gövde örnekleyicisi (model null iken kullanılır). */
   body: BodySampler;
+  /** Araca özel sürüş ayarları */
+  driving: DrivingTuning;
   /** Vinil kutu projeksiyonu (manifest boyutlarından) */
   vinylBox: ProjectionBox;
   /** Gerçek modelin adlarını kurallara uyduran eşleme (kurallara uymayan hazır modeller için) */
@@ -31,6 +36,7 @@ function defineCar(
   manifestJson: unknown,
   placeholderJson: unknown,
   partsJson: unknown,
+  drivingJson: unknown,
   modelMap?: ModelMap,
 ): CarDefinition {
   const manifest = loadManifest(manifestJson, 'manifest.json');
@@ -38,6 +44,7 @@ function defineCar(
   return {
     manifest,
     parts: loadPartsCatalog(partsJson, manifest),
+    driving: loadDriving(drivingJson, `${manifest.id}/driving.json`),
     body: createBodySampler(manifest, profile),
     vinylBox: createProjectionBox(manifest.dimensions),
     ...(modelMap ? { modelMap } : {}),
@@ -46,8 +53,14 @@ function defineCar(
 
 const definitions: Record<string, CarDefinition> = {};
 for (const car of [
-  defineCar(stallionManifest, stallionPlaceholder, stallionParts),
-  defineCar(mustangManifest, mustangPlaceholder, mustangParts, mustangMap as unknown as ModelMap),
+  defineCar(stallionManifest, stallionPlaceholder, stallionParts, stallionDriving),
+  defineCar(
+    mustangManifest,
+    mustangPlaceholder,
+    mustangParts,
+    mustangDriving,
+    mustangMap as unknown as ModelMap,
+  ),
 ])
   definitions[car.manifest.id] = car;
 

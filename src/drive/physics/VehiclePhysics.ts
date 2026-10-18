@@ -27,17 +27,7 @@ const CHASSIS_HALF = [0.88, 0.32, 2.25] as const;
 const CHASSIS_CENTER_Y = 0.12;
 /** Boyuna tutuş (Rapier frictionSlip): çekiş/fren sınırı */
 const FRICTION_BASE = 1.25;
-/** Yanal tepe tutuş (lastik modeli): sokak lastiği ≈ 1.05 g */
-const LATERAL_MU = 1.05;
-/** Lastik gevşeme uzunluğu (m): yanal kuvvet kayma açısını bu yolda yakalar */
-const TIRE_RELAX_LENGTH = 0.5;
-/** Yanal kuvvetin yatış momentine katkısı: 0 = ağırlık merkezinden, 1 = zeminden */
-const ROLL_INFLUENCE = 0.15;
-/** Arka lastik kayma açısı çarpanı: arkayı biraz daha tepkisel yapar (kontrollü kuyruk) */
-const REAR_SLIP_SCALE = 1.3;
 const ROLLING_RESISTANCE = 0.015;
-const FRONT_BRAKE_BIAS = 0.65;
-const HANDBRAKE_REAR_GRIP = 0.45;
 /** Direksiyon girişinin tam kilitten kilide çıkma hızı (1/sn) ve bırakınca merkeze dönme hızı */
 const STEER_RATE = 3.2;
 const STEER_RETURN_RATE = 5.5;
@@ -289,7 +279,7 @@ export class VehiclePhysics {
       wheels.push({ surface, contact });
       if (i === 2) surfaceMain = surface;
       const surfaceGrip = this.track.config.gripBySurface[surface];
-      const rearBoost = axle === 'rear' && input.handbrake ? HANDBRAKE_REAR_GRIP : 1;
+      const rearBoost = axle === 'rear' && input.handbrake ? spec.driving.handbrakeRearGrip : 1;
       controller.setWheelFrictionSlip(
         i,
         FRICTION_BASE * spec.lateralGrip[axle] * surfaceGrip * rearBoost,
@@ -298,7 +288,7 @@ export class VehiclePhysics {
       // Rapier, motor kuvveti varken freni yok sayar: düşük hızda el freni + gaz = çizgi kilitli burnout.
       const holdRear = input.handbrake && speed < 3;
       controller.setWheelEngineForce(i, axle === 'rear' && !holdRear ? o.engineForce / 2 : 0);
-      const bias = axle === 'front' ? FRONT_BRAKE_BIAS : 1 - FRONT_BRAKE_BIAS;
+      const bias = axle === 'front' ? spec.driving.frontBrakeBias : 1 - spec.driving.frontBrakeBias;
       // Rapier fren değeri adım başına azami itkidir (N·s): kuvveti dt ile çarp.
       controller.setWheelBrake(i, (brakeForce * bias * 2 + (axle === 'rear' ? handbrake : 0)) * dt);
     }
@@ -362,23 +352,32 @@ export class VehiclePhysics {
       const vLat = px * wlx + pz * wlz;
       // Gevşeme: lastik kuvveti kayma açısını RELAX_LENGTH metrelik yolda yakalar (anlık doyma yok)
       const raw = slipAngle(vLat, vLong);
-      const follow = Math.min(1, (Math.max(Math.abs(vLong), 3) * dt) / TIRE_RELAX_LENGTH);
+      const follow = Math.min(
+        1,
+        (Math.max(Math.abs(vLong), 3) * dt) / spec.driving.tireRelaxLength,
+      );
       const prevAlpha = this.slipAngles[i] ?? 0;
       const alpha = prevAlpha + (raw - prevAlpha) * follow;
       this.slipAngles[i] = alpha;
       const surfaceGrip = this.track.config.gripBySurface[info.surface];
-      const rearBoost = axle === 'rear' && input.handbrake ? HANDBRAKE_REAR_GRIP : 1;
-      const mu = LATERAL_MU * spec.lateralGrip[axle] * surfaceGrip * rearBoost;
+      const rearBoost = axle === 'rear' && input.handbrake ? spec.driving.handbrakeRearGrip : 1;
+      const mu = spec.driving.lateralMu * spec.lateralGrip[axle] * surfaceGrip * rearBoost;
       const fxUsed = Math.abs(controller.wheelForwardImpulse(i) ?? 0) / dt;
       const usage = fxUsed / (FRICTION_BASE * spec.longitudinalGrip[axle] * fz + 1);
       // Kararlılık: kuvvet, tekerleğin yanal hızını tek adımda sıfırlayandan büyük olamaz
       const fyMax = (0.3 * (spec.massKg / 4) * Math.abs(vLat)) / dt;
-      const fyRaw = lateralForce(alpha * (axle === 'rear' ? REAR_SLIP_SCALE : 1), fz, mu) * combinedScale(usage);
+      const fyRaw =
+        lateralForce(alpha * (axle === 'rear' ? spec.driving.rearSlipScale : 1), fz, mu) *
+        combinedScale(usage);
       const fy = Math.max(-fyMax, Math.min(fyMax, fyRaw));
       // Yanal kuvvet, ağırlık merkezi yüksekliğine yakın bir noktadan uygulanır (Rapier roll influence gibi);
       // yerden uygulanırsa gövde aşırı yatar ve tekerlekler yerden kalkar.
-      const pointY = com.y + ry * ROLL_INFLUENCE;
-      chassis.addForceAtPoint({ x: wlx * fy, y: 0, z: wlz * fy }, { x: cp.x, y: pointY, z: cp.z }, true);
+      const pointY = com.y + ry * spec.driving.rollInfluence;
+      chassis.addForceAtPoint(
+        { x: wlx * fy, y: 0, z: wlz * fy },
+        { x: cp.x, y: pointY, z: cp.z },
+        true,
+      );
     }
 
     controller.updateVehicle(dt);

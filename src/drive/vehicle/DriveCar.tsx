@@ -120,7 +120,7 @@ export function DriveCar({
     let created: VehiclePhysics | null = null;
     void loadRapier().then((R) => {
       if (cancelled) return;
-      const spec = deriveVehicleSpec(build, car.manifest, car.parts);
+      const spec = deriveVehicleSpec(build, car.manifest, car.parts, car.driving);
       created = VehiclePhysics.create(R, spec, track);
       physics.current = created;
       lap.current = initialLap();
