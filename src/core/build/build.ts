@@ -3,6 +3,7 @@ import { normalizePaintMap } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
 import type { FitmentState } from '../wheels/types';
 import { normalizeFitment } from '../wheels/wheels';
+import { normalizePerformance, type PerformanceConfig } from '../performance/performance';
 import { normalizeGlass, normalizeLighting, normalizeStance } from '../stance/stance';
 import { CURRENT_BUILD_VERSION, type BuildState, type LookFields } from './types';
 
@@ -24,6 +25,7 @@ export function createDefaultBuild(manifest: CarManifest, now = new Date()): Bui
     stance: normalizeStance({}),
     glass: normalizeGlass({}),
     lighting: normalizeLighting({}),
+    performance: normalizePerformance({}),
     updatedAt: now.toISOString(),
   };
 }
@@ -105,4 +107,16 @@ export function withLook(
   now = new Date(),
 ): BuildState {
   return { ...build, ...normalizeLook(patch, build), updatedAt: now.toISOString() };
+}
+
+export function withPerformance(
+  build: BuildState,
+  patch: Partial<PerformanceConfig>,
+  now = new Date(),
+): BuildState {
+  return {
+    ...build,
+    performance: normalizePerformance({ ...build.performance, ...patch }),
+    updatedAt: now.toISOString(),
+  };
 }

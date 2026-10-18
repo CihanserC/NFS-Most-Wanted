@@ -3,6 +3,7 @@ import { DEFAULT_BUILD_NAME, normalizeParts } from './build';
 import { normalizePaintMap } from '../paint/paint';
 import { normalizeFitment } from '../wheels/wheels';
 import { normalizeGlass, normalizeLighting, normalizeStance } from '../stance/stance';
+import { normalizePerformance } from '../performance/performance';
 import { sanitizeLayers } from '../vinyl/layers';
 import { hasVinylShape } from '../../vinyl/shapes/library';
 import { migrateBuild } from './migrate';
@@ -28,6 +29,7 @@ export function deserializeBuild(json: string, manifest: CarManifest): BuildStat
     stance: normalizeStance(migrated.stance),
     glass: normalizeGlass(migrated.glass),
     lighting: normalizeLighting(migrated.lighting),
+    performance: normalizePerformance(migrated.performance),
     updatedAt:
       typeof migrated.updatedAt === 'string' ? migrated.updatedAt : new Date().toISOString(),
   };

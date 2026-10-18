@@ -1,0 +1,244 @@
+.dv-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: 'Bahnschrift', 'Arial Narrow', 'Segoe UI', sans-serif;
+  color: #f2efe8;
+  user-select: none;
+}
+
+.dv-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #ff7a18;
+  background: rgba(5, 6, 8, 0.65);
+}
+
+.dv-lap {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  min-width: 230px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(8, 9, 12, 0.82), rgba(8, 9, 12, 0.55));
+  border-left: 4px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+
+.dv-lap-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a9a6a0;
+}
+
+.dv-lap-row strong {
+  color: #f2efe8;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-lap-row.is-best strong {
+  color: #2fd8ff;
+}
+
+.dv-lap-time {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 4px 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-warn {
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #ff5a3c;
+  text-transform: uppercase;
+}
+
+.dv-minimap {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  padding: 4px;
+  background: rgba(8, 9, 12, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dv-minimap-track {
+  fill: none;
+  stroke: rgba(242, 239, 232, 0.55);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.dv-minimap-car {
+  fill: #ff7a18;
+  stroke: #0b0c0e;
+  stroke-width: 1;
+}
+
+.dv-speedo {
+  position: absolute;
+  right: 28px;
+  bottom: 26px;
+  width: 380px;
+  text-align: right;
+}
+
+.dv-rpm {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 3px;
+  height: 14px;
+  margin-bottom: 8px;
+  transform: skewX(-18deg);
+}
+
+.dv-rpm span {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dv-rpm span.is-lit {
+  background: #ff9a3c;
+  box-shadow: 0 0 8px rgba(255, 122, 24, 0.7);
+}
+
+.dv-rpm span.is-lit.is-red {
+  background: #ff3b2a;
+  box-shadow: 0 0 10px rgba(255, 59, 42, 0.8);
+}
+
+.dv-speed-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dv-gear {
+  align-self: center;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0b0c0e;
+  background: #ff7a18;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.dv-speed {
+  min-width: 150px;
+  font-size: 84px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+}
+
+.dv-unit {
+  font-size: 16px;
+  letter-spacing: 0.2em;
+  color: #a9a6a0;
+}
+
+.dv-banner {
+  position: absolute;
+  top: 24%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 22px;
+  font-size: 18px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  background: rgba(8, 9, 12, 0.7);
+  border-bottom: 2px solid #2fd8ff;
+}
+
+.dv-banner.is-warn {
+  top: 30%;
+  color: #ff5a3c;
+  border-bottom-color: #ff5a3c;
+}
+
+.dv-keys {
+  position: absolute;
+  left: 22px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  max-width: 55vw;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #a9a6a0;
+  text-transform: uppercase;
+}
+
+.dv-fps {
+  color: #2fd8ff;
+}
+
+.dv-pause {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 4, 6, 0.6);
+  pointer-events: auto;
+}
+
+.dv-pause-panel {
+  min-width: 360px;
+  background: rgba(10, 11, 14, 0.94);
+  border-left: 5px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+  padding: 22px 0 18px;
+}
+
+.dv-pause-title {
+  padding: 0 28px 14px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.dv-pause ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dv-pause button {
+  display: block;
+  width: 100%;
+  padding: 12px 28px;
+  text-align: left;
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d8d5ce;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dv-pause button.is-active {
+  color: #0b0c0e;
+  background: #ff7a18;
+}

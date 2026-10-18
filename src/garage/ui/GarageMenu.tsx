@@ -5,7 +5,9 @@ import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
+import { useDriveStore } from '../../core/store/driveStore';
 import { LookEditor } from './look/LookEditor';
+import { PerformanceEditor } from './performance/PerformanceEditor';
 import { StanceEditor } from './stance/StanceEditor';
 import { WheelsEditor } from './wheels/WheelsEditor';
 import { VinylEditor } from '../../vinyl/editor/VinylEditor';
@@ -20,10 +22,26 @@ type Item = { id: string; label: string; disabled?: boolean; meta?: string; inst
  *            -> (vinil kategorisi) vinyl (editör)
  */
 type Level =
-  'categories' | 'slots' | 'options' | 'zones' | 'paint' | 'wheels' | 'vinyl' | 'stance' | 'look';
+  | 'categories'
+  | 'slots'
+  | 'options'
+  | 'zones'
+  | 'paint'
+  | 'wheels'
+  | 'vinyl'
+  | 'stance'
+  | 'look'
+  | 'performance';
 
 /** Kendi kontrolleri olan (liste olmayan) seviyeler. */
-const EDITOR_LEVELS: readonly Level[] = ['paint', 'wheels', 'vinyl', 'stance', 'look'];
+const EDITOR_LEVELS: readonly Level[] = [
+  'paint',
+  'wheels',
+  'vinyl',
+  'stance',
+  'look',
+  'performance',
+];
 
 const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
 
@@ -45,7 +63,7 @@ export function GarageMenu() {
       ? 'wheels'
       : category.kind === 'vinyl'
         ? 'vinyl'
-        : category.kind === 'stance' || category.kind === 'look'
+        : category.kind === 'stance' || category.kind === 'look' || category.kind === 'performance'
           ? category.kind
           : category.kind === 'paint'
             ? paintZone
@@ -88,6 +106,7 @@ export function GarageMenu() {
       case 'vinyl':
       case 'stance':
       case 'look':
+      case 'performance':
         return [];
     }
   }, [level, category, slotId, car, parts, paint]);
@@ -132,12 +151,18 @@ export function GarageMenu() {
       const item = items[index];
       if (!item || item.disabled) return;
       if (level !== 'options') setHl({ key: '', index: 0 });
-      if (level === 'categories') selectCategory(item.id);
-      else if (level === 'slots') selectSlot(item.id);
+      if (level === 'categories') {
+        // Test Sürüşü bir editör değil, mod geçişidir.
+        if (menuCategories.find((c) => c.id === item.id)?.kind === 'drive') {
+          clearPreview();
+          useDriveStore.getState().begin();
+          useAppStore.getState().setMode('drive');
+        } else selectCategory(item.id);
+      } else if (level === 'slots') selectSlot(item.id);
       else if (level === 'zones') selectPaintZone(item.id);
       else if (level === 'options' && slotId) setPart(slotId, item.id);
     },
-    [items, level, slotId, selectCategory, selectSlot, selectPaintZone, setPart],
+    [items, level, slotId, selectCategory, selectSlot, selectPaintZone, setPart, clearPreview],
   );
 
   const back = useCallback(() => {
@@ -234,7 +259,9 @@ export function GarageMenu() {
             </div>
           </div>
         </div>
-        {level === 'stance' ? (
+        {level === 'performance' ? (
+          <PerformanceEditor />
+        ) : level === 'stance' ? (
           <StanceEditor />
         ) : level === 'look' ? (
           <LookEditor />

@@ -1,0 +1,84 @@
+.pf-stat {
+  margin: 8px 0;
+}
+
+.pf-stat-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a9a6a0;
+}
+
+.pf-stat-head strong {
+  color: #f2efe8;
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-stat-head em {
+  font-style: normal;
+}
+
+.pf-stat-head em.is-up {
+  color: #3dff7a;
+}
+
+.pf-stat-head em.is-down {
+  color: #ff5a3c;
+}
+
+.pf-bar {
+  position: relative;
+  height: 8px;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  transform: skewX(-18deg);
+}
+
+.pf-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff7a18, #ffb35a);
+  transition: width 0.15s ease;
+}
+
+.pf-bar i {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 14px;
+  background: #2fd8ff;
+}
+
+.pf-dyno {
+  width: 100%;
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pf-dyno polyline {
+  fill: none;
+  stroke-width: 2;
+}
+
+.pf-dyno polyline.is-hp {
+  stroke: #ff7a18;
+}
+
+.pf-dyno polyline.is-torque {
+  stroke: #2fd8ff;
+}
+
+.pf-dyno text {
+  font-size: 11px;
+}
+
+.pf-dyno text.is-hp {
+  fill: #ff7a18;
+}
+
+.pf-dyno text.is-torque {
+  fill: #2fd8ff;
+}

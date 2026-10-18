@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { axleBodies, trackLimitMm } from '../../car/fitmentBody';
 import { getCar } from '../../data/cars';
 import { createDefaultBuild, withLook } from '../build/build';
+import { CURRENT_BUILD_VERSION } from '../build/types';
+import { normalizePerformance } from '../performance/performance';
 import { deserializeBuild } from '../build/serialize';
 import { createBuildStore } from '../store/buildStore';
 import { checkFitment } from '../wheels/fitment';
@@ -125,7 +127,8 @@ describe('duruş / cam / ışık kaydı', () => {
     delete v4.glass;
     delete v4.lighting;
     const migrated = deserializeBuild(JSON.stringify(v4), car.manifest);
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(CURRENT_BUILD_VERSION);
+    expect(migrated.performance).toEqual(normalizePerformance({}));
     expect(migrated.stance).toEqual(stanceData.defaults.stance);
     expect(migrated.glass).toEqual(stanceData.defaults.glass);
   });

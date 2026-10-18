@@ -1,4 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from 'react';
+import { useFrame } from '@react-three/fiber';
+import type { Group } from 'three';
+import type { WheelPose } from '../../wheelPose';
 import { WHEEL_IDS, type WheelId } from '../../../core/manifest/types';
 import type {
   Axle,
@@ -82,21 +85,62 @@ function Wheel({
 }
 
 /** Manifestteki tekerlek konumlarına prosedürel jant + lastik + fren. */
+/** Sürüşte pose referansından dikey kayma, direksiyon ve dönüşü uygular; garajda sabit. */
+function WheelSlot({
+  index,
+  position,
+  camber,
+  poses,
+  children,
+}: {
+  index: number;
+  position: [number, number, number];
+  camber: number;
+  poses?: RefObject<WheelPose[]>;
+  children: ReactNode;
+}) {
+  const lift = useRef<Group>(null);
+  const steer = useRef<Group>(null);
+  const spin = useRef<Group>(null);
+  useFrame(() => {
+    const pose = poses?.current[index];
+    if (!pose) return;
+    if (lift.current) lift.current.position.y = pose.dy;
+    if (steer.current) steer.current.rotation.y = pose.steer;
+    if (spin.current) spin.current.rotation.x = pose.spin;
+  });
+  return (
+    <group position={position}>
+      <group ref={lift}>
+        <group rotation-z={camber}>
+          <group ref={steer}>
+            <group ref={spin}>{children}</group>
+          </group>
+        </group>
+      </group>
+    </group>
+  );
+}
+
+/** Manifestteki tekerlek konumlarına prosedürel jant + lastik + fren. */
 export function ProceduralWheels({
   car,
   fitment,
   stance,
   trackLimitMm,
+  poses,
 }: {
   car: CarDefinition;
   fitment: FitmentState;
   stance: StanceConfig;
   trackLimitMm: number;
+  /** Sürüşte: tekerlek başına süspansiyon/direksiyon/dönüş (WHEEL_IDS sırasıyla) */
+  poses?: RefObject<WheelPose[]>;
 }) {
   const discMm = effectiveDiscMm(fitment);
   return (
     <group>
-      {WHEEL_IDS.map((id) => {
+      {WHEEL_IDS.map((id, index) => {
         const axle = axleOf(id);
         const [x, y, z] = car.manifest.wheels[id].position;
         const sign = x >= 0 ? 1 : -1;
@@ -104,15 +148,21 @@ export function ProceduralWheels({
         const spacer = effectiveTrackMm(stance, axle, trackLimitMm) / 1000;
         const camber = (stance.camberDeg[axle] * Math.PI) / 180;
         return (
-          <group key={id} position={[x + sign * spacer, y, z]} rotation-z={-sign * camber}>
+          <WheelSlot
+            key={id}
+            index={index}
+            position={[x + sign * spacer, y, z]}
+            camber={-sign * camber}
+            poses={poses}
+          >
             <Wheel
               wheel={fitment.wheels[axle]}
               tire={fitment.tires[axle]}
               brakes={fitment.brakes}
               discMm={discMm}
-              outboardSign={x >= 0 ? 1 : -1}
+              outboardSign={sign}
             />
-          </group>
+          </WheelSlot>
         );
       })}
     </group>

@@ -9,10 +9,12 @@ import {
   withPart,
   withVinyl,
   withLook,
+  withPerformance,
   normalizeLook,
 } from '../build/build';
 import { emptyHistory, record, redo, undo, type History } from '../build/history';
 import type { BuildState, LookFields } from '../build/types';
+import type { PerformanceConfig } from '../performance/performance';
 import type { CarManifest } from '../manifest/types';
 import { sanitizePaint } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
@@ -58,6 +60,7 @@ export type BuildStoreState = {
   previewLook: (patch: Partial<LookFields>) => void;
   commitLookPreview: () => void;
   clearLookPreview: () => void;
+  setPerformance: (patch: Partial<PerformanceConfig>) => void;
   undo: () => void;
   redo: () => void;
   loadBuild: (build: BuildState) => void;
@@ -213,6 +216,16 @@ export const createBuildStore = (manifest: CarManifest) => {
       },
 
       clearLookPreview: () => set({ lookPreview: null }),
+
+      setPerformance: (patch) => {
+        const { build, history } = get();
+        const next = withPerformance(build, patch);
+        if (JSON.stringify(next.performance) === JSON.stringify(build.performance)) return;
+        set((s) => {
+          s.history = record(history, build);
+          s.build = next;
+        });
+      },
 
       undo: () => {
         const r = undo(get().history, get().build);

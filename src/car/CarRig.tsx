@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import type { Group } from 'three';
 import { bodyLift } from '../core/wheels/fitment';
 import { stanceBodyOffset } from '../core/stance/stance';
@@ -13,6 +13,7 @@ import { useVinylPicking } from '../vinyl/editor/useVinylPicking';
 import { VinylGizmo } from '../vinyl/editor/VinylGizmo';
 import { VinylRuntime } from '../vinyl/render/VinylRuntime';
 import { trackLimitMm } from './fitmentBody';
+import type { WheelPose } from './wheelPose';
 import { Underglow } from './lighting/Underglow';
 import { LookSync } from './materials/LookSync';
 import { CarMaterialsProvider } from './materials/CarMaterialsContext';
@@ -23,7 +24,7 @@ import { slotRenderers } from './slots/registry';
 import { isRenderedSlot } from './slots/slotIds';
 
 /** Manifest + BuildState -> 3D araç. */
-export function CarRig() {
+export function CarRig({ drive }: { drive?: { poses: RefObject<WheelPose[]> } }) {
   const carId = useBuildStore((s) => s.build.carId);
   const car = getCar(carId);
   const parts = useEffectiveParts();
@@ -64,6 +65,7 @@ export function CarRig() {
           fitment={fitment}
           stance={stance}
           trackLimitMm={trackLimitMm(car, parts)}
+          poses={drive?.poses}
         />
         <Underglow car={car} underglow={lighting.underglow} bodyLiftM={body.lift} />
         <group
@@ -71,8 +73,8 @@ export function CarRig() {
           name={car.manifest.id}
           position-y={body.lift}
           rotation-x={body.pitch}
-          onClick={vinylPicking.onClick}
-          onPointerMissed={vinylPicking.onPointerMissed}
+          onClick={drive ? undefined : vinylPicking.onClick}
+          onPointerMissed={drive ? undefined : vinylPicking.onPointerMissed}
         >
           <PlaceholderBody car={car} parts={parts} />
           {slotIds.filter(isRenderedSlot).map((slotId) => {
@@ -81,7 +83,7 @@ export function CarRig() {
             if (option === undefined) return null;
             return <Renderer key={slotId} option={option} parts={parts} car={car} />;
           })}
-          <VinylGizmo root={root} box={box} />
+          {!drive && <VinylGizmo root={root} box={box} />}
         </group>
       </group>
     </CarMaterialsProvider>

@@ -1,3 +1,4 @@
+import type { PerformanceConfig } from '../performance/performance';
 import type { PaintConfig } from '../paint/types';
 import type { GlassConfig, LightingConfig, StanceConfig } from '../stance/stance';
 import type { VinylLayer } from '../vinyl/types';
@@ -6,10 +7,10 @@ import type { AxlePair, BrakeConfig, TireConfig, WheelConfig } from '../wheels/t
 /**
  * Aracın tüm modifiye durumunu tutan serileştirilebilir obje.
  * Yeni alanlar ilgili fazlarda yeni sürüm + migration ile eklenir (bkz. migrate.ts).
- * v1: parts · v2: paint · v3: wheels, tires, brakes · v4: vinyl · v5: stance, glass, lighting
+ * v1: parts · v2: paint · v3: wheels, tires, brakes · v4: vinyl · v5: stance, glass, lighting · v6: performance
  */
 export type BuildState = {
-  version: 5;
+  version: 6;
   carId: string;
   name: string;
   /** slot id -> seçenek id */
@@ -24,10 +25,11 @@ export type BuildState = {
   stance: StanceConfig;
   glass: GlassConfig;
   lighting: LightingConfig;
+  performance: PerformanceConfig;
   updatedAt: string;
 };
 
-export const CURRENT_BUILD_VERSION = 5;
+export const CURRENT_BUILD_VERSION = 6;
 
 /** Duruş/cam/ışık alanları (tek seferde önizlenip yazılabilen basit alanlar) */
 export type LookFields = Pick<BuildState, 'stance' | 'glass' | 'lighting'>;

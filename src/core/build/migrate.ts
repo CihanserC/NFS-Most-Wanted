@@ -20,6 +20,8 @@ const migrations: Record<number, (raw: RawBuild) => RawBuild> = {
   3: (raw) => ({ ...raw, vinyl: [], version: 4 }),
   // 4 -> 5: duruş, cam filmi, ışıklar. deserialize varsayılanlarla doldurur.
   4: (raw) => ({ ...raw, stance: {}, glass: {}, lighting: {}, version: 5 }),
+  // 5 -> 6: performans parçaları. deserialize varsayılanlarla doldurur.
+  5: (raw) => ({ ...raw, performance: {}, version: 6 }),
 };
 
 export class BuildMigrationError extends Error {

@@ -12,8 +12,10 @@ export function FpsProbe() {
   useEffect(() => {
     // Geliştirme: renderer/sahneyi konsoldan incelemek için.
     if (import.meta.env.DEV)
-      Object.assign(window, { __muscleGarageThree: { gl: three.gl, scene: three.scene } });
-  }, [three.gl, three.scene]);
+      Object.assign(window, {
+        __muscleGarageThree: { gl: three.gl, scene: three.scene, camera: three.camera },
+      });
+  }, [three.gl, three.scene, three.camera]);
   useFrame(({ gl }, delta) => {
     const a = acc.current;
     a.time += delta;

@@ -3,19 +3,12 @@ import { Quaternion, Vector3 } from 'three';
 import type { Vec3 } from '../../core/math/tuples';
 import { useCarMaterials } from '../materials/useCarMaterials';
 import { Bar, type SlotProps } from './common';
+import { EXHAUST_LAYOUT, exhaustPipes } from './exhaustTails';
 import { deckPose } from './pose';
 
 /** Egzoz, motor ve iç mekan placeholder ölçüleri (m). */
 const LAYOUT = {
-  exhaust: {
-    y: 0.22,
-    pipeRadius: 0.03,
-    startZ: -1.7,
-    tailOffset: 0.02,
-    dualX: [0.55],
-    quadX: [0.45, 0.62],
-    side: { y: 0.28, out: 0.05, zFront: 0.95, zRear: -0.85 },
-  },
+  exhaust: { ...EXHAUST_LAYOUT, pipeRadius: 0.03 },
   tip: { length: 0.12, radius: 0.042, ovalScale: [1.4, 0.8] as const, turnDownAngle: Math.PI / 4 },
   engine: {
     bay: { width: 1.3, height: 0.5, depth: 1.0 },
@@ -49,29 +42,6 @@ const LAYOUT = {
 
 const UP = new Vector3(0, 1, 0);
 const FACE_FORWARD = Math.PI / 2;
-
-type Pipe = { from: Vec3; to: Vec3; visible: boolean };
-
-function exhaustPipes(option: string, sideX: number, halfLength: number): Pipe[] {
-  const e = LAYOUT.exhaust;
-  const tailZ = -halfLength - e.tailOffset;
-  if (option === 'side_pipes') {
-    const x = sideX + e.side.out;
-    return [1, -1].map((s) => ({
-      from: [s * x, e.side.y, e.side.zFront],
-      to: [s * x, e.side.y, e.side.zRear],
-      visible: true,
-    }));
-  }
-  const xs = option === 'quad' ? e.quadX : e.dualX;
-  return xs.flatMap((x) =>
-    [1, -1].map((s) => ({
-      from: [s * x, e.y, e.startZ] as Vec3,
-      to: [s * x, e.y, tailZ] as Vec3,
-      visible: false,
-    })),
-  );
-}
 
 function Tip({ at, direction, style }: { at: Vec3; direction: Vec3; style: string }) {
   const m = useCarMaterials();

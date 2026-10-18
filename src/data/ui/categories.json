@@ -54,7 +54,7 @@
   {
     "id": "performance",
     "slots": [],
-    "kind": "parts"
+    "kind": "performance"
   },
   {
     "id": "photo_mode",
@@ -64,7 +64,7 @@
   {
     "id": "test_drive",
     "slots": [],
-    "kind": "parts"
+    "kind": "drive"
   },
   {
     "id": "garage",

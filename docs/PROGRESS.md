@@ -1,6 +1,42 @@
 # İlerleme
 
-## Aktif faz: Faz 8 — Test Sürüşü (BAŞLANMADI)
+## Aktif faz: Faz 9 — Kaydet/Yükle ve Fotoğraf Modu (BAŞLANMADI)
+
+## Faz 8 — Test Sürüşü ✅ (2026-10-18)
+
+**Yapılanlar**
+
+- **Pist** (`data/track/circuit.json`, `core/drive/track.ts`): kapalı Catmull-Rom spline, ≈1,9 km, 14 m asfalt + kerbler. 420 m'lik uzun düzlük, S/şikan, hızlı viraj ve 18 m yarıçaplı sıkı viraj. Yüzey sınıflandırma (asfalt / kerb / çim) ve yüzey başına tutuş/direnç.
+- **Çevre:** çim, bariyerler (fizik çarpışmasıyla aynı segmentler, `core/drive/barriers.ts`), ağaç/kaya/lamba direği (tohumlu, tekrarlanabilir), iki tribün. Gün batımı ve gece (N tuşu / duraklat menüsü): gökyüzü, güneş/ay, sis, ortam yansıması, gecede far huzmeleri ve lamba başları.
+- **Fizik** (`drive/physics/VehiclePhysics.ts`, Rapier raycast araç kontrolcüsü, 120 Hz sabit adım): atölyeden `deriveVehicleSpec` ile aktarılan değerler: sürüş yüksekliği → süspansiyon boyu ve ağırlık merkezi; jant+lastik çapı → tekerlek yarıçapı; lastik tipi/genişliği/kamber → tutuş; spacer → iz genişliği; spoyler/kit → downforce; parça ağırlıkları → kütle.
+- **Güç aktarma** (`core/drive/drivetrain.ts`): tork eğrisi, vites oranları, otomatik vites, geri vites, motor freni, debriyaj kayması.
+- **Performans** (BuildState v6, `core/performance/`): motor (stok/sokak/yarış), şanzıman (4/5/6 vites), fren, süspansiyon sertliği; süperşarjör Motor Görünümü'ndeki blower V8'den gelir. Performans editörü: istatistik çubukları (hover'da önizleme + fark), dyno grafiği.
+- **Burnout / drift:** düşük hızda el freni + gaz = çizgi kilitli burnout; hızlıyken el freni arka tutuşu düşürüp kaydırır.
+- **Kameralar** (C): arkadan, alçak takip, kaput, tampon; hıza duyarlı FOV.
+- **HUD:** hız (km/s), rpm şeridi, vites, tur / son / en iyi süre, minimap, pist dışı uyarısı. Esc → duraklat menüsü (devam, başa dön, gün/gece, ses, atölyeye dön).
+- **Efektler:** lastik izi (halka tampon), lastik dumanı ve çim tozu, gaz kesilince egzoz alevi (egzoz tipine göre uç konumları).
+- **Ses (Web Audio, sentezlenmiş):** V8 ateşleme frekansı rpm'e bağlı, egzoz tipine göre ton, süperşarjör uğultusu, lastik çığlığı, rüzgâr.
+- **Tur zamanı** (`core/drive/lap.ts`): sıralı kontrol noktaları, geri geçiş/kısayol = geçersiz tur, en iyi tur.
+- **Atölye ↔ pist:** build (parça, boya, vinil, jant, duruş, performans) pistte görsel olarak aynı araç; Esc → "Atölyeye dön" build'i korur. Sürüş kodu (Rapier WASM dahil, 4,4 MB) tembel yüklenir; atölye paketi 1,8 MB kaldı.
+- **Testler (232):** pist geometrisi/yarıçap/yüzey, tur zamanı, bariyer ve çevre yerleşimi, güç aktarma, `deriveVehicleSpec`, performans istatistikleri, **Rapier ile başsız fizik** (yerleşme, 0-100, fren, direksiyon yönü, burnout, geri vites, duruşa göre yükseklik, çim yüzeyi) ve **otopilotla tam tur** (stok ≈ 94 sn, tam ayarlı daha hızlı).
+
+**Notlar / kararlar**
+
+- Rapier fren değeri kuvvet değil adım başına azami itkidir (N·s) ve motor kuvveti varken yok sayılır: fren `dt` ile ölçeklenir; el freni + gazda arka motor kuvveti kesilir.
+- Çizgi kilitli burnout'ta tekerlek patinajı kozmetiktir (duman, iz, ses, rpm); gaz+hareket halinde de çekiş sınırı aşılınca patinaj işaretlenir.
+- Süperşarjör ayrı bir alan değil, `parts.engine === 'blower_v8'` (görsel ile performans tek yerden).
+- Gamepad desteği yok (klavye): UI cilası/Faz 11.
+- Dev kancaları (sadece `npm run dev`): `window.__muscleGarageDrive` (`input.override`, `physics`), `window.__freeCamera = true` (kamera elle), `__muscleGarageThree.camera`.
+
+**Doğrulama:** tip kontrolü, lint, 232 test, build yeşil. Tarayıcıda: pist ve HUD, burnout dumanı + tur zamanlayıcı, duraklat menüsü, gece modu, atölyeye dönüş, Performans editörü gözle doğrulandı. Egzoz alevi ve ses (kulakla) gözle/kulakla doğrulanmadı.
+
+**Eksik / bilinen sorunlar**
+
+- Test makinesinde (Intel UHD, yazılım çizimine yakın) sürüş 5–35 FPS; hedef donanımda (≥60 FPS) ölçülmedi. Fizik sabit adımlı olduğundan düşük FPS'te simülasyon yavaşlar (adım sınırı 10/kare), doğruluk bozulmaz.
+- Rapier araç modelinde yan yatma (roll) kontrolü yok; çok sert virajda devrilirse 2 sn sonra otomatik düzeltilir (R: elle).
+- Otopilot dışında insan sürüşü gerçek klavye ile denenmedi (girdi `override` ile test edildi).
+- Hacimsel olmayan gece aydınlatması: lambalar ışık havuzu atmıyor (sadece emissive + bloom).
+- Underglow (Faz 7) pistte henüz yansıtılan ışık atmıyor; neon tüpleri görünüyor.
 
 ## Faz 7 — Diğer Görsel Modifiyeler ✅ (2026-10-18)
 
