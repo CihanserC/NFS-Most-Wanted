@@ -1,6 +1,34 @@
 # İlerleme
 
-## Aktif faz: Faz 9 — Kaydet/Yükle ve Fotoğraf Modu (BAŞLANMADI)
+## Aktif faz: Faz 10 — Gerçek Model Entegrasyonu (BAŞLANMADI)
+
+## Faz 9 — Kaydet/Yükle ve Fotoğraf Modu ✅ (2026-10-18)
+
+**Yapılanlar**
+
+- **Kalıcı depo** (`core/storage/`): IndexedDB (`garageStorage.ts`, slotlar + meta) ve bellek yedeği (IndexedDB yoksa/gizli pencerede). Slot = build JSON'u + 16:9 JPEG önizleme + ad/tarih. En fazla 24 slot.
+- **Garaj servisi** (`garageService.ts`): kaydet (yeni/üzerine yaz, eski önizleme korunur), listele (en yeni önce), yükle (migration + manifeste göre normalizasyon), sil, anlaşılır hata kodları (`slot_limit`, `not_found`, `corrupt`, `invalid_json`, `wrong_car`, `storage`).
+- **Otomatik kayıt / geri yükleme** (`persistence.ts`): her değişiklikten 0,8 sn sonra son oturum yazılır; sayfa açılınca geri yüklenir; sekme gizlenirken/kapanırken bekleyen kayıt hemen yazılır.
+- **Boya presetleri** localStorage'dan IndexedDB'ye taşındı (eski veri açılışta otomatik aktarılıp silinir).
+- **JSON dışa/içe aktarma:** `muscle-garage-build` zarfı (dosya, panoya kopyala); içe aktarma zarflı ya da çıplak BuildState, eski sürümler migration ile kabul eder, başka araca ait/bozuk dosya anlaşılır mesajla reddedilir.
+- **Garaj editörü:** proje adı, Kaydet / Yeni olarak kaydet / Yeni proje, önizlemeli slot listesi (Yükle, iki tıklamalı Sil), paylaşım bölümü (dosya, pano, yapıştır).
+- **Fotoğraf modu (§8.3):** serbest kamera (kaydırma + 16 m'ye kadar uzaklık), ayarlanabilir FOV (18–90°), alan derinliği (bulanıklık + odak aralığı, odak yörünge hedefini izler), pozlama (±2 EV, ton eşlemeden önce HDR çarpanı), çözünürlük 1×–4× (tarayıcı sınırına otomatik kısaltılır, çıktı boyutu gösterilir), döner tabla aç/kapa. H arayüzü gizler/gösterir, P fotoğraf çeker. Çekim post-processing sonrası kareyi alır; yüksek çözünürlükte piksel oranı geçici yükseltilip eski haline döner. PNG olarak indirilir.
+- **Testler (272):** IndexedDB (fake-indexeddb) ve bellek yedeği için kaydet/yükle/sil/limit/otomatik kayıt, sayfa yenileme senaryosu, boya preseti taşıma, JSON dışa/içe aktarma ve hata kodları, fotoğraf boyut sınırları, dosya adı, ayar sınırları, çeviri kapsamı.
+
+**Doğrulama:** tip kontrolü, lint, 272 test, build yeşil. Tarayıcıda (gerçek IndexedDB): değişiklik + sayfa yenileme sonrası build geri geldi, Garaj'a kaydedilen proje önizlemesiyle listelendi, fotoğraf editörü ve DoF çalıştı, 3× yakalama 3840×1894 dolu kare verdi (indirme tetiklenmedi), H ile arayüz gizlendi/gösterildi.
+
+**Notlar / kararlar**
+
+- Proje adı geri alınabilir bir modifiye sayılmaz (undo geçmişine yazılmaz).
+- Otomatik kayıt ayrı bir gizli slottur (`__autosave__`); listede görünmez ve 24 slot sınırına dahil değildir.
+- Dev kancaları: `__muscleGarage.useGarageStore`, `__muscleGaragePhoto.captureCanvas({ pixelRatio })`.
+
+**Eksik / bilinen sorunlar**
+
+- PNG indirme ve dosyadan içe aktarma (tarayıcı dosya penceresi) otomasyonla denenmedi; mantık birim testlerinde.
+- Önizleme küçük resmi mevcut kamera açısından alınır (atölye menüsü açıkken araç sol panelin arkasında kalabilir).
+- DoF yüksek çözünürlükte (4×) belleği zorlayabilir; 8192 px / 33 MP sınırı aşılmaz.
+- Garaj slotları sürümlenmiş build JSON'u saklar; migration testleri var ama çok eski gerçek kayıt örneği yok.
 
 ## Faz 8 — Test Sürüşü ✅ (2026-10-18)
 

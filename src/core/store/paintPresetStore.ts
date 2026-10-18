@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import { sanitizePaint } from '../paint/paint';
 import type { PaintConfig } from '../paint/types';
 
@@ -9,10 +8,13 @@ export type PaintPresetState = {
   presets: UserPaintPreset[];
   add: (name: string, paint: PaintConfig) => void;
   remove: (id: string) => void;
+  /** Kalıcı depodan yüklenen listeyi koyar (başlangıçta) */
+  replace: (presets: UserPaintPreset[]) => void;
 };
 
 export const USER_PRESET_LIMIT = 50;
-const STORAGE_KEY = 'muscle-garage.paint-presets';
+/** Eski sürümlerin localStorage anahtarı (Faz 9'da IndexedDB'ye taşındı). */
+export const LEGACY_STORAGE_KEY = 'muscle-garage.paint-presets';
 
 /** Kayıtlı veriyi her durumda geçerli preset listesine çevirir. */
 export function sanitizeUserPresets(input: unknown): UserPaintPreset[] {
@@ -30,34 +32,22 @@ export function sanitizeUserPresets(input: unknown): UserPaintPreset[] {
 }
 
 /**
- * Kullanıcının kaydettiği boya presetleri. Faz 9'da IndexedDB garajına taşınana kadar
- * tarayıcı localStorage'ında tutulur (erişilemezse sadece bu oturumda yaşar).
+ * Kullanıcının kaydettiği boya presetleri. Liste IndexedDB'de tutulur (persistence.ts
+ * başlangıçta yükler ve her değişikliği yazar); store kendisi depolamayı bilmez.
  */
-export const usePaintPresetStore = create<PaintPresetState>()(
-  persist(
-    (set) => ({
-      presets: [],
-      add: (name, paint) =>
-        set((s) => ({
-          presets: [
-            {
-              id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-              name,
-              paint,
-            },
-            ...s.presets,
-          ].slice(0, USER_PRESET_LIMIT),
-        })),
-      remove: (id) => set((s) => ({ presets: s.presets.filter((p) => p.id !== id) })),
-    }),
-    {
-      name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ presets: s.presets }),
-      merge: (persisted, current) => ({
-        ...current,
-        presets: sanitizeUserPresets((persisted as { presets?: unknown } | undefined)?.presets),
-      }),
-    },
-  ),
-);
+export const usePaintPresetStore = create<PaintPresetState>()((set) => ({
+  presets: [],
+  add: (name, paint) =>
+    set((s) => ({
+      presets: [
+        {
+          id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+          name,
+          paint,
+        },
+        ...s.presets,
+      ].slice(0, USER_PRESET_LIMIT),
+    })),
+  remove: (id) => set((s) => ({ presets: s.presets.filter((p) => p.id !== id) })),
+  replace: (presets) => set({ presets: sanitizeUserPresets(presets) }),
+}));

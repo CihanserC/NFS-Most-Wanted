@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GarageScene } from '../garage/scene/GarageScene';
 import { GarageMenu } from '../garage/ui/GarageMenu';
@@ -8,6 +8,11 @@ import { DEFAULT_CAR_ID, getCar } from '../data/cars';
 import { sceneConfig } from '../garage/scene/sceneConfig';
 import { useAppStore } from '../core/store/appStore';
 import { useQualityPreset } from '../core/store/graphicsStore';
+import { usePhotoStore } from '../core/store/photoStore';
+import { takePhoto } from '../garage/photo/actions';
+import { categoryKind } from '../garage/ui/categories';
+import { t } from '../i18n';
+import '../garage/ui/garage/garageEditor.css';
 
 // Rapier (WASM) ve pist kodu yalnızca test sürüşüne girilince yüklenir.
 const DriveScene = lazy(() =>
@@ -17,9 +22,40 @@ const DriveScene = lazy(() =>
 const { manifest } = getCar(DEFAULT_CAR_ID);
 const initialCamera = manifest.cameraPresets[manifest.defaultCamera];
 
+/** Fotoğraf modu kısayolları: H arayüzü gizler/gösterir, P fotoğraf çeker. */
+function PhotoShortcuts() {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      )
+        return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const photo = usePhotoStore.getState();
+      if (e.code === 'KeyH') photo.setHideUi(!photo.hideUi);
+      else if (e.code === 'KeyP') void takePhoto();
+      else if (e.code === 'Escape' && photo.hideUi) photo.setHideUi(false);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      // Fotoğraf kategorisinden çıkılınca arayüz yeniden görünür
+      usePhotoStore.getState().setHideUi(false);
+    };
+  }, []);
+  return null;
+}
+
 export function App() {
   const q = useQualityPreset();
   const mode = useAppStore((s) => s.mode);
+  const photoMode = useAppStore((s) => categoryKind(s.categoryId) === 'photo');
+  const hideUi = usePhotoStore((s) => s.hideUi);
   const { fov, near, far } = sceneConfig.camera;
   return (
     <>
@@ -35,11 +71,17 @@ export function App() {
       >
         <Suspense fallback={null}>{mode === 'garage' ? <GarageScene /> : <DriveScene />}</Suspense>
       </Canvas>
+      {mode === 'garage' && photoMode && <PhotoShortcuts />}
+      {mode === 'garage' && photoMode && hideUi && (
+        <div className="ge-hint">{t('photo.showUi')}</div>
+      )}
       {mode === 'garage' ? (
-        <>
-          <GarageMenu />
-          <TopBar />
-        </>
+        !(photoMode && hideUi) && (
+          <>
+            <GarageMenu />
+            <TopBar />
+          </>
+        )
       ) : (
         <DriveOverlay />
       )}

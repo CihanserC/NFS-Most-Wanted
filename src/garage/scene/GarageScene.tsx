@@ -2,6 +2,7 @@ import { CarRig } from '../../car/CarRig';
 import { GarageCamera } from '../camera/GarageCamera';
 import { FpsProbe } from '../fx/FpsProbe';
 import { PostFX } from '../fx/PostFX';
+import { PhotoBridge } from '../photo/PhotoBridge';
 import { GarageEnvironment } from './GarageEnvironment';
 import { GarageFloor } from './GarageFloor';
 import { GarageLights } from './GarageLights';
@@ -26,6 +27,7 @@ export function GarageScene() {
       </Turntable>
       <GarageCamera />
       <PostFX />
+      <PhotoBridge />
       <FpsProbe />
     </>
   );

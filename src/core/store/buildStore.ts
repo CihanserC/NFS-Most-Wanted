@@ -17,6 +17,7 @@ import type { BuildState, LookFields } from '../build/types';
 import type { PerformanceConfig } from '../performance/performance';
 import type { CarManifest } from '../manifest/types';
 import { sanitizePaint } from '../paint/paint';
+import { cleanName } from '../storage/garageService';
 import type { PaintConfig } from '../paint/types';
 import type { VinylLayer } from '../vinyl/types';
 import type { FitmentState } from '../wheels/types';
@@ -61,6 +62,8 @@ export type BuildStoreState = {
   commitLookPreview: () => void;
   clearLookPreview: () => void;
   setPerformance: (patch: Partial<PerformanceConfig>) => void;
+  /** Proje adı: geçmişe yazılmaz (geri alınabilir bir modifiye değil) */
+  setName: (name: string) => void;
   undo: () => void;
   redo: () => void;
   loadBuild: (build: BuildState) => void;
@@ -216,6 +219,11 @@ export const createBuildStore = (manifest: CarManifest) => {
       },
 
       clearLookPreview: () => set({ lookPreview: null }),
+
+      setName: (name) =>
+        set((s) => {
+          s.build = { ...s.build, name: cleanName(name), updatedAt: new Date().toISOString() };
+        }),
 
       setPerformance: (patch) => {
         const { build, history } = get();

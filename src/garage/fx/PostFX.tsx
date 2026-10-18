@@ -16,7 +16,11 @@ import {
   useQualityPreset,
   type ToneMappingChoice,
 } from '../../core/store/graphicsStore';
+import { useAppStore } from '../../core/store/appStore';
+import { usePhotoStore } from '../../core/store/photoStore';
+import { categoryKind } from '../ui/categories';
 import { sceneConfig } from '../scene/sceneConfig';
+import { Exposure, PhotoDepthOfField } from './PhotoEffects';
 import { createGradeLUT } from './colorGrade';
 
 const TONE_MAPPING_MODES: Record<ToneMappingChoice, ToneMappingMode> = {
@@ -37,7 +41,7 @@ function useGradeLUT(): LookupTexture {
 }
 
 /**
- * Sıra: AO -> Bloom (HDR) -> Tone mapping -> renk düzenleme (LUT, sRGB) -> vinyet -> kenar
+ * Sıra: AO -> (fotoğraf: alan derinliği) -> Bloom (HDR) -> pozlama -> Tone mapping -> renk düzenleme (LUT, sRGB) -> vinyet -> kenar
  * yumuşatma (SMAA/FXAA). Efektler kalite ayarına göre açılıp kapanır.
  */
 export function PostFX() {
@@ -45,6 +49,11 @@ export function PostFX() {
   const toneMapping = useGraphicsStore((s) => s.toneMapping);
   const lut = useGradeLUT();
   const p = sceneConfig.post;
+  // Fotoğraf modu ayarları yalnızca o kategoride ve atölyede uygulanır.
+  const photoActive = useAppStore(
+    (s) => s.mode === 'garage' && categoryKind(s.categoryId) === 'photo',
+  );
+  const photo = usePhotoStore();
 
   const effects: ReactElement[] = [];
   if (q.ao)
@@ -59,6 +68,8 @@ export function PostFX() {
         color={p.ao.color}
       />,
     );
+  if (photoActive && photo.dofEnabled)
+    effects.push(<PhotoDepthOfField key="dof" bokeh={photo.bokeh} focusRange={photo.focusRange} />);
   if (q.bloom)
     effects.push(
       <Bloom
@@ -70,6 +81,7 @@ export function PostFX() {
         radius={p.bloom.radius}
       />,
     );
+  effects.push(<Exposure key="exposure" stops={photoActive ? photo.exposure : 0} />);
   effects.push(<ToneMapping key={`tone-${toneMapping}`} mode={TONE_MAPPING_MODES[toneMapping]} />);
   effects.push(<LUT key="lut" lut={lut} />);
   effects.push(

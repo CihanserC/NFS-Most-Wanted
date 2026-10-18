@@ -1,8 +1,9 @@
 import { useEffect, useRef, type ComponentRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3 } from 'three';
+import { useFrame, useStore, useThree } from '@react-three/fiber';
+import { Vector3, type PerspectiveCamera } from 'three';
 import { useAppStore } from '../../core/store/appStore';
+import { usePhotoStore } from '../../core/store/photoStore';
 import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { sceneConfig } from '../scene/sceneConfig';
@@ -15,6 +16,9 @@ type Transition = {
   toTarget: Vector3;
   t: number;
 };
+
+/** Fotoğraf modunda serbest yörünge sınırları (m) */
+const PHOTO_ORBIT = { minDistance: 0.7, maxDistance: 16 };
 
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
@@ -44,6 +48,16 @@ export function GarageCamera() {
   const presetId = usePresetId();
   const transition = useRef<Transition | null>(null);
   const o = sceneConfig.orbit;
+  // Fotoğraf modu: serbest kamera (kaydırma, geniş mesafe) ve ayarlanabilir FOV
+  const photo = useAppStore((s) => categoryKind(s.categoryId) === 'photo');
+  const photoFov = usePhotoStore((s) => s.fov);
+  const store = useStore();
+
+  useEffect(() => {
+    const cam = store.getState().camera as PerspectiveCamera;
+    cam.fov = photo ? photoFov : sceneConfig.camera.fov;
+    cam.updateProjectionMatrix();
+  }, [photo, photoFov, store]);
 
   useEffect(() => {
     const preset = getCar(carId).manifest.cameraPresets[presetId];
@@ -74,12 +88,12 @@ export function GarageCamera() {
     <OrbitControls
       ref={controls}
       makeDefault
-      minDistance={o.minDistance}
-      maxDistance={o.maxDistance}
+      minDistance={photo ? PHOTO_ORBIT.minDistance : o.minDistance}
+      maxDistance={photo ? PHOTO_ORBIT.maxDistance : o.maxDistance}
       maxPolarAngle={o.maxPolarAngle}
       enableDamping
       dampingFactor={o.dampingFactor}
-      enablePan={false}
+      enablePan={photo}
       // Kullanıcı sürüklemeye başlarsa otomatik geçiş iptal edilir.
       onStart={() => {
         transition.current = null;

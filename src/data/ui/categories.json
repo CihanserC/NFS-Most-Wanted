@@ -59,7 +59,7 @@
   {
     "id": "photo_mode",
     "slots": [],
-    "kind": "parts"
+    "kind": "photo"
   },
   {
     "id": "test_drive",
@@ -69,6 +69,6 @@
   {
     "id": "garage",
     "slots": [],
-    "kind": "parts"
+    "kind": "garage"
   }
 ]

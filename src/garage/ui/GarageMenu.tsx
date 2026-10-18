@@ -6,7 +6,9 @@ import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
 import { useDriveStore } from '../../core/store/driveStore';
+import { GarageEditor } from './garage/GarageEditor';
 import { LookEditor } from './look/LookEditor';
+import { PhotoEditor } from './photo/PhotoEditor';
 import { PerformanceEditor } from './performance/PerformanceEditor';
 import { StanceEditor } from './stance/StanceEditor';
 import { WheelsEditor } from './wheels/WheelsEditor';
@@ -31,7 +33,9 @@ type Level =
   | 'vinyl'
   | 'stance'
   | 'look'
-  | 'performance';
+  | 'performance'
+  | 'garage'
+  | 'photo';
 
 /** Kendi kontrolleri olan (liste olmayan) seviyeler. */
 const EDITOR_LEVELS: readonly Level[] = [
@@ -41,6 +45,8 @@ const EDITOR_LEVELS: readonly Level[] = [
   'stance',
   'look',
   'performance',
+  'garage',
+  'photo',
 ];
 
 const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
@@ -63,7 +69,11 @@ export function GarageMenu() {
       ? 'wheels'
       : category.kind === 'vinyl'
         ? 'vinyl'
-        : category.kind === 'stance' || category.kind === 'look' || category.kind === 'performance'
+        : category.kind === 'stance' ||
+            category.kind === 'look' ||
+            category.kind === 'performance' ||
+            category.kind === 'garage' ||
+            category.kind === 'photo'
           ? category.kind
           : category.kind === 'paint'
             ? paintZone
@@ -107,6 +117,8 @@ export function GarageMenu() {
       case 'stance':
       case 'look':
       case 'performance':
+      case 'garage':
+      case 'photo':
         return [];
     }
   }, [level, category, slotId, car, parts, paint]);
@@ -259,7 +271,11 @@ export function GarageMenu() {
             </div>
           </div>
         </div>
-        {level === 'performance' ? (
+        {level === 'garage' ? (
+          <GarageEditor />
+        ) : level === 'photo' ? (
+          <PhotoEditor />
+        ) : level === 'performance' ? (
           <PerformanceEditor />
         ) : level === 'stance' ? (
           <StanceEditor />

@@ -44,7 +44,8 @@
   },
   "categoryCameras": {
     "stance": "side",
-    "lights_glass": "front_three_quarter"
+    "lights_glass": "front_three_quarter",
+    "photo_mode": "front_three_quarter"
   },
   "vinylCameras": {
     "left": "vinyl_left",
