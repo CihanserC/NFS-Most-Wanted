@@ -60,14 +60,16 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
 
   if (!paint) return null;
 
-  const targets = colorTargets(paint);
+  // Yerleşim kayıtlı boyaya göre belirlenir: hover önizlemesi türü değiştirince bölümler
+  // açılıp kapanmasın (içerik kayar, fare başka öğeye düşer ve titreme olur).
+  const base = saved[zone] ?? paint;
+  const targets = colorTargets(base);
   const activeTarget = targets.some((x) => x.field === target) ? target : 'color';
-  const hasFlakes = FLAKE_PAINT_TYPES.includes(paint.type);
+  const hasFlakes = FLAKE_PAINT_TYPES.includes(base.type);
 
   const preview = (patch: Partial<PaintConfig>) => previewPaint({ [zone]: { ...paint, ...patch } });
   const commit = (patch: Partial<PaintConfig>) => setPaint({ [zone]: { ...paint, ...patch } });
   // Hover önizlemesi kayıtlı boya üzerinden yapılır ki birikmesin.
-  const base = saved[zone] ?? paint;
   const hoverPreview = (patch: Partial<PaintConfig>) =>
     previewPaint({ [zone]: { ...base, ...patch } });
   const hoverCommit = (patch: Partial<PaintConfig>) => setPaint({ [zone]: { ...base, ...patch } });
