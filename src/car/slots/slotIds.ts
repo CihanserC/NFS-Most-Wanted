@@ -9,7 +9,6 @@ export const RENDERED_SLOT_IDS = [
   'grille',
   'chin_spoiler',
   'hood',
-  'hood_pins',
   'side_skirts',
   'fenders',
   'spoiler_rear',

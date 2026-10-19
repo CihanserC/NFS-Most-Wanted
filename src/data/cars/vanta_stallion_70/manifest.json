@@ -171,13 +171,8 @@
       "default": "stock",
       "camera": "hood_top"
     },
-    "hood_pins": {
-      "options": ["none", "chrome", "black"],
-      "default": "none",
-      "camera": "hood_top"
-    },
     "side_skirts": {
-      "options": ["none", "slim", "pro_touring"],
+      "options": ["none", "slim", "pro_touring", "carbon_blade", "chrome_rocker", "aero_flick"],
       "default": "none",
       "camera": "side"
     },
@@ -187,7 +182,7 @@
       "camera": "wheel_front"
     },
     "spoiler_rear": {
-      "options": ["none", "ducktail", "classic_wing", "high_wing"],
+      "options": ["none", "lip", "ducktail", "pedestal", "classic_wing", "high_wing", "gt_wing"],
       "default": "none",
       "camera": "rear_three_quarter"
     },

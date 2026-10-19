@@ -9,7 +9,7 @@ import {
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three';
-import { computeBarriers } from '../../core/drive/barriers';
+import { barrierChains } from '../../core/drive/barriers';
 import {
   buildScenery,
   GANTRY_PILLAR_M,
@@ -19,6 +19,7 @@ import {
 import type { Track } from '../../core/drive/track';
 import {
   ASPHALT_TILE_M,
+  barrierWallGeometry,
   createAsphaltTexture,
   createCheckerTexture,
   createGantryBannerTexture,
@@ -34,6 +35,7 @@ import {
 
 const GROUND_SIZE = 4000;
 const BARRIER_HEIGHT = 1.2;
+const BARRIER_THICKNESS = 0.8;
 const LAMP_HEIGHT = 9;
 const TREE_TRUNK = { radius: 0.25, height: 2 };
 const TREE_CROWN = { radius: 1.6, height: 4.6 };
@@ -209,7 +211,7 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
     () => new MeshStandardMaterial({ map: vergeTex, roughness: 1, metalness: 0 }),
   );
   const barrierMat = useDisposable(
-    () => new MeshStandardMaterial({ color: '#ffffff', roughness: 0.75, metalness: 0.05 }),
+    () => new MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0.05 }),
   );
   const trunkMat = useDisposable(
     () => new MeshStandardMaterial({ color: '#4a3524', roughness: 1 }),
@@ -253,10 +255,17 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
     [geometries],
   );
 
-  const barriers = useMemo(() => computeBarriers(track), [track]);
+  // Bariyer duvarı: her kenar tek parça, kırmızı/beyaz segmentler örtüşmeden birleşir
+  const barrierWalls = useMemo(() => {
+    const chains = barrierChains(track);
+    const colors = [new Color('#d0302a').toArray(), new Color('#ecebe6').toArray()] as const;
+    return ([1, -1] as const).map((side) =>
+      barrierWallGeometry(chains[side], BARRIER_THICKNESS, BARRIER_HEIGHT, colors),
+    );
+  }, [track]);
+  useEffect(() => () => barrierWalls.forEach((g) => g.dispose()), [barrierWalls]);
   const scenery = useMemo(() => buildScenery(track), [track]);
 
-  const barrierRef = useRef<InstancedMesh>(null);
   const trunkRef = useRef<InstancedMesh>(null);
   const crownRef = useRef<InstancedMesh>(null);
   const oakTrunkRef = useRef<InstancedMesh>(null);
@@ -264,23 +273,6 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
   const rockRef = useRef<InstancedMesh>(null);
   const poleRef = useRef<InstancedMesh>(null);
   const lampRef = useRef<InstancedMesh>(null);
-
-  useLayoutEffect(() => {
-    const m = barrierRef.current;
-    if (!m) return;
-    const red = new Color('#d0302a');
-    const white = new Color('#ecebe6');
-    barriers.forEach((b, i) => {
-      dummy.position.set(b.x, BARRIER_HEIGHT / 2, b.z);
-      dummy.rotation.set(0, b.yaw, 0);
-      dummy.scale.set(0.8, BARRIER_HEIGHT, b.halfLength * 2);
-      dummy.updateMatrix();
-      m.setMatrixAt(i, dummy.matrix);
-      m.setColorAt(i, Math.floor(i / 2) % 2 === 0 ? red : white);
-    });
-    m.instanceMatrix.needsUpdate = true;
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [barriers]);
 
   useLayoutEffect(() => {
     const trunk = trunkRef.current;
@@ -353,16 +345,9 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
       <mesh geometry={geometries.kerbLeft} material={kerbMat} receiveShadow />
       <mesh geometry={geometries.kerbRight} material={kerbMat} receiveShadow />
 
-      <instancedMesh
-        ref={barrierRef}
-        args={[undefined, undefined, barriers.length]}
-        material={barrierMat}
-        castShadow
-        receiveShadow
-        frustumCulled={false}
-      >
-        <boxGeometry args={[1, 1, 1]} />
-      </instancedMesh>
+      {barrierWalls.map((g, i) => (
+        <mesh key={i} geometry={g} material={barrierMat} castShadow receiveShadow />
+      ))}
 
       <instancedMesh
         ref={trunkRef}

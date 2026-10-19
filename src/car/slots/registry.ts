@@ -1,14 +1,5 @@
 import type { ComponentType } from 'react';
-import {
-  Fenders,
-  Hood,
-  HoodPins,
-  Mirrors,
-  RearLouvers,
-  RearSpoiler,
-  Roof,
-  SideSkirts,
-} from './body';
+import { Fenders, Hood, Mirrors, RearLouvers, RearSpoiler, Roof, SideSkirts } from './body';
 import type { SlotProps } from './common';
 import { ChinSpoiler, FrontBumper, Grille, Headlights } from './front';
 import { Engine, Exhaust, ExhaustTips, Interior } from './mechanical';
@@ -21,7 +12,6 @@ export const slotRenderers: Record<RenderedSlotId, ComponentType<SlotProps>> = {
   grille: Grille,
   chin_spoiler: ChinSpoiler,
   hood: Hood,
-  hood_pins: HoodPins,
   side_skirts: SideSkirts,
   fenders: Fenders,
   spoiler_rear: RearSpoiler,

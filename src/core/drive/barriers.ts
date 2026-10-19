@@ -59,29 +59,39 @@ function sideOffsets(track: Track, side: 1 | -1): number[] {
 }
 
 /**
+ * Her kenarın bariyer zinciri noktaları (kapalı döngü; son nokta ilkine bağlanır). Görsel duvar
+ * bu noktalardan tek parça çizilir: segmentler örtüşmez, eklemde kırmızı/beyaz yüzler üst üste
+ * binip titremez (z-fighting).
+ */
+export function barrierChains(track: Track): Record<1 | -1, [number, number][]> {
+  const n = track.samples.length;
+  const chain = (side: 1 | -1) => {
+    const offsets = sideOffsets(track, side);
+    const pts: [number, number][] = [];
+    for (let i = 0; i < n; i += SEGMENT_STEP) {
+      const s = track.samples[i] as TrackSample;
+      const off = offsets[i] as number;
+      pts.push([s.x + s.nx * off * side, s.z + s.nz * off * side]);
+    }
+    return pts;
+  };
+  return { 1: chain(1), [-1]: chain(-1) } as Record<1 | -1, [number, number][]>;
+}
+
+/**
  * Pist kenarlarındaki bariyerler: her kenarda uçları ortak, kesintisiz bir zincir. Uç noktalar
  * pist normali boyunca ofsetlenmiş örneklerden alındığı için virajın dış tarafında da aralık kalmaz.
- * Fizik çarpışma kutuları ve görsel aynı segmentleri kullanır.
+ * Fizik çarpışma şekilleri bu segmentleri kullanır.
  */
 export function computeBarriers(track: Track): BarrierSegment[] {
-  const n = track.samples.length;
-  const offsets = { 1: sideOffsets(track, 1), [-1]: sideOffsets(track, -1) } as Record<
-    1 | -1,
-    number[]
-  >;
-  const point = (i: number, side: 1 | -1): [number, number] => {
-    const k = ((i % n) + n) % n;
-    const s = track.samples[k] as TrackSample;
-    const off = offsets[side][k] as number;
-    return [s.x + s.nx * off * side, s.z + s.nz * off * side];
-  };
+  const chains = barrierChains(track);
+  const count = chains[1].length;
   const out: BarrierSegment[] = [];
-  for (let i = 0; i < n; i += SEGMENT_STEP) {
-    // Son segment döngüyü kapatır (n, STEP'in katı olmayabilir)
-    const j = Math.min(i + SEGMENT_STEP, n);
+  for (let i = 0; i < count; i++) {
     for (const side of [1, -1] as const) {
-      const [ax, az] = point(i, side);
-      const [bx, bz] = point(j, side);
+      const pts = chains[side];
+      const [ax, az] = pts[i] as [number, number];
+      const [bx, bz] = pts[(i + 1) % count] as [number, number];
       const dx = bx - ax;
       const dz = bz - az;
       out.push({

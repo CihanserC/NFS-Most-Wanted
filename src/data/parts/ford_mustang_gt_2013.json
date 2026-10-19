@@ -13,20 +13,6 @@
       "weightKg": 2
     }
   },
-  "hood_pins": {
-    "none": {
-      "price": 0,
-      "weightKg": 0
-    },
-    "chrome": {
-      "price": 120,
-      "weightKg": 0
-    },
-    "black": {
-      "price": 120,
-      "weightKg": 0
-    }
-  },
   "chin_spoiler": {
     "none": {
       "price": 0,
@@ -56,6 +42,20 @@
       "price": 950,
       "weightKg": 5,
       "downforce": 0.02
+    },
+    "carbon_blade": {
+      "price": 1100,
+      "weightKg": 2,
+      "downforce": 0.02
+    },
+    "chrome_rocker": {
+      "price": 400,
+      "weightKg": 2
+    },
+    "aero_flick": {
+      "price": 1300,
+      "weightKg": 4,
+      "downforce": 0.03
     }
   },
   "spoiler_rear": {
@@ -63,10 +63,20 @@
       "price": 0,
       "weightKg": 0
     },
+    "lip": {
+      "price": 350,
+      "weightKg": 1,
+      "downforce": 0.02
+    },
     "ducktail": {
       "price": 650,
       "weightKg": 3,
       "downforce": 0.05
+    },
+    "pedestal": {
+      "price": 1200,
+      "weightKg": 6,
+      "downforce": 0.1
     },
     "classic_wing": {
       "price": 900,
@@ -77,6 +87,11 @@
       "price": 1500,
       "weightKg": 7,
       "downforce": 0.14
+    },
+    "gt_wing": {
+      "price": 2600,
+      "weightKg": 8,
+      "downforce": 0.2
     }
   },
   "interior": {

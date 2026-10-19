@@ -233,3 +233,58 @@ export function createGrassTexture(): CanvasTexture {
   }
   return finish(c);
 }
+
+/**
+ * Bariyer duvarı: kapalı zincir noktalarından tek parça prizma (iç yüz, dış yüz, üst). Eklemde
+ * iki komşu segment aynı (açıortay yönünde ofsetlenmiş) köşeleri paylaşır; böylece segmentler
+ * örtüşmez ve renk sınırında yüzler üst üste binip titremez. Renkler segment başına (vertexColors).
+ */
+export function barrierWallGeometry(
+  points: readonly (readonly [number, number])[],
+  thickness: number,
+  height: number,
+  colors: readonly (readonly number[])[],
+): BufferGeometry {
+  const n = points.length;
+  // Eklem normali: komşu iki segment yönünün ortalamasına dik (yatay)
+  const normals = points.map((_, i) => {
+    const [px, pz] = points[(i - 1 + n) % n] as readonly [number, number];
+    const [nx, nz] = points[(i + 1) % n] as readonly [number, number];
+    const dx = nx - px;
+    const dz = nz - pz;
+    const len = Math.hypot(dx, dz) || 1;
+    return [-dz / len, dx / len] as const;
+  });
+  const half = thickness / 2;
+  const corner = (i: number, side: 1 | -1, y: number) => {
+    const [x, z] = points[i % n] as readonly [number, number];
+    const [ox, oz] = normals[i % n] as readonly [number, number];
+    return [x + ox * half * side, y, z + oz * half * side];
+  };
+  const pos: number[] = [];
+  const col: number[] = [];
+  const quad = (a: number[], b: number[], c: number[], d: number[], rgb: readonly number[]) => {
+    pos.push(...a, ...b, ...c, ...a, ...c, ...d);
+    for (let k = 0; k < 6; k++) col.push(...rgb);
+  };
+  for (let i = 0; i < n; i++) {
+    const j = i + 1;
+    const rgb = colors[i % colors.length] as readonly number[];
+    // İki yan yüz ve üst yüz (alt yüz zeminde, görünmez)
+    quad(corner(i, 1, 0), corner(j, 1, 0), corner(j, 1, height), corner(i, 1, height), rgb);
+    quad(corner(j, -1, 0), corner(i, -1, 0), corner(i, -1, height), corner(j, -1, height), rgb);
+    quad(
+      corner(i, 1, height),
+      corner(j, 1, height),
+      corner(j, -1, height),
+      corner(i, -1, height),
+      rgb,
+    );
+  }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new BufferAttribute(new Float32Array(pos), 3));
+  g.setAttribute('color', new BufferAttribute(new Float32Array(col), 3));
+  g.computeVertexNormals();
+  g.computeBoundingSphere();
+  return g;
+}

@@ -9,12 +9,19 @@ const LAYOUT = {
   cowl: { length: 0.4, width: 0.72, rise: 0.07, opening: 0.045 },
   shaker: { fromHoodRear: 0.64, width: 0.42, height: 0.12, depth: 0.5, radius: 0.03 },
   cutoutTrim: { thickness: 0.02, height: 0.012 },
-  pins: { fromHoodEnd: 0.25, x: 0.55, radius: 0.02, height: 0.012 },
-  skirts: { y: 0.27, slim: [0.03, 0.06] as const, proTouring: [0.05, 0.1] as const, blade: 0.015 },
+  skirts: {
+    y: 0.27,
+    slim: [0.03, 0.06] as const,
+    proTouring: [0.05, 0.1] as const,
+    aero: [0.045, 0.09] as const,
+    blade: 0.015,
+    bladeOut: 0.09,
+    chromeY: 0.34,
+  },
   flare: { mild: { tube: 0.03, spread: 1.6 }, widebody: { tube: 0.06, spread: 2.2 }, sideY: 0.6 },
-  ducktail: { zFromTail: 0.24, width: 1.6, height: 0.05, depth: 0.3, kick: 0.25 },
-  wing: { zFromTail: 0.22, postX: 0.6, width: 1.6, chord: 0.24, thickness: 0.025, aoa: -0.08 },
-  wingHeight: { classic: 0.15, high: 0.4 },
+  ducktail: { zFromTail: 0.24, width: 1.6, widthFill: 1, height: 0.05, depth: 0.3, kick: 0.25 },
+  lip: { zFromTail: 0.06, width: 1.5, widthFill: 0.95, height: 0.025, depth: 0.09, kick: 0.4 },
+  wing: { thickness: 0.025, aoa: -0.08 },
   louvers: { count: 9, inset: 0.95, chord: 0.07, thickness: 0.012, lift: 0.025, tilt: -0.3 },
   mirror: { z: 0.42, y: 1.0, out: 0.07, bulletRadius: 0.05, racing: [0.05, 0.075, 0.13] as const },
 } as const;
@@ -94,49 +101,80 @@ export function Hood({ option, car }: SlotProps) {
   return null;
 }
 
-export function HoodPins({ option, car }: SlotProps) {
-  const m = useCarMaterials();
-  if (option === 'none') return null;
-  const p = LAYOUT.pins;
-  // Kaputun ön kenarından içeride; kaput kenara doğru alçaldığı için yükseklik pimin x'inde ölçülür
-  const z = car.body.profile.hood.zEnd - p.fromHoodEnd;
-  const pose = deckPose(car, z, p.x);
-  const mat = option === 'chrome' ? m.chrome : m.blackTrim;
-  return (
-    <Mirrored>
-      <group position={[p.x, pose.y, z]} rotation-x={pose.angle}>
-        <mesh material={mat}>
-          <cylinderGeometry args={[p.radius, p.radius, p.height, 20]} />
-        </mesh>
-        <mesh position={[0, p.height / 2, -p.radius * 1.6]} material={mat}>
-          <boxGeometry args={[0.006, 0.006, p.radius * 2.4]} />
-        </mesh>
-      </group>
-    </Mirrored>
-  );
-}
-
-export function SideSkirts({ option, car }: SlotProps) {
-  const m = useCarMaterials();
-  if (option === 'none') return null;
-  const s = LAYOUT.skirts;
+/** Marşpiyel ortak yerleşimi: ön ve arka tekerlek kemeri arasında, gövde yan yüzeyinde. */
+function skirtSpan(car: SlotProps['car']) {
   const [front, rear] = car.body.wheelArches;
   if (!front || !rear) return null;
   const zFront = front.z - front.radius - SKIRT_FRONT_GAP;
   const zRear = rear.z + rear.radius + SKIRT_FRONT_GAP;
-  const zc = (zFront + zRear) / 2;
-  const len = zFront - zRear;
-  const [thickness, height] = option === 'slim' ? s.slim : s.proTouring;
-  const x = sideX(car, zc, s.y) + thickness / 2 - 0.01;
+  return { zFront, zRear, zc: (zFront + zRear) / 2, len: zFront - zRear };
+}
+
+export function SideSkirts({ option, car }: SlotProps) {
+  const m = useCarMaterials();
+  const span = skirtSpan(car);
+  if (option === 'none' || !span) return null;
+  const s = LAYOUT.skirts;
+  const { zRear, zc, len } = span;
+  const paint = paintFor(m, 'body');
+  const side = (y: number) => sideX(car, zc, y);
+
+  if (option === 'chrome_rocker') {
+    // Eşik üstünde ince krom çıta
+    const y = s.chromeY;
+    return (
+      <Mirrored>
+        <mesh position={[side(y) + 0.004, y, zc]} material={m.chrome}>
+          <boxGeometry args={[0.008, 0.035, len]} />
+        </mesh>
+      </Mirrored>
+    );
+  }
+
+  if (option === 'carbon_blade') {
+    // Eşiğin altından dışa taşan yatay karbon bıçak + ince taşıyıcı
+    const y = s.y - 0.035;
+    const x = side(s.y);
+    return (
+      <Mirrored>
+        <mesh position={[x + s.bladeOut / 2 - 0.02, y, zc]} material={m.carbon} castShadow>
+          <boxGeometry args={[s.bladeOut, 0.012, len]} />
+        </mesh>
+        <mesh position={[x - 0.005, y + 0.025, zc]} material={m.blackTrim}>
+          <boxGeometry args={[0.02, 0.05, len * 0.98]} />
+        </mesh>
+      </Mirrored>
+    );
+  }
+
+  const [thickness, height] =
+    option === 'slim' ? s.slim : option === 'aero_flick' ? s.aero : s.proTouring;
+  const x = side(s.y) + thickness / 2 - 0.01;
   return (
     <Mirrored>
-      <mesh position={[x, s.y, zc]} material={paintFor(m, 'body')} castShadow>
+      <mesh position={[x, s.y, zc]} material={paint} castShadow>
         <boxGeometry args={[thickness, height, len]} />
       </mesh>
       {option === 'pro_touring' && (
         <mesh position={[x + thickness / 2, s.y - height / 2, zc]} material={m.blackTrim}>
           <boxGeometry args={[thickness, s.blade, len]} />
         </mesh>
+      )}
+      {option === 'aero_flick' && (
+        <>
+          <mesh position={[x + thickness / 2, s.y - height / 2, zc]} material={m.carbon}>
+            <boxGeometry args={[thickness * 1.6, s.blade, len]} />
+          </mesh>
+          {/* Arka tekerlek önünde yukarı kıvrık kanatçık */}
+          <mesh
+            position={[x + thickness * 0.9, s.y + height * 0.2, zRear + 0.12]}
+            rotation={[0, -0.35, 0.5]}
+            material={m.carbon}
+            castShadow
+          >
+            <boxGeometry args={[0.12, 0.01, 0.2]} />
+          </mesh>
+        </>
       )}
     </Mirrored>
   );
@@ -171,11 +209,11 @@ export function RearSpoiler({ option, car }: SlotProps) {
   const deckRef = topY(car, -car.body.halfLength + 0.3);
   const tail = tailZ(car, deckRef - 0.03);
 
-  if (option === 'ducktail') {
-    const d = LAYOUT.ducktail;
+  if (option === 'lip' || option === 'ducktail') {
+    const d = option === 'lip' ? LAYOUT.lip : LAYOUT.ducktail;
     const z = tail + d.zFromTail - d.depth / 2;
     const pose = deckPose(car, z);
-    const width = Math.min(d.width, 2 * deckHalfWidth(car, z));
+    const width = Math.min(d.width, 2 * deckHalfWidth(car, z) * d.widthFill);
     const base = restY(car, z, d.depth / 2, 0, width / 2);
     return (
       <mesh
@@ -189,38 +227,119 @@ export function RearSpoiler({ option, car }: SlotProps) {
     );
   }
 
-  if (option === 'classic_wing' || option === 'high_wing') {
-    const w = LAYOUT.wing;
-    const h = option === 'high_wing' ? LAYOUT.wingHeight.high : LAYOUT.wingHeight.classic;
-    const z = tail + w.zFromTail;
-    const half = deckHalfWidth(car, z);
-    const postX = Math.min(w.postX, half * 0.8);
-    const width = Math.min(w.width, 2 * half + 0.1);
-    // Ayaklar kendi x'lerindeki bagaj yüzeyine basar; kanat o yükseklikten h kadar yukarıda
-    const y = topY(car, z, postX);
-    return (
-      <group position={[0, y, z]}>
-        <Mirrored>
-          <mesh
-            position={[postX, h / 2, 0]}
-            material={option === 'high_wing' ? m.blackTrim : paint}
-          >
-            <boxGeometry args={[0.04, h + 0.02, 0.08]} />
-          </mesh>
-          {option === 'high_wing' && (
-            <mesh position={[width / 2, h, 0]} material={m.blackTrim}>
-              <boxGeometry args={[0.01, 0.12, w.chord * 1.25]} />
+  const style = WING_STYLES[option];
+  if (!style) return null;
+  const w = LAYOUT.wing;
+  const z = tail + style.zFromTail;
+  const half = deckHalfWidth(car, z);
+  const postX = Math.min(style.postX, half * 0.8);
+  const width = Math.min(style.width, 2 * half + style.overhang);
+  // Ayaklar kendi x'lerindeki bagaj yüzeyine basar; kanat o yükseklikten h kadar yukarıda
+  const y = topY(car, z, postX);
+  const h = style.height;
+  const wingMat = style.material === 'carbon' ? m.carbon : paint;
+  const postMat = style.material === 'paint' ? paint : m.blackTrim;
+  return (
+    <group position={[0, y, z]}>
+      <Mirrored>
+        {style.swanNeck ? (
+          // Kuğu boynu: ayak bagajdan öne-yukarı çıkar, kanadı üstünden tutar
+          <>
+            <Bar
+              from={[postX, 0, style.neckForward]}
+              to={[postX, h + w.thickness + 0.05, 0.02]}
+              radius={0.018}
+              material={postMat}
+            />
+            <mesh position={[postX, h + w.thickness / 2 + 0.03, 0]} material={postMat}>
+              <boxGeometry args={[0.03, 0.06, 0.08]} />
             </mesh>
-          )}
-        </Mirrored>
-        <mesh position-y={h} rotation-x={w.aoa} material={paint} castShadow>
-          <boxGeometry args={[width, w.thickness, w.chord]} />
-        </mesh>
-      </group>
-    );
-  }
-  return null;
+          </>
+        ) : (
+          <mesh position={[postX, h / 2, 0]} material={postMat}>
+            <boxGeometry args={[style.postWidth, h + 0.02, 0.08]} />
+          </mesh>
+        )}
+        {style.endplate && (
+          <mesh position={[width / 2, h, 0]} material={m.carbon}>
+            <boxGeometry args={[0.01, style.endplate[0], style.endplate[1]]} />
+          </mesh>
+        )}
+      </Mirrored>
+      <mesh position-y={h} rotation-x={w.aoa} material={wingMat} castShadow>
+        <boxGeometry args={[width, w.thickness, style.chord]} />
+      </mesh>
+    </group>
+  );
 }
+
+type WingStyle = {
+  zFromTail: number;
+  height: number;
+  chord: number;
+  width: number;
+  /** Bagaj genişliğinin dışına taşma payı (m) */
+  overhang: number;
+  postX: number;
+  postWidth: number;
+  material: 'paint' | 'carbon';
+  /** Uç plaka [yükseklik, uzunluk] */
+  endplate?: readonly [number, number];
+  swanNeck?: boolean;
+  /** Kuğu boynu ayağının kanada göre öne uzanması (m) */
+  neckForward: number;
+};
+
+/** Kanat biçimleri: ölçüler aracın bagaj genişliği ve kenarına göre ayrıca sınırlanır. */
+const WING_STYLES: Partial<Record<string, WingStyle>> = {
+  pedestal: {
+    zFromTail: 0.17,
+    height: 0.085,
+    chord: 0.2,
+    width: 1.4,
+    overhang: 0,
+    postX: 0.45,
+    postWidth: 0.06,
+    material: 'paint',
+    neckForward: 0,
+  },
+  classic_wing: {
+    zFromTail: 0.22,
+    height: 0.15,
+    chord: 0.24,
+    width: 1.6,
+    overhang: 0.1,
+    postX: 0.6,
+    postWidth: 0.04,
+    material: 'paint',
+    neckForward: 0,
+  },
+  high_wing: {
+    zFromTail: 0.22,
+    height: 0.4,
+    chord: 0.24,
+    width: 1.6,
+    overhang: 0.1,
+    postX: 0.6,
+    postWidth: 0.04,
+    material: 'paint',
+    endplate: [0.12, 0.3],
+    neckForward: 0,
+  },
+  gt_wing: {
+    zFromTail: 0.1,
+    height: 0.3,
+    chord: 0.3,
+    width: 1.75,
+    overhang: 0.25,
+    postX: 0.42,
+    postWidth: 0.03,
+    material: 'carbon',
+    endplate: [0.2, 0.38],
+    swanNeck: true,
+    neckForward: 0.22,
+  },
+};
 
 export function RearLouvers({ option, car }: SlotProps) {
   const m = useCarMaterials();
