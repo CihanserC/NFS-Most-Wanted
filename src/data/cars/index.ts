@@ -17,6 +17,8 @@ import mustangDriving from './ford_mustang_gt_2013/driving.json';
 import mustangMap from './ford_mustang_gt_2013/modelMap.json';
 import mustangPlaceholder from './ford_mustang_gt_2013/placeholder.json';
 import mustangParts from '../parts/ford_mustang_gt_2013.json';
+import mustangSurface from './ford_mustang_gt_2013/surface.json';
+import { parseSurface, type CarSurface } from '../../car/surface';
 import type { ModelMap } from '../../core/model/modelMap';
 
 export type CarDefinition = {
@@ -30,6 +32,8 @@ export type CarDefinition = {
   vinylBox: ProjectionBox;
   /** Gerçek modelin adlarını kurallara uyduran eşleme (kurallara uymayan hazır modeller için) */
   modelMap?: ModelMap;
+  /** Gerçek modelden ölçülen gövde yüzeyi: parçalar buna oturur (yoksa `body` profili) */
+  surface?: CarSurface;
 };
 
 function defineCar(
@@ -38,6 +42,7 @@ function defineCar(
   partsJson: unknown,
   drivingJson: unknown,
   modelMap?: ModelMap,
+  surfaceJson?: unknown,
 ): CarDefinition {
   const manifest = loadManifest(manifestJson, 'manifest.json');
   const profile = parsePlaceholderProfile(placeholderJson, `${manifest.id}/placeholder.json`);
@@ -48,6 +53,7 @@ function defineCar(
     body: createBodySampler(manifest, profile),
     vinylBox: createProjectionBox(manifest.dimensions),
     ...(modelMap ? { modelMap } : {}),
+    ...(surfaceJson ? { surface: parseSurface(surfaceJson, `${manifest.id}/surface.json`) } : {}),
   };
 }
 
@@ -60,6 +66,7 @@ for (const car of [
     mustangParts,
     mustangDriving,
     mustangMap as unknown as ModelMap,
+    mustangSurface,
   ),
 ])
   definitions[car.manifest.id] = car;

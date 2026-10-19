@@ -2,14 +2,14 @@ import { RoundedBox } from '@react-three/drei';
 import { paintFor } from '../materials/carMaterials';
 import { useCarMaterials } from '../materials/useCarMaterials';
 import { Bar, Mirrored, type SlotProps } from './common';
-import { deckPose, roofPose } from './pose';
+import { deckHalfWidth, deckPose, hoodRearZ, restY, roofPose, sideX, tailZ, topY } from './pose';
 
 /** Gövde üstü/yanı placeholder ölçüleri (m). */
 const LAYOUT = {
-  cowl: { zStart: 0.66, zEnd: 1.06, width: 0.72, rise: 0.07, opening: 0.045 },
-  shaker: { z: 1.3, width: 0.42, height: 0.12, depth: 0.5, radius: 0.03 },
+  cowl: { length: 0.4, width: 0.72, rise: 0.07, opening: 0.045 },
+  shaker: { fromHoodRear: 0.64, width: 0.42, height: 0.12, depth: 0.5, radius: 0.03 },
   cutoutTrim: { thickness: 0.02, height: 0.012 },
-  pins: { z: 2.05, x: 0.55, radius: 0.02, height: 0.012 },
+  pins: { fromHoodEnd: 0.25, x: 0.55, radius: 0.02, height: 0.012 },
   skirts: { y: 0.27, slim: [0.03, 0.06] as const, proTouring: [0.05, 0.1] as const, blade: 0.015 },
   flare: { mild: { tube: 0.03, spread: 1.6 }, widebody: { tube: 0.06, spread: 2.2 }, sideY: 0.6 },
   ducktail: { zFromTail: 0.24, width: 1.6, height: 0.05, depth: 0.3, kick: 0.25 },
@@ -27,16 +27,23 @@ export function Hood({ option, car }: SlotProps) {
 
   if (option === 'cowl_induction') {
     const c = LAYOUT.cowl;
-    const zc = (c.zStart + c.zEnd) / 2;
-    const len = c.zEnd - c.zStart;
+    // Kaputun arka kenarından öne doğru yükselen kabartma (ön cama dayanır)
+    const zStart = hoodRearZ(car);
+    const zc = zStart + c.length / 2;
     const pose = deckPose(car, zc);
-    const pitch = pose.angle + Math.atan(c.rise / len);
+    const pitch = pose.angle + Math.atan(c.rise / c.length);
+    // Alt yüz ayak izinin en alçak noktasında: kavisli kaputta kenarlar havada kalmaz
+    const bottom = restY(car, zc, c.length / 2, 0, c.width / 2);
+    const height = pose.y - bottom + c.rise / 2;
     return (
-      <group position={[0, pose.y, zc]} rotation-x={pitch}>
-        <mesh position-y={c.rise / 4} material={hoodPaint} castShadow>
-          <boxGeometry args={[c.width, c.rise / 2, len]} />
+      <group position={[0, bottom, zc]} rotation-x={pitch}>
+        <mesh position-y={height / 2} material={hoodPaint} castShadow>
+          <boxGeometry args={[c.width, height, c.length]} />
         </mesh>
-        <mesh position={[0, c.rise / 4, -len / 2 - 0.001]} material={m.underbody}>
+        <mesh
+          position={[0, height - c.opening * 0.4, -c.length / 2 - 0.001]}
+          material={m.underbody}
+        >
           <boxGeometry args={[c.width * 0.85, c.opening * 0.6, 0.004]} />
         </mesh>
       </group>
@@ -45,9 +52,11 @@ export function Hood({ option, car }: SlotProps) {
 
   if (option === 'shaker_scoop') {
     const s = LAYOUT.shaker;
-    const pose = deckPose(car, s.z);
+    const z = hoodRearZ(car) + s.fromHoodRear;
+    const pose = deckPose(car, z);
+    const base = restY(car, z, s.depth / 2, 0, s.width / 2);
     return (
-      <group position={[0, pose.y + s.height / 2, s.z]} rotation-x={pose.angle}>
+      <group position={[0, base + s.height / 2, z]} rotation-x={pose.angle}>
         <RoundedBox
           args={[s.width, s.height, s.depth]}
           radius={s.radius}
@@ -89,11 +98,13 @@ export function HoodPins({ option, car }: SlotProps) {
   const m = useCarMaterials();
   if (option === 'none') return null;
   const p = LAYOUT.pins;
-  const pose = deckPose(car, p.z);
+  // Kaputun ön kenarından içeride; kaput kenara doğru alçaldığı için yükseklik pimin x'inde ölçülür
+  const z = car.body.profile.hood.zEnd - p.fromHoodEnd;
+  const pose = deckPose(car, z, p.x);
   const mat = option === 'chrome' ? m.chrome : m.blackTrim;
   return (
     <Mirrored>
-      <group position={[p.x, pose.y, p.z]} rotation-x={pose.angle}>
+      <group position={[p.x, pose.y, z]} rotation-x={pose.angle}>
         <mesh material={mat}>
           <cylinderGeometry args={[p.radius, p.radius, p.height, 20]} />
         </mesh>
@@ -116,7 +127,7 @@ export function SideSkirts({ option, car }: SlotProps) {
   const zc = (zFront + zRear) / 2;
   const len = zFront - zRear;
   const [thickness, height] = option === 'slim' ? s.slim : s.proTouring;
-  const x = car.body.sideX(zc, s.y) + thickness / 2 - 0.01;
+  const x = sideX(car, zc, s.y) + thickness / 2 - 0.01;
   return (
     <Mirrored>
       <mesh position={[x, s.y, zc]} material={paintFor(m, 'body')} castShadow>
@@ -155,21 +166,25 @@ export function Fenders({ option, car }: SlotProps) {
 
 export function RearSpoiler({ option, car }: SlotProps) {
   const m = useCarMaterials();
-  const tail = -car.body.halfLength;
   const paint = paintFor(m, 'body');
+  // Bagaj kapağının arka kenarı: bagaj yüksekliğinin hemen altındaki en arka gövde noktası
+  const deckRef = topY(car, -car.body.halfLength + 0.3);
+  const tail = tailZ(car, deckRef - 0.03);
 
   if (option === 'ducktail') {
     const d = LAYOUT.ducktail;
     const z = tail + d.zFromTail - d.depth / 2;
     const pose = deckPose(car, z);
+    const width = Math.min(d.width, 2 * deckHalfWidth(car, z));
+    const base = restY(car, z, d.depth / 2, 0, width / 2);
     return (
       <mesh
-        position={[0, pose.y + d.height / 2, z]}
+        position={[0, base + d.height / 2, z]}
         rotation-x={pose.angle + d.kick}
         material={paint}
         castShadow
       >
-        <boxGeometry args={[d.width, d.height, d.depth]} />
+        <boxGeometry args={[width, d.height, d.depth]} />
       </mesh>
     );
   }
@@ -178,24 +193,28 @@ export function RearSpoiler({ option, car }: SlotProps) {
     const w = LAYOUT.wing;
     const h = option === 'high_wing' ? LAYOUT.wingHeight.high : LAYOUT.wingHeight.classic;
     const z = tail + w.zFromTail;
-    const y = car.body.deckY(z);
+    const half = deckHalfWidth(car, z);
+    const postX = Math.min(w.postX, half * 0.8);
+    const width = Math.min(w.width, 2 * half + 0.1);
+    // Ayaklar kendi x'lerindeki bagaj yüzeyine basar; kanat o yükseklikten h kadar yukarıda
+    const y = topY(car, z, postX);
     return (
       <group position={[0, y, z]}>
         <Mirrored>
           <mesh
-            position={[w.postX, h / 2, 0]}
+            position={[postX, h / 2, 0]}
             material={option === 'high_wing' ? m.blackTrim : paint}
           >
-            <boxGeometry args={[0.04, h, 0.08]} />
+            <boxGeometry args={[0.04, h + 0.02, 0.08]} />
           </mesh>
           {option === 'high_wing' && (
-            <mesh position={[w.width / 2, h, 0]} material={m.blackTrim}>
+            <mesh position={[width / 2, h, 0]} material={m.blackTrim}>
               <boxGeometry args={[0.01, 0.12, w.chord * 1.25]} />
             </mesh>
           )}
         </Mirrored>
         <mesh position-y={h} rotation-x={w.aoa} material={paint} castShadow>
-          <boxGeometry args={[w.width, w.thickness, w.chord]} />
+          <boxGeometry args={[width, w.thickness, w.chord]} />
         </mesh>
       </group>
     );

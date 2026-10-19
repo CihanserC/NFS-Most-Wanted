@@ -81,7 +81,15 @@ export function CarShell({ car, parts }: { car: CarDefinition; parts: Record<str
           const Renderer = slotRenderers[slotId];
           const option = parts[slotId];
           if (option === undefined) return null;
-          return <Renderer key={slotId} option={option} parts={parts} car={car} />;
+          return (
+            <Renderer
+              key={slotId}
+              option={option}
+              parts={parts}
+              car={car}
+              onModel={Boolean(model)}
+            />
+          );
         })}
     </>
   );

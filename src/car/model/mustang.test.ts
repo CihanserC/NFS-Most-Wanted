@@ -1,14 +1,8 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import {
-  Box3,
-  MeshStandardMaterial,
-  Vector3,
-  type Material,
-  type Mesh,
-  type Object3D,
-} from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Box3, Vector3, type Mesh } from 'three';
+import { loadGlbScene, sharedTestMaterials } from './glbTestUtils';
+import { sampleSurface } from './surfaceMap';
+import { sample2 } from '../surface';
 import { defaultParts } from '../../core/build/build';
 import { slotsNeedingPlaceholder } from '../../core/model/modelRules';
 import { prepareModel } from '../../core/model/prepareModel';
@@ -18,53 +12,8 @@ import { axleBodies } from '../fitmentBody';
 const car = getCar('ford_mustang_gt_2013');
 const GLB = new URL('../../../public/assets/cars/ford_mustang_gt_2013.glb', import.meta.url);
 
-/**
- * GLB'den doku/uzantı referanslarını çıkarır (Node'da görüntü çözümü yok); geometri ve adlar kalır.
- * Gerçek modelin düğüm/materyal adlarını ve ölçülerini sınamak için yeterli.
- */
-function stripTextures(buffer: Buffer): ArrayBuffer {
-  const jsonLength = buffer.readUInt32LE(12);
-  const json = JSON.parse(buffer.subarray(20, 20 + jsonLength).toString('utf8')) as {
-    images?: unknown;
-    textures?: unknown;
-    samplers?: unknown;
-    extensionsUsed?: unknown;
-    extensionsRequired?: unknown;
-    materials: Record<string, unknown>[];
-  };
-  delete json.images;
-  delete json.textures;
-  delete json.samplers;
-  delete json.extensionsUsed;
-  delete json.extensionsRequired;
-  json.materials = json.materials.map((m) => ({
-    name: m.name,
-    pbrMetallicRoughness: { baseColorFactor: [0.5, 0.5, 0.5, 1] },
-  }));
-  const bytes = Buffer.from(JSON.stringify(json), 'utf8');
-  const padded = Buffer.alloc((bytes.length + 3) & ~3, 0x20);
-  bytes.copy(padded);
-  const rest = buffer.subarray(20 + jsonLength);
-  const out = Buffer.alloc(20 + padded.length + rest.length);
-  buffer.copy(out, 0, 0, 12);
-  out.writeUInt32LE(out.length, 8);
-  out.writeUInt32LE(padded.length, 12);
-  buffer.copy(out, 16, 16, 20);
-  padded.copy(out, 20);
-  rest.copy(out, 20 + padded.length);
-  return out.buffer.slice(out.byteOffset, out.byteOffset + out.length);
-}
-
-function loadScene(): Promise<Object3D> {
-  const data = stripTextures(readFileSync(GLB));
-  return new Promise((resolve, reject) =>
-    new GLTFLoader().parse(data, '', (g) => resolve(g.scene), reject),
-  );
-}
-
-const shared = new Map<string, Material>(
-  ['paint_body', 'paint_hood', 'mat_glass'].map((n) => [n, new MeshStandardMaterial({ name: n })]),
-);
+const shared = sharedTestMaterials;
+const loadScene = () => loadGlbScene(GLB);
 
 describe('2013 Ford Mustang GT (gerçek GLB)', () => {
   it('manifest araç kayıt defterinde ve model yolu public altında', () => {
@@ -137,6 +86,27 @@ describe('2013 Ford Mustang GT (gerçek GLB)', () => {
         spoiler_rear: 'ducktail',
       }).sort(),
     ).toEqual(['hood', 'spoiler_rear']);
+  });
+
+  it('yüzey haritası (surface.json) modelle güncel: örnek noktalarda ±1 cm', async () => {
+    const prepared = prepareModel(await loadScene(), car.manifest, shared, car.modelMap);
+    const fresh = sampleSurface(prepared.root);
+    const stored = car.surface;
+    expect(stored).toBeDefined();
+    // Model/eşleme değişip harita yeniden üretilmediyse burası kırılır (bkz. surface.gen.test.ts)
+    for (const [z, x] of [
+      [2.05, 0.55],
+      [1.3, 0],
+      [-2.1, 0.3],
+      [-0.4, 0],
+      [0.5, 0.7],
+    ] as const) {
+      const a = sample2(fresh.top, z, x);
+      const b = sample2(stored!.top, z, x);
+      expect(a).not.toBeNull();
+      expect(Math.abs((a ?? 0) - (b ?? 0))).toBeLessThan(0.01);
+    }
+    expect(fresh.nose.values).toEqual(stored!.nose.values);
   });
 
   it('çapa uyarısı eşlemeli modellerde gürültü yapmaz', async () => {

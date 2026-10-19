@@ -1,7 +1,10 @@
+import { useEffect, useMemo } from 'react';
 import { RoundedBox } from '@react-three/drei';
+import { ExtrudeGeometry, Shape } from 'three';
 import { paintFor } from '../materials/carMaterials';
 import { useCarMaterials } from '../materials/useCarMaterials';
 import { Mirrored, type SlotProps } from './common';
+import { bottomY, noseZ, sideX } from './pose';
 
 /** Ön bölge placeholder ölçüleri (m). z değerleri burun yüzeyine göredir. */
 const LAYOUT = {
@@ -13,8 +16,16 @@ const LAYOUT = {
   grilleBars: { stock: 3, billet: 6, meshColumns: 16, meshRows: 5, bar: 0.012, billetBar: 0.022 },
   headlight: { x: 0.62, y: 0.62, offsetZ: 0.03, radius: 0.08, bezelTube: 0.012, haloRadius: 0.06 },
   hiddenCover: { width: 0.27, height: 0.19, depth: 0.02, slats: 4 },
-  chin: { y: 0.31, width: 1.5, thickness: 0.03, depth: 0.14, offsetZ: -0.02, pitch: -0.25 },
-  splitter: { y: 0.29, width: 1.72, thickness: 0.012, depth: 0.2, offsetZ: 0.02 },
+  chin: {
+    y: 0.31,
+    width: 1.5,
+    thickness: 0.03,
+    depth: 0.14,
+    offsetZ: -0.02,
+    pitch: -0.25,
+    protrude: 0.03,
+  },
+  splitter: { y: 0.29, width: 1.72, thickness: 0.012, depth: 0.2, offsetZ: 0.02, protrude: 0.07 },
 } as const;
 
 export function FrontBumper({ option, car }: SlotProps) {
@@ -172,28 +183,77 @@ export function Headlights({ option, car }: SlotProps) {
   );
 }
 
+/** Gerçek modelde lip/splitter'ın tamponun gerisine uzandığı mesafe (m) */
+const CHIN_REACH = 0.4;
+
+/**
+ * Gerçek modelde lip/splitter: tamponun alt kenar hattını (yan yüzey haritasından) izleyen,
+ * `protrude` kadar dışa taşan düz levha. Burnun kavsini takip ettiği için köşeleri havada kalmaz.
+ * Dönüş yerel uzayda: y=0 alt yüz, kalınlık yukarı.
+ */
+function useChinGeometry(car: SlotProps['car'], protrude: number, thickness: number) {
+  return useMemo(() => {
+    if (!car.surface) return null;
+    const front = noseZ(car, 0.3);
+    const lower = bottomY(car, front - 0.12);
+    const edgeY = lower + 0.03;
+    const back = front - CHIN_REACH;
+    const nose = noseZ(car, edgeY) + protrude;
+    const side: [number, number][] = [];
+    for (let z = back; z < nose - 0.01; z += 0.02) {
+      const x = Math.max(0, sideX(car, z, edgeY)) + protrude;
+      // Burun ucu yuvarlak: önde x hızla küçülür; z burnu geçmesin
+      side.push([x, Math.min(z, nose)]);
+    }
+    const shape = new Shape();
+    // Şekil düzlemi (x, -z): -π/2 x dönüşüyle yerel z -> dünya y (kalınlık yukarı)
+    shape.moveTo(-(side[0]?.[0] ?? 0), -back);
+    for (const [x, z] of side) shape.lineTo(-x, -z);
+    shape.lineTo(0, -nose);
+    for (const [x, z] of [...side].reverse()) shape.lineTo(x, -z);
+    shape.closePath();
+    const geometry = new ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false });
+    return { geometry, y: lower - thickness };
+  }, [car, protrude, thickness]);
+}
+
 export function ChinSpoiler({ option, car }: SlotProps) {
   const m = useCarMaterials();
-  const z0 = car.body.halfLength;
-  if (option === 'classic') {
-    const c = LAYOUT.chin;
+  const classic = option === 'classic';
+  const fitted = useChinGeometry(
+    car,
+    classic ? LAYOUT.chin.protrude : LAYOUT.splitter.protrude,
+    classic ? LAYOUT.chin.thickness : LAYOUT.splitter.thickness,
+  );
+  useEffect(() => () => fitted?.geometry.dispose(), [fitted]);
+  if (option !== 'classic' && option !== 'carbon_splitter') return null;
+  const material = classic ? paintFor(m, 'bumpers') : m.carbon;
+
+  if (fitted)
     return (
       <mesh
-        position={[0, c.y, z0 + c.offsetZ]}
-        rotation-x={c.pitch}
-        material={paintFor(m, 'bumpers')}
-      >
+        geometry={fitted.geometry}
+        position-y={fitted.y}
+        rotation-x={-Math.PI / 2}
+        material={material}
+        castShadow
+      />
+    );
+
+  // Placeholder gövde: sabit ölçülü levha
+  const z0 = car.body.halfLength;
+  if (classic) {
+    const c = LAYOUT.chin;
+    return (
+      <mesh position={[0, c.y, z0 + c.offsetZ]} rotation-x={c.pitch} material={material}>
         <boxGeometry args={[c.width, c.thickness, c.depth]} />
       </mesh>
     );
   }
-  if (option === 'carbon_splitter') {
-    const s = LAYOUT.splitter;
-    return (
-      <mesh position={[0, s.y, z0 + s.offsetZ]} material={m.carbon}>
-        <boxGeometry args={[s.width, s.thickness, s.depth]} />
-      </mesh>
-    );
-  }
-  return null;
+  const sp = LAYOUT.splitter;
+  return (
+    <mesh position={[0, sp.y, z0 + sp.offsetZ]} material={material}>
+      <boxGeometry args={[sp.width, sp.thickness, sp.depth]} />
+    </mesh>
+  );
 }

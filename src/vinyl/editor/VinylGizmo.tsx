@@ -108,8 +108,11 @@ function ReflectionHidden({ children }: { children: ReactNode }) {
         const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         const mirrored = camera.position.y < 0;
         for (const material of materials) {
+          // Malzemenin kendi ayarı korunur: taşıma alanı (colorWrite=false) ana kamerada da
+          // görünmez kalmalı, yoksa vinilin önünde opak bir dikdörtgen çizilir.
+          material.userData.colorWrite ??= material.colorWrite;
           material.userData.depthWrite ??= material.depthWrite;
-          material.colorWrite = !mirrored;
+          material.colorWrite = !mirrored && (material.userData.colorWrite as boolean);
           material.depthWrite = !mirrored && (material.userData.depthWrite as boolean);
         }
       };

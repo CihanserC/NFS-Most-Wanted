@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BRAKE_LEVELS,
   buildStats,
@@ -95,7 +96,10 @@ function Dyno({ perf, supercharged }: { perf: PerformanceConfig; supercharged: b
   );
 }
 
-/** Performans: motor, şanzıman, fren, süspansiyon seçimi + istatistik çubukları ve dyno. */
+/**
+ * Performans: motor, şanzıman, fren, süspansiyon seçimi soldaki editörde; istatistik çubukları ve
+ * dyno sağ üstte ayrı panelde (araç görünür kalsın, seçenek üzerinde gezinirken fark yan yana okunur).
+ */
 export function PerformanceEditor() {
   const build = useBuildStore((s) => s.build);
   const { setPerformance } = useBuildStore.getState();
@@ -129,20 +133,6 @@ export function PerformanceEditor() {
 
   return (
     <div className="pe we pf">
-      <Section title={t('perf.stats')}>
-        {STAT_KEYS.map(({ key, digits, lowerIsBetter }) => (
-          <StatBar
-            key={key}
-            stat={key}
-            value={shown[key]}
-            saved={saved[key]}
-            digits={digits}
-            lowerIsBetter={lowerIsBetter}
-          />
-        ))}
-        <Dyno perf={preview} supercharged={supercharged} />
-        <p className="we-info">{t(supercharged ? 'perf.supercharger' : 'perf.supercharger.off')}</p>
-      </Section>
       <Section title={t('perf.engine')}>{choice('engine', ENGINE_LEVELS, 'perfEngine')}</Section>
       <Section title={t('perf.transmission')}>
         {choice('transmission', TRANSMISSIONS, 'perfTransmission')}
@@ -151,6 +141,26 @@ export function PerformanceEditor() {
       <Section title={t('perf.suspension')}>
         {choice('suspension', SUSPENSION_LEVELS, 'perfSuspension')}
       </Section>
+      {createPortal(
+        <aside className="pf-stats-panel" aria-label={t('perf.stats')}>
+          <h3>{t('perf.stats')}</h3>
+          {STAT_KEYS.map(({ key, digits, lowerIsBetter }) => (
+            <StatBar
+              key={key}
+              stat={key}
+              value={shown[key]}
+              saved={saved[key]}
+              digits={digits}
+              lowerIsBetter={lowerIsBetter}
+            />
+          ))}
+          <Dyno perf={preview} supercharged={supercharged} />
+          <p className="we-info">
+            {t(supercharged ? 'perf.supercharger' : 'perf.supercharger.off')}
+          </p>
+        </aside>,
+        document.body,
+      )}
     </div>
   );
 }

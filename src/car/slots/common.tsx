@@ -8,6 +8,8 @@ export type SlotProps = {
   /** Önizleme dahil tüm etkin parçalar (bazı slotlar birbirine bağlı). */
   parts: Record<string, string>;
   car: CarDefinition;
+  /** Gerçek modelin üstüne ek parça olarak mı çiziliyor (placeholder gövde değil) */
+  onModel?: boolean;
 };
 
 const UP = new Vector3(0, 1, 0);

@@ -1,3 +1,37 @@
+/* Sağ üst istatistik paneli (üst çubuğun altında) */
+.pf-stats-panel {
+  position: fixed;
+  top: 76px;
+  right: 24px;
+  z-index: 5;
+  width: 300px;
+  padding: 12px 18px 10px;
+  font-family: var(--gm-font);
+  font-size: 13px;
+  color: var(--gm-text);
+  background: var(--gm-bg);
+  border-right: 3px solid var(--gm-accent);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.pf-stats-panel h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gm-accent);
+}
+
+.pf-stats-panel .we-info {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--gm-dim);
+}
+
 .pf-stat {
   margin: 8px 0;
 }

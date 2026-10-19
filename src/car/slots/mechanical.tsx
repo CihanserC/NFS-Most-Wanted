@@ -168,12 +168,64 @@ export function Engine({ option, parts, car }: SlotProps) {
   );
 }
 
-export function Interior({ option, car }: SlotProps) {
+/** Takla kafesi: ana çember, A sütunu boruları, arka destekler ve çapraz. */
+function RollCage({ dashZ }: { dashZ: number }) {
+  const m = useCarMaterials();
+  const c = LAYOUT.cage;
+  return (
+    <group>
+      {[1, -1].map((s) => (
+        <group key={s}>
+          <Bar
+            from={[s * c.hoopX, c.footY, c.hoopZ]}
+            to={[s * c.hoopX, c.top, c.hoopZ]}
+            radius={c.radius}
+            material={m.cage}
+          />
+          <Bar
+            from={[s * c.hoopX, c.top, c.hoopZ]}
+            to={[s * c.hoopX, c.frontTop, c.frontZ]}
+            radius={c.radius}
+            material={m.cage}
+          />
+          <Bar
+            from={[s * c.hoopX, c.frontTop, c.frontZ]}
+            to={[s * c.hoopX, c.footY + 0.2, dashZ]}
+            radius={c.radius}
+            material={m.cage}
+          />
+          <Bar
+            from={[s * c.hoopX, c.top, c.hoopZ]}
+            to={[s * c.hoopX * 0.9, c.footY + 0.15, c.rearZ]}
+            radius={c.radius}
+            material={m.cage}
+          />
+        </group>
+      ))}
+      <Bar
+        from={[c.hoopX, c.top, c.hoopZ]}
+        to={[-c.hoopX, c.top, c.hoopZ]}
+        radius={c.radius}
+        material={m.cage}
+      />
+      <Bar
+        from={[c.hoopX, c.footY, c.hoopZ]}
+        to={[-c.hoopX, c.top, c.hoopZ]}
+        radius={c.radius}
+        material={m.cage}
+      />
+    </group>
+  );
+}
+
+export function Interior({ option, car, onModel }: SlotProps) {
   const m = useCarMaterials();
   const i = LAYOUT.interior;
   const open = car.body.profile.cabinOpening;
   const tubDepth = car.body.profile.cabin.baseY - open.floorY;
-  const c = LAYOUT.cage;
+  const cage = option === 'roll_cage' && <RollCage dashZ={i.dash.z} />;
+  // Gerçek modelin kendi iç mekanı var: yalnız kafes eklenir (placeholder koltuk/torpido çizilmez)
+  if (onModel) return cage || null;
 
   return (
     <group>
@@ -214,51 +266,7 @@ export function Interior({ option, car }: SlotProps) {
         <torusGeometry args={[i.wheel.radius, 0.015, 8, 32]} />
       </mesh>
 
-      {option === 'roll_cage' &&
-        [1, -1].map((s) => (
-          <group key={s}>
-            <Bar
-              from={[s * c.hoopX, c.footY, c.hoopZ]}
-              to={[s * c.hoopX, c.top, c.hoopZ]}
-              radius={c.radius}
-              material={m.cage}
-            />
-            <Bar
-              from={[s * c.hoopX, c.top, c.hoopZ]}
-              to={[s * c.hoopX, c.frontTop, c.frontZ]}
-              radius={c.radius}
-              material={m.cage}
-            />
-            <Bar
-              from={[s * c.hoopX, c.frontTop, c.frontZ]}
-              to={[s * c.hoopX, c.footY + 0.2, i.dash.z]}
-              radius={c.radius}
-              material={m.cage}
-            />
-            <Bar
-              from={[s * c.hoopX, c.top, c.hoopZ]}
-              to={[s * c.hoopX * 0.9, c.footY + 0.15, c.rearZ]}
-              radius={c.radius}
-              material={m.cage}
-            />
-          </group>
-        ))}
-      {option === 'roll_cage' && (
-        <>
-          <Bar
-            from={[c.hoopX, c.top, c.hoopZ]}
-            to={[-c.hoopX, c.top, c.hoopZ]}
-            radius={c.radius}
-            material={m.cage}
-          />
-          <Bar
-            from={[c.hoopX, c.footY, c.hoopZ]}
-            to={[-c.hoopX, c.top, c.hoopZ]}
-            radius={c.radius}
-            material={m.cage}
-          />
-        </>
-      )}
+      {cage}
     </group>
   );
 }
