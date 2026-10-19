@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { newLayerId, sanitizeLayers } from './layers';
 import { vinylConfig } from './projection';
 import type { VinylLayer } from './types';
@@ -31,15 +32,15 @@ export function parseVinylGroup(json: string, isShape: (id: string) => boolean):
   try {
     data = JSON.parse(json);
   } catch {
-    throw new VinylImportError('Geçerli bir JSON değil');
+    throw new VinylImportError(t('error.invalidJson'));
   }
   const obj = data as { format?: unknown; version?: unknown; layers?: unknown };
   if (!obj || typeof obj !== 'object' || obj.format !== VINYL_EXPORT_FORMAT)
-    throw new VinylImportError('Tanınmayan vinil dosyası');
+    throw new VinylImportError(t('vinyl.error.unknown'));
   if (obj.version !== VINYL_EXPORT_VERSION)
-    throw new VinylImportError(`Desteklenmeyen vinil dosyası sürümü: ${String(obj.version)}`);
+    throw new VinylImportError(t('vinyl.error.version', { v: String(obj.version) }));
   const layers = sanitizeLayers(obj.layers, isShape);
-  if (layers.length === 0) throw new VinylImportError('Dosyada geçerli katman yok');
+  if (layers.length === 0) throw new VinylImportError(t('vinyl.error.empty'));
 
   const groupMap = new Map<string, string>();
   const single = layers.length > 1 ? newLayerId().replace(/^v/, 'g') : undefined;

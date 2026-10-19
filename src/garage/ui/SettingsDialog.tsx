@@ -3,7 +3,8 @@ import { playUiSound } from '../../audio/uiSound';
 import { useAppStore } from '../../core/store/appStore';
 import { useAudioStore } from '../../core/store/audioStore';
 import { QUALITY_LEVELS, TONE_MAPPINGS, useGraphicsStore } from '../../core/store/graphicsStore';
-import { t } from '../../i18n';
+import { LOCALE_NAMES, LOCALES, t, useLocale, useLocaleStore } from '../../i18n';
+import { volumeLabel } from '../../audio/volumeLabel';
 import './settings.css';
 
 /** Ses seviyesi basamakları (ayar penceresinde ◀ ▶ ile) */
@@ -26,11 +27,18 @@ function useRows(): Row[] {
   const g = useGraphicsStore();
   const volume = useAudioStore((s) => s.volume);
   const turntable = useAppStore((s) => s.turntable);
+  const locale = useLocale();
   const onOff = (v: boolean) => (v ? t('ui.on') : t('ui.off'));
   const nearestVolume = VOLUME_OPTIONS.reduce((a, b) =>
     Math.abs(b - volume) < Math.abs(a - volume) ? b : a,
   );
   return [
+    {
+      id: 'language',
+      label: t('settings.language'),
+      value: LOCALE_NAMES[locale],
+      step: (d) => useLocaleStore.getState().setLocale(cycle(LOCALES, locale, d)),
+    },
     {
       id: 'quality',
       label: t('ui.quality'),
@@ -58,7 +66,7 @@ function useRows(): Row[] {
     {
       id: 'sound',
       label: t('ui.sound'),
-      value: nearestVolume <= 0 ? t('ui.off') : `%${Math.round(nearestVolume * 100)}`,
+      value: volumeLabel(nearestVolume),
       step: (d) => {
         useAudioStore.getState().setVolume(cycle(VOLUME_OPTIONS, nearestVolume, d));
         playUiSound('confirm');

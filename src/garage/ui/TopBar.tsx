@@ -1,4 +1,4 @@
-import { t } from '../../i18n';
+import { formatNumber, t } from '../../i18n';
 import { leaveToSelect } from '../../core/store/carSession';
 import { useAppStore } from '../../core/store/appStore';
 import { useGraphicsStore } from '../../core/store/graphicsStore';
@@ -37,7 +37,7 @@ export function TopBar() {
       {showFps && (
         <span
           className={`gm-fps-readout${fps > 0 && fps < 55 ? ' is-low' : ''}`}
-          title={`${t('ui.drawCalls')}: ${drawCalls} · ${t('ui.triangles')}: ${triangles.toLocaleString('tr-TR')}`}
+          title={`${t('ui.drawCalls')}: ${drawCalls} · ${t('ui.triangles')}: ${formatNumber(triangles)}`}
         >
           {fps} FPS
         </span>

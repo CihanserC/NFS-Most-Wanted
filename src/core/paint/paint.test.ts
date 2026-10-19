@@ -99,8 +99,8 @@ describe('boya JSON', () => {
       JSON.stringify({ format: 'muscle-garage/paint', version, zones: z });
     expect(() => parsePaintExport('{', zones)).toThrow(PaintImportError);
     expect(() => parsePaintExport('{"foo":1}', zones)).toThrow(PaintImportError);
-    expect(() => parsePaintExport(file(99, {}), zones)).toThrow(/sürüm/);
-    expect(() => parsePaintExport(file(1, { wing: {} }), zones)).toThrow(/bölge/);
+    expect(() => parsePaintExport(file(99, {}), zones)).toThrow(/version/);
+    expect(() => parsePaintExport(file(1, { wing: {} }), zones)).toThrow(/zones/);
   });
 });
 

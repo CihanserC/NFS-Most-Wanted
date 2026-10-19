@@ -1,3 +1,4 @@
+import { toUpperLocale } from '../../i18n';
 /**
  * Orijinal "yarış" çizgi fontu. Her karakter 4×6'lık ızgarada (x sağa, y aşağı) bir veya
  * daha fazla çizgi (polyline) iskeletidir; kalem kalınlığı ve uç/birleşim stili font
@@ -477,7 +478,7 @@ export const getStrokeFont = (id: string | undefined): StrokeFontStyle =>
 
 /** Türkçe büyük harfe çevirir (i -> İ, ı -> I) ve fontta olmayan karakterleri atar. */
 export function normalizeText(text: string): string {
-  return [...text.toLocaleUpperCase('tr-TR')].filter((c) => c === ' ' || c in GLYPHS).join('');
+  return [...toUpperLocale(text)].filter((c) => c === ' ' || c in GLYPHS).join('');
 }
 
 export type TextLayout = {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RENDERED_SLOT_IDS } from '../car/slots/slotIds';
-import { hasTranslation } from '../i18n';
+import { hasTranslation, LOCALES, translationKeys } from '../i18n';
 import { getCar } from './cars';
 import categories from './ui/categories.json';
 
@@ -25,7 +25,14 @@ describe('veri tutarlılığı', () => {
     for (const id of slotIds) expect(RENDERED_SLOT_IDS as readonly string[]).toContain(id);
   });
 
-  it('tüm kategori, slot ve parça adlarının Türkçe çevirisi var', () => {
+  it('İngilizce ve Türkçe sözlükler aynı anahtarları içerir (eksik çeviri yok)', () => {
+    const en = new Set(translationKeys('en'));
+    const tr = new Set(translationKeys('tr'));
+    expect([...en].filter((k) => !tr.has(k))).toEqual([]);
+    expect([...tr].filter((k) => !en.has(k))).toEqual([]);
+  });
+
+  it('tüm kategori, slot ve parça adlarının her dilde çevirisi var', () => {
     const keys = [
       ...categories.map((c) => `category.${c.id}`),
       ...slotIds.map((id) => `slot.${id}`),
@@ -33,6 +40,7 @@ describe('veri tutarlılığı', () => {
         s.options.map((o) => `part.${id}.${o}`),
       ),
     ];
-    expect(keys.filter((k) => !hasTranslation(k))).toEqual([]);
+    for (const locale of LOCALES)
+      expect(keys.filter((k) => !hasTranslation(k, locale))).toEqual([]);
   });
 });

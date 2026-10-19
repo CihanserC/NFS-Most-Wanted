@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import defaultPaintJson from '../../data/paints/default.json';
 import { normalizeHex } from '../color/color';
 import { PAINT_TYPES, type PaintConfig, type PaintType } from './types';
@@ -86,20 +87,20 @@ export function parsePaintExport(json: string, zones: string[]): Record<string, 
   try {
     data = JSON.parse(json);
   } catch {
-    throw new PaintImportError('Geçerli bir JSON değil');
+    throw new PaintImportError(t('error.invalidJson'));
   }
   if (isObj(data) && data.format === PAINT_EXPORT_FORMAT) {
     if (data.version !== PAINT_EXPORT_VERSION)
-      throw new PaintImportError(`Desteklenmeyen boya dosyası sürümü: ${String(data.version)}`);
-    if (!isObj(data.zones)) throw new PaintImportError('"zones" alanı eksik');
+      throw new PaintImportError(t('paint.error.version', { v: String(data.version) }));
+    if (!isObj(data.zones)) throw new PaintImportError(t('paint.error.zonesMissing'));
     const zonesObj = data.zones;
     const known = zones.filter((z) => z in zonesObj);
-    if (known.length === 0) throw new PaintImportError('Dosyada bu araca ait boya bölgesi yok');
+    if (known.length === 0) throw new PaintImportError(t('paint.error.noZones'));
     return normalizePaintMap(zonesObj, zones);
   }
   if (validatePaint(data).length === 0) {
     const single = sanitizePaint(data);
     return Object.fromEntries(zones.map((z) => [z, single]));
   }
-  throw new PaintImportError('Tanınmayan boya dosyası');
+  throw new PaintImportError(t('paint.error.unknown'));
 }

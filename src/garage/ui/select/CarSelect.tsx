@@ -6,7 +6,7 @@ import { enterCar, previewCar } from '../../../core/store/carSession';
 import { useGarageStore } from '../../../core/store/garageStore';
 import { useBuildStore } from '../../../core/store/stores';
 import { listCars, type CarDefinition } from '../../../data/cars';
-import { t } from '../../../i18n';
+import { formatDate as formatLocaleDate, t } from '../../../i18n';
 import './carSelect.css';
 
 const STAT_KEYS: { key: keyof BuildStats; digits: number }[] = [
@@ -23,7 +23,7 @@ function stockStats(car: CarDefinition): BuildStats {
 }
 
 const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' });
+  formatLocaleDate(new Date(iso), { day: '2-digit', month: 'short' });
 
 /**
  * Araç seçim ekranı: vitrinde (döner tabla) seçili araç, altta araç kartları ve stok özellikleri.

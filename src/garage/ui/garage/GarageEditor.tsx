@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useGarageStore } from '../../../core/store/garageStore';
 import { useBuildStore } from '../../../core/store/stores';
 import { exportBuildJson, exportFileName } from '../../../core/storage/garageService';
-import { t } from '../../../i18n';
+import { formatDate as formatLocaleDate, t } from '../../../i18n';
 import { downloadBlob } from '../../photo/capture';
 import { captureThumbnail } from '../../photo/actions';
 import { Section } from '../controls';
@@ -11,7 +11,7 @@ import './garageEditor.css';
 const NOTICE_MS = 4500;
 
 const formatDate = (iso: string) =>
-  new Date(iso).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+  formatLocaleDate(new Date(iso), { dateStyle: 'short', timeStyle: 'short' });
 
 /** Proje adı: yazarken yerel, Enter/odak kaybında projeye uygulanır. */
 function NameField() {

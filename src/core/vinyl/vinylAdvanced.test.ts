@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { setLocale } from '../../i18n';
 import { getCar } from '../../data/cars';
 import {
   getVinylShape,
@@ -71,7 +72,11 @@ describe('şekil kütüphanesi (§7.4)', () => {
 
 describe('çizgi fontu ve yazı', () => {
   it('Türkçe büyük harfe çevirir, bilinmeyen karakteri atar', () => {
+    // Büyük harf dile göre: Türkçede i -> İ, İngilizcede i -> I
+    setLocale('tr');
     expect(normalizeText('istanbul ığdır')).toBe('İSTANBUL IĞDIR');
+    setLocale('en');
+    expect(normalizeText('istanbul')).toBe('ISTANBUL');
     expect(normalizeText('a@b€c')).toBe('ABC');
   });
 
@@ -274,19 +279,19 @@ describe('vinil grubu dışa / içe aktarma', () => {
 
   it('bozuk / yabancı dosyayı anlaşılır hatayla reddeder', () => {
     expect(() => parseVinylGroup('{', hasVinylShape)).toThrow(VinylImportError);
-    expect(() => parseVinylGroup('{"format":"x"}', hasVinylShape)).toThrow(/Tanınmayan/);
+    expect(() => parseVinylGroup('{"format":"x"}', hasVinylShape)).toThrow(/Unrecognised/);
     expect(() =>
       parseVinylGroup(
         JSON.stringify({ format: 'muscle-garage/vinyl', version: 9, layers: [] }),
         hasVinylShape,
       ),
-    ).toThrow(/sürüm/);
+    ).toThrow(/version/);
     expect(() =>
       parseVinylGroup(
         JSON.stringify({ format: 'muscle-garage/vinyl', version: 1, layers: [{ shapeId: 'yok' }] }),
         hasVinylShape,
       ),
-    ).toThrow(/geçerli katman/);
+    ).toThrow(/no valid layers/);
   });
 });
 

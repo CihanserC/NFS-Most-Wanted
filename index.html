@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -86,7 +86,16 @@
     <div id="boot" role="status" aria-live="polite">
       <div class="boot-inner">
         <div class="boot-title">Muscle <b>Garage</b></div>
-        <div class="boot-sub">Atölye hazırlanıyor</div>
+        <div class="boot-sub" id="boot-sub">Preparing the garage</div>
+        <script>
+          // Kayıtlı dil Türkçeyse açılış metni de Türkçe (uygulama yüklenmeden önce)
+          try {
+            if (localStorage.getItem('muscle-garage.locale') === 'tr') {
+              document.documentElement.lang = 'tr';
+              document.getElementById('boot-sub').textContent = 'Atölye hazırlanıyor';
+            }
+          } catch (e) {}
+        </script>
         <div class="boot-bar"><i></i></div>
       </div>
     </div>

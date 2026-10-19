@@ -100,7 +100,7 @@ export function CreditsScreen() {
                 <li key={s.name}>
                   <strong>{s.name}</strong>
                   <small>
-                    {s.license} · {s.usedFor}
+                    {s.license} · {t(s.usedForKey)}
                   </small>
                   <a href={s.url} target="_blank" rel="noreferrer noopener">
                     {s.url}

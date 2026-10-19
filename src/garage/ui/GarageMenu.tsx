@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { categoryLabel, hasTranslation, partLabel, slotLabel, t } from '../../i18n';
+import { categoryLabel, formatNumber, hasTranslation, partLabel, slotLabel, t } from '../../i18n';
 import { useAppStore } from '../../core/store/appStore';
 import { playUiSound } from '../../audio/uiSound';
 import { useBuildStore } from '../../core/store/stores';
@@ -50,7 +50,7 @@ const EDITOR_LEVELS: readonly Level[] = [
   'photo',
 ];
 
-const formatPrice = (price: number) => (price === 0 ? '—' : `$${price.toLocaleString('tr-TR')}`);
+const formatPrice = (price: number) => (price === 0 ? '—' : `$${formatNumber(price)}`);
 
 /** Most Wanted tarzı atölye menüsü. */
 export function GarageMenu() {

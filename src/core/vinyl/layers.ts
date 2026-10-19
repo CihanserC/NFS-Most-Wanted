@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { normalizeHex } from '../color/color';
 import { vinylConfig } from './projection';
 import { MASK_MODES, VINYL_SIDES, type MaskMode, type VinylLayer, type VinylSide } from './types';
@@ -97,7 +98,7 @@ export function createLayer(
 
 export class LayerLimitError extends Error {
   constructor() {
-    super(`Katman limiti (${vinylConfig.layerLimit}) doldu`);
+    super(t('vinyl.error.layerLimit', { n: vinylConfig.layerLimit }));
     this.name = 'LayerLimitError';
   }
 }

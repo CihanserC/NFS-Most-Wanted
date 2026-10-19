@@ -106,6 +106,8 @@ export function PerformanceEditor() {
   const car = getCar(build.carId);
   const [hover, setHover] = useState<Partial<PerformanceConfig> | null>(null);
   const supercharged = hasSupercharger(build.parts);
+  // Blower V8 seçeneği yalnız motor slotu olan araçlarda (Mustang'te yok)
+  const blowerAvailable = car.manifest.slots.engine?.options.includes('blower_v8') ?? false;
 
   const preview: PerformanceConfig = { ...build.performance, ...hover };
   const statsFor = (performance: PerformanceConfig) =>
@@ -156,7 +158,13 @@ export function PerformanceEditor() {
           ))}
           <Dyno perf={preview} supercharged={supercharged} />
           <p className="we-info">
-            {t(supercharged ? 'perf.supercharger' : 'perf.supercharger.off')}
+            {t(
+              supercharged
+                ? 'perf.supercharger'
+                : blowerAvailable
+                  ? 'perf.supercharger.off'
+                  : 'perf.supercharger.unavailable',
+            )}
           </p>
         </aside>,
         document.body,
