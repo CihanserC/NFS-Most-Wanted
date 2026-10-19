@@ -63,6 +63,8 @@ export type VehicleSnapshot = {
   speed: number;
   forwardSpeed: number;
   lateralSpeed: number;
+  /** Arka tekerlek patinaj hızı (m/s) */
+  slipSpeed: number;
   rpm: number;
   gear: number;
   reverse: boolean;
@@ -462,6 +464,7 @@ export class VehiclePhysics {
       speed,
       forwardSpeed: this.lastForward,
       lateralSpeed: this.lastLateral,
+      slipSpeed: this.slipSpeed,
       rpm: this.drivetrain.rpm,
       gear: this.drivetrain.gear,
       reverse: this.drivetrain.reverse,

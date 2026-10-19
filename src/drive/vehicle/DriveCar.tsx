@@ -1,3 +1,4 @@
+import { applyAssists, DEFAULT_ASSISTS } from '../../core/drive/assists';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Quaternion, SpotLight, Vector3, type Group } from 'three';
@@ -182,7 +183,15 @@ export function DriveCar({
     if (!store.paused) {
       acc.current += Math.min(delta, 0.1);
       let steps = 0;
-      const drive = input.current?.read() ?? { throttle: 0, brake: 0, steer: 0, handbrake: false };
+      const raw = input.current?.read() ?? { throttle: 0, brake: 0, steer: 0, handbrake: false };
+      const prev = snapshotRef.current;
+      const drive = prev
+        ? applyAssists(
+            raw,
+            { forwardSpeed: prev.forwardSpeed, lateralSpeed: prev.lateralSpeed, slipSpeed: prev.slipSpeed },
+            DEFAULT_ASSISTS,
+          )
+        : raw;
       while (acc.current >= PHYSICS_STEP && steps < MAX_STEPS_PER_FRAME) {
         ph.step(PHYSICS_STEP, drive);
         acc.current -= PHYSICS_STEP;

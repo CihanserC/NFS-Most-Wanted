@@ -1,9 +1,10 @@
 import { useRef, type RefObject } from 'react';
-import { Environment, Lightformer, Sky, Stars } from '@react-three/drei';
+import { Environment, Lightformer, Stars } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, type DirectionalLight, type Group } from 'three';
 import { useQualityPreset } from '../../core/store/graphicsStore';
 import type { TimeOfDay } from '../../core/store/driveStore';
+import { SkyDome } from './SkyDome';
 import { driveLighting } from './driveLighting';
 
 const SHADOW_RANGE = 45;
@@ -37,16 +38,13 @@ export function DriveEnvironment({
     <>
       <color attach="background" args={[l.background]} />
       <fog attach="fog" args={[l.fog.color, l.fog.near, l.fog.far]} />
-      {timeOfDay === 'sunset' ? (
-        <Sky
-          distance={4500}
-          sunPosition={l.sunDirection.clone().multiplyScalar(1000).toArray()}
-          turbidity={9}
-          rayleigh={2.4}
-          mieCoefficient={0.012}
-          mieDirectionalG={0.9}
-        />
-      ) : (
+      <SkyDome
+        horizon={l.sky.horizon}
+        zenith={l.sky.zenith}
+        glow={l.sky.glow}
+        sunDirection={l.sunDirection}
+      />
+      {timeOfDay === 'night' && (
         <Stars radius={600} depth={60} count={2500} factor={5} saturation={0} fade speed={0} />
       )}
       <hemisphereLight args={[l.hemi.sky, l.hemi.ground, l.hemi.intensity]} />
