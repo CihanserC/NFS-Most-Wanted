@@ -3,12 +3,21 @@ import type { Track, TrackSample } from './track';
 export type SceneryItem = { x: number; z: number; scale: number; rotation: number };
 export type LampPost = { x: number; z: number; yaw: number };
 export type Grandstand = { x: number; z: number; yaw: number; length: number };
+/** Başlangıç/bitiş kapısı: pisti dik kesen köprü; yaw pist yönü, span direkler arası (m) */
+export type StartGantry = { x: number; z: number; yaw: number; span: number };
+
+/** Kapı direğinin kare kesit kenarı (m); fizik çarpışma kutusu da bunu kullanır */
+export const GANTRY_PILLAR_M = 0.8;
 
 export type Scenery = {
-  trees: SceneryItem[];
+  /** Kozalaklı (koni taç) */
+  pines: SceneryItem[];
+  /** Yapraklı (yuvarlak taç) */
+  oaks: SceneryItem[];
   rocks: SceneryItem[];
   lamps: LampPost[];
   grandstands: Grandstand[];
+  gantry: StartGantry;
 };
 
 /** Tekrarlanabilir rastgelelik (mulberry32) */
@@ -23,8 +32,12 @@ function rng(seed: number): () => number {
   };
 }
 
-const TREE_COUNT = 160;
+const PINE_COUNT = 220;
+const OAK_COUNT = 160;
 const ROCK_COUNT = 90;
+/** Ağaçların bir kısmı gruplar halinde (koru) yerleşir; geri kalanı serbest */
+const GROVE_COUNT = 14;
+const GROVE_RADIUS = 34;
 const LAMP_EVERY_SAMPLES = 70;
 /** Pist merkezinden bu mesafenin içine ağaç/kaya konmaz (bariyer dışı + pay) */
 const CLEARANCE_MARGIN = 6;
@@ -39,13 +52,29 @@ export function buildScenery(track: Track, seed = 7): Scenery {
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
   const cz = (Math.min(...zs) + Math.max(...zs)) / 2;
 
-  const place = (count: number, scaleRange: [number, number]): SceneryItem[] => {
+  const groves = Array.from({ length: GROVE_COUNT }, () => ({
+    x: cx + (random() * 2 - 1) * FIELD_RADIUS * 0.85,
+    z: cz + (random() * 2 - 1) * FIELD_RADIUS * 0.85,
+  }));
+
+  const place = (count: number, scaleRange: [number, number], groveShare = 0): SceneryItem[] => {
     const items: SceneryItem[] = [];
     let attempts = 0;
     while (items.length < count && attempts < count * 40) {
       attempts++;
-      const x = cx + (random() * 2 - 1) * FIELD_RADIUS;
-      const z = cz + (random() * 2 - 1) * FIELD_RADIUS;
+      let x: number;
+      let z: number;
+      const grove =
+        random() < groveShare ? groves[Math.floor(random() * groves.length)] : undefined;
+      if (grove) {
+        const a = random() * Math.PI * 2;
+        const r = Math.sqrt(random()) * GROVE_RADIUS;
+        x = grove.x + Math.cos(a) * r;
+        z = grove.z + Math.sin(a) * r;
+      } else {
+        x = cx + (random() * 2 - 1) * FIELD_RADIUS;
+        z = cz + (random() * 2 - 1) * FIELD_RADIUS;
+      }
       if (distanceToTrack(track, x, z) < minDist) continue;
       items.push({
         x,
@@ -82,10 +111,26 @@ export function buildScenery(track: Track, seed = 7): Scenery {
   }));
 
   return {
-    trees: place(TREE_COUNT, [0.8, 1.6]),
+    pines: place(PINE_COUNT, [0.8, 1.6], 0.55),
+    oaks: place(OAK_COUNT, [0.7, 1.4], 0.65),
     rocks: place(ROCK_COUNT, [0.6, 2.4]),
     lamps,
     grandstands,
+    gantry: startGantry(track),
+  };
+}
+
+/**
+ * Başlangıç/bitiş kapısı: çizginin tam üstünde; direkler bariyerlerin hemen dışında durur ki
+ * araç direğe ancak bariyeri aşarak ulaşabilsin (direkler ayrıca fizikte katıdır).
+ */
+export function startGantry(track: Track): StartGantry {
+  const start = track.samples[track.startIndex] as TrackSample;
+  return {
+    x: start.x,
+    z: start.z,
+    yaw: Math.atan2(start.tx, start.tz),
+    span: track.widthM + 2 * (track.config.barrierOffsetM + 1.2),
   };
 }
 

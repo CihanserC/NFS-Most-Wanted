@@ -2,6 +2,7 @@ import {
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
+  ClampToEdgeWrapping,
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three';
@@ -12,7 +13,14 @@ export const ASPHALT_TILE_M = 12;
 export const KERB_TILE_M = 3;
 export const GRASS_TILE_M = 10;
 /** Yüzey yükseklikleri: z-fighting olmasın diye asfalt > çim, kerb > asfalt */
-export const SURFACE_Y = { grass: 0, asphalt: 0.01, kerb: 0.02 } as const;
+export const SURFACE_Y = {
+  grass: 0,
+  verge: 0.005,
+  asphalt: 0.01,
+  kerb: 0.02,
+  line: 0.015,
+} as const;
+export const VERGE_TILE_M = 8;
 
 /**
  * Pist boyunca [fromOffset, toOffset] arası (sol pozitif) şerit. UV: u = yanal 0..1,
@@ -95,22 +103,101 @@ function finish(c: HTMLCanvasElement, repeatX = 1, repeatY = 1): CanvasTexture {
   return t;
 }
 
-/** Asfalt: gürültü, kenar çizgileri ve kesik orta şerit (yanal u: 0..1). */
+/** Asfalt: ince agrega, hafif büyük ölçekli ton farkı, beyaz kenar çizgileri ve kauçuk izi (yanal u: 0..1). */
 export function createAsphaltTexture(): CanvasTexture {
-  const [c, ctx] = canvas(256, 512);
-  ctx.fillStyle = '#2a2b2e';
-  ctx.fillRect(0, 0, 256, 512);
-  noise(ctx, 256, 512, 9000, 0.12);
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  // araç iz bantları (hafif koyu)
-  ctx.fillRect(256 * 0.28, 0, 22, 512);
-  ctx.fillRect(256 * 0.68, 0, 22, 512);
-  ctx.fillStyle = '#d8d8d0';
-  ctx.fillRect(256 * 0.03, 0, 6, 512);
-  ctx.fillRect(256 * 0.97 - 6, 0, 6, 512);
-  ctx.fillStyle = '#c9b24a';
-  ctx.fillRect(256 * 0.5 - 3, 0, 6, 150);
+  const W = 512;
+  const H = 1024;
+  const [c, ctx] = canvas(W, H);
+  ctx.fillStyle = '#2b2c2f';
+  ctx.fillRect(0, 0, W, H);
+  // Büyük ölçekli ton farkı (yama/onarım hissi), çok düşük kontrast
+  for (let i = 0; i < 40; i++) {
+    const v = 30 + Math.floor(Math.random() * 18);
+    ctx.fillStyle = `rgba(${v},${v},${v + 2},0.18)`;
+    ctx.beginPath();
+    ctx.ellipse(
+      Math.random() * W,
+      Math.random() * H,
+      30 + Math.random() * 90,
+      40 + Math.random() * 160,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  // İnce agrega: tek piksellik, düşük kontrastlı taneler
+  for (let i = 0; i < 60000; i++) {
+    const v = 20 + Math.floor(Math.random() * 70);
+    ctx.fillStyle = `rgba(${v},${v},${v},0.35)`;
+    ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+  }
+  // Yarış çizgisi kauçuk izi: iki koyu, yumuşak bant
+  for (const center of [0.36, 0.64]) {
+    const g = ctx.createLinearGradient(W * (center - 0.12), 0, W * (center + 0.12), 0);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(0.5, 'rgba(0,0,0,0.22)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(W * (center - 0.12), 0, W * 0.24, H);
+  }
+  // Kenar çizgileri (pist kenarından biraz içeride)
+  ctx.fillStyle = '#e4e2da';
+  ctx.fillRect(W * 0.025, 0, 8, H);
+  ctx.fillRect(W * 0.975 - 8, 0, 8, H);
   return finish(c);
+}
+
+/** Başlangıç/bitiş çizgisi: iki sıra dama (u: pist enine, v: boyuna). */
+export function createCheckerTexture(columns = 16): CanvasTexture {
+  const cell = 32;
+  const [c, ctx] = canvas(columns * cell, cell * 2);
+  for (let x = 0; x < columns; x++)
+    for (let y = 0; y < 2; y++) {
+      ctx.fillStyle = (x + y) % 2 === 0 ? '#f2f0ea' : '#151517';
+      ctx.fillRect(x * cell, y * cell, cell, cell);
+    }
+  const t = finish(c);
+  t.wrapS = t.wrapT = ClampToEdgeWrapping;
+  return t;
+}
+
+/** Bariyere kadar uzanan biçilmiş çim: pist boyunca açık/koyu biçme şeritleri. */
+export function createVergeTexture(): CanvasTexture {
+  const [c, ctx] = canvas(64, 256);
+  ctx.fillStyle = '#4a5a2a';
+  ctx.fillRect(0, 0, 64, 128);
+  ctx.fillStyle = '#3f4f24';
+  ctx.fillRect(0, 128, 64, 128);
+  for (let i = 0; i < 900; i++) {
+    const hue = 72 + Math.random() * 20;
+    ctx.fillStyle = `hsla(${hue}, 32%, ${20 + Math.random() * 12}%, 0.45)`;
+    ctx.fillRect(
+      Math.random() * 64,
+      Math.random() * 256,
+      1 + Math.random() * 2,
+      1 + Math.random() * 3,
+    );
+  }
+  return finish(c);
+}
+
+/** Başlangıç kapısı afişi: koyu zemin, turuncu şerit ve pist adı. */
+export function createGantryBannerTexture(title: string): CanvasTexture {
+  const [c, ctx] = canvas(1024, 128);
+  ctx.fillStyle = '#121316';
+  ctx.fillRect(0, 0, 1024, 128);
+  ctx.fillStyle = '#ff7a18';
+  ctx.fillRect(0, 0, 1024, 10);
+  ctx.fillRect(0, 118, 1024, 10);
+  ctx.fillStyle = '#f2efe8';
+  ctx.font = 'bold 62px "Bahnschrift", "Arial Narrow", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(title, 512, 66);
+  const t = finish(c);
+  t.wrapS = t.wrapT = ClampToEdgeWrapping;
+  return t;
 }
 
 export function createKerbTexture(): CanvasTexture {

@@ -19,12 +19,31 @@ describe('bariyerler', () => {
     for (const b of barriers) expect(distanceToTrack(track, b.x, b.z)).toBeGreaterThan(clearance);
   });
 
-  it('segmentler pist kenarına yakın (bariyer mesafesi civarında)', () => {
+  it('segmentler pist kenarına yakın (viraj içinde daraltılmış olabilir)', () => {
+    const min = track.widthM / 2 + track.config.kerbM + 1;
     for (const b of barriers) {
       const d = distanceToTrack(track, b.x, b.z);
-      expect(d).toBeGreaterThan(edge - 4);
+      expect(d).toBeGreaterThan(min);
       expect(d).toBeLessThan(edge + 1.5);
-      expect(b.halfLength).toBeGreaterThan(2);
+      expect(b.halfLength).toBeGreaterThan(1);
+    }
+  });
+
+  it('her kenarda zincir kesintisiz: ardışık segmentlerin uçları örtüşür (araç kaçamaz)', () => {
+    const ends = (b: (typeof barriers)[number]) => {
+      const ux = Math.sin(b.yaw) * b.halfLength;
+      const uz = Math.cos(b.yaw) * b.halfLength;
+      return { start: [b.x - ux, b.z - uz], end: [b.x + ux, b.z + uz] };
+    };
+    for (const side of [1, -1] as const) {
+      const chain = barriers.filter((b) => b.side === side);
+      chain.forEach((b, i) => {
+        const next = chain[(i + 1) % chain.length]!;
+        const a = ends(b).end;
+        const c = ends(next).start;
+        // Uçlar arası mesafe örtüşme payının altında: aralık yok
+        expect(Math.hypot(a[0]! - c[0]!, a[1]! - c[1]!)).toBeLessThan(1.3);
+      });
     }
   });
 });
@@ -39,9 +58,10 @@ describe('çevre yerleşimi', () => {
 
   it('ağaç ve kayalar pistten ve bariyerden uzak', () => {
     const min = edge;
-    expect(scenery.trees.length).toBeGreaterThan(80);
+    expect(scenery.pines.length).toBeGreaterThan(150);
+    expect(scenery.oaks.length).toBeGreaterThan(100);
     expect(scenery.rocks.length).toBeGreaterThan(40);
-    for (const item of [...scenery.trees, ...scenery.rocks])
+    for (const item of [...scenery.pines, ...scenery.oaks, ...scenery.rocks])
       expect(distanceToTrack(track, item.x, item.z)).toBeGreaterThanOrEqual(min);
   });
 
@@ -51,5 +71,8 @@ describe('çevre yerleşimi', () => {
     const start = track.samples[track.startIndex]!;
     for (const g of scenery.grandstands)
       expect(Math.hypot(g.x - start.x, g.z - start.z)).toBeLessThan(80);
+    expect(Math.hypot(scenery.gantry.x - start.x, scenery.gantry.z - start.z)).toBeLessThan(1);
+    // Direkler bariyerin dışında
+    expect(scenery.gantry.span / 2).toBeGreaterThan(edge);
   });
 });

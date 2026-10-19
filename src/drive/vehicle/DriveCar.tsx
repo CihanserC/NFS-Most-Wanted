@@ -188,7 +188,11 @@ export function DriveCar({
       const drive = prev
         ? applyAssists(
             raw,
-            { forwardSpeed: prev.forwardSpeed, lateralSpeed: prev.lateralSpeed, slipSpeed: prev.slipSpeed },
+            {
+              forwardSpeed: prev.forwardSpeed,
+              lateralSpeed: prev.lateralSpeed,
+              slipSpeed: prev.slipSpeed,
+            },
             DEFAULT_ASSISTS,
           )
         : raw;

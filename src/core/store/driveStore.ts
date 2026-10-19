@@ -25,10 +25,14 @@ export type DriveHud = {
   offTrack: boolean;
 };
 
+/** Duraklatma menüsünün gösterdiği sayfa */
+export type PauseView = 'main' | 'controls';
+
 export type DriveState = {
   /** Fizik dünyası kuruldu mu (yükleme göstergesi) */
   ready: boolean;
   paused: boolean;
+  pauseView: PauseView;
   cameraIndex: number;
   timeOfDay: TimeOfDay;
   hud: DriveHud;
@@ -39,6 +43,9 @@ export type DriveState = {
   setHud: (hud: DriveHud) => void;
   setReady: (ready: boolean) => void;
   setPaused: (paused: boolean) => void;
+  setPauseView: (view: PauseView) => void;
+  /** Esc: kontroller sayfasındaysa menüye döner, değilse duraklatmayı açar/kapatır */
+  escape: () => void;
   cycleCamera: () => void;
   toggleTimeOfDay: () => void;
   restart: () => void;
@@ -64,6 +71,7 @@ export const initialHud = (): DriveHud => ({
 export const useDriveStore = create<DriveState>()((set) => ({
   ready: false,
   paused: false,
+  pauseView: 'main',
   cameraIndex: 0,
   timeOfDay: 'sunset',
   hud: initialHud(),
@@ -71,10 +79,17 @@ export const useDriveStore = create<DriveState>()((set) => ({
   respawnTick: 0,
   setHud: (hud) => set({ hud }),
   setReady: (ready) => set({ ready }),
-  setPaused: (paused) => set({ paused }),
+  setPaused: (paused) => set({ paused, pauseView: 'main' }),
+  setPauseView: (pauseView) => set({ pauseView }),
+  escape: () =>
+    set((s) =>
+      s.paused && s.pauseView !== 'main'
+        ? { pauseView: 'main' }
+        : { paused: !s.paused, pauseView: 'main' },
+    ),
   cycleCamera: () => set((s) => ({ cameraIndex: (s.cameraIndex + 1) % DRIVE_CAMERAS.length })),
   toggleTimeOfDay: () => set((s) => ({ timeOfDay: s.timeOfDay === 'sunset' ? 'night' : 'sunset' })),
   restart: () => set((s) => ({ restartTick: s.restartTick + 1, hud: initialHud() })),
   respawn: () => set((s) => ({ respawnTick: s.respawnTick + 1 })),
-  begin: () => set({ paused: false, ready: false, hud: initialHud() }),
+  begin: () => set({ paused: false, pauseView: 'main', ready: false, hud: initialHud() }),
 }));

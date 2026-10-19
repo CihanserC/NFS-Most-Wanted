@@ -7,6 +7,7 @@ import {
   type DrivetrainState,
 } from '../../core/drive/drivetrain';
 import { computeBarriers } from '../../core/drive/barriers';
+import { GANTRY_PILLAR_M, startGantry } from '../../core/drive/scenery';
 import {
   queryTrack,
   spawnPose,
@@ -37,6 +38,8 @@ const SPIN_INERTIA_MASS = 110;
 /** Şasi ters dönerse bu süre sonra otomatik düzeltilir (sn) */
 const FLIP_RESET_SECONDS = 2;
 const MAX_SUSPENSION_FORCE = 1e5;
+/** Bariyer kapsülü yarıçapı (m): görsel bariyer 0.8 m kalınlığında, 1.2 m yüksekliğinde */
+const BARRIER_RADIUS = 0.55;
 /** Gaz kesilince egzoz alevinin süresi (sn) */
 const FLAME_SECONDS = 0.28;
 
@@ -170,13 +173,38 @@ export class VehiclePhysics {
     return v;
   }
 
-  /** Pist kenarlarına bariyer çarpışma kutuları (görselle aynı segmentler). */
+  /**
+   * Pist kenarlarına bariyer çarpışma şekilleri (görselle aynı zincir). Kutu yerine yatay kapsül:
+   * ardışık kapsüller uç kürelerini paylaştığından eklem yerinde çıkıntı olmaz; bariyere
+   * sürtünen araç kutu köşesine takılıp savrulmaz.
+   */
   private buildBarriers(): void {
+    const s45 = Math.SQRT1_2;
     for (const seg of computeBarriers(this.track)) {
+      const sy = Math.sin(seg.yaw / 2);
+      const cy = Math.cos(seg.yaw / 2);
+      // Önce x etrafında 90° (kapsül ekseni y -> z), sonra yaw
+      const rotation = { x: cy * s45, y: sy * s45, z: -sy * s45, w: cy * s45 };
       this.world.createCollider(
-        this.R.ColliderDesc.cuboid(0.4, 0.6, seg.halfLength)
-          .setTranslation(seg.x, 0.6, seg.z)
-          .setRotation({ x: 0, y: Math.sin(seg.yaw / 2), z: 0, w: Math.cos(seg.yaw / 2) })
+        this.R.ColliderDesc.capsule(seg.halfSpan, BARRIER_RADIUS)
+          .setTranslation(seg.x, BARRIER_RADIUS + 0.05, seg.z)
+          .setRotation(rotation)
+          .setFriction(0.1)
+          .setRestitution(0),
+      );
+    }
+    // Başlangıç kapısının direkleri (görseldeki grup: yerel x ekseni dünyada (cos yaw, 0, -sin yaw))
+    const g = startGantry(this.track);
+    const half = GANTRY_PILLAR_M / 2;
+    for (const side of [1, -1]) {
+      this.world.createCollider(
+        this.R.ColliderDesc.cuboid(half, 4, half)
+          .setTranslation(
+            g.x + Math.cos(g.yaw) * (g.span / 2) * side,
+            4,
+            g.z - Math.sin(g.yaw) * (g.span / 2) * side,
+          )
+          .setRotation({ x: 0, y: Math.sin(g.yaw / 2), z: 0, w: Math.cos(g.yaw / 2) })
           .setFriction(0.1)
           .setRestitution(0),
       );
@@ -280,11 +308,13 @@ export class VehiclePhysics {
       }
       wheels.push({ surface, contact });
       if (i === 2) surfaceMain = surface;
-      const surfaceGrip = this.track.config.gripBySurface[surface];
+      // Boyuna çekiş (gaz/fren) ayrı katsayı: çimde yanal tutuş düşük kalsın ama araç
+      // ileri/geri makul hızlanabilsin
+      const surfaceTraction = this.track.config.tractionBySurface[surface];
       const rearBoost = axle === 'rear' && input.handbrake ? spec.driving.handbrakeRearGrip : 1;
       controller.setWheelFrictionSlip(
         i,
-        FRICTION_BASE * spec.lateralGrip[axle] * surfaceGrip * rearBoost,
+        FRICTION_BASE * spec.lateralGrip[axle] * surfaceTraction * rearBoost,
       );
       controller.setWheelSteering(i, axle === 'front' ? steerRad : 0);
       // Rapier, motor kuvveti varken freni yok sayar: düşük hızda el freni + gaz = çizgi kilitli burnout.
@@ -301,7 +331,7 @@ export class VehiclePhysics {
       FRICTION_BASE *
       spec.longitudinalGrip.rear *
       rearLoad *
-      this.track.config.gripBySurface[surfaceMain];
+      this.track.config.tractionBySurface[surfaceMain];
     const excess = Math.abs(o.engineForce) - tractionLimit;
     if (excess > 0 && o.throttle > 0.5)
       this.slipSpeed = Math.min(40, this.slipSpeed + (excess / SPIN_INERTIA_MASS) * dt);

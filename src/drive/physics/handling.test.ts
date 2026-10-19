@@ -2,7 +2,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { getCar, listCars } from '../../data/cars';
 import { createDefaultBuild } from '../../core/build/build';
 import type { DriveInput } from '../../core/drive/drivetrain';
-import { buildTrack, getDefaultTrack } from '../../core/drive/track';
+import { buildTrack, getDefaultTrack, queryTrack } from '../../core/drive/track';
+import { startGantry } from '../../core/drive/scenery';
 import { deriveVehicleSpec } from '../../core/drive/vehicleSpec';
 import { loadRapier, type Rapier } from './rapier';
 import { PHYSICS_STEP, VehiclePhysics } from './VehiclePhysics';
@@ -151,17 +152,86 @@ describe('bariyer çarpışması', () => {
       car.driving,
     );
     const v = VehiclePhysics.create(R, spec, track);
-    // Düzlükte tam gaz + hafif sol direksiyon: bariyere sığ açıyla (≈10°) girip sürtünür
-    let hit = false;
-    let maxBounce = 0;
-    for (let t = 0; t < 12; t += PHYSICS_STEP) {
-      v.step(PHYSICS_STEP, input({ throttle: 1, steer: t > 2 ? 0.2 : 0 }));
-      const s = v.snapshot();
-      if (s.speed > 8 && Math.abs(s.lateralSpeed) > 0.5) hit = true;
-      if (hit) maxBounce = Math.max(maxBounce, -s.forwardSpeed);
+    // Başlangıç düzlüğünde, sağ bariyere 10° açıyla 90 km/s: sığ açıyla girip sürtünür
+    const s0 = track.samples[track.startIndex + 20]!;
+    const a = (10 * Math.PI) / 180;
+    const dx = s0.tx * Math.cos(a) - s0.nx * Math.sin(a);
+    const dz = s0.tz * Math.cos(a) - s0.nz * Math.sin(a);
+    const yaw = Math.atan2(dx, dz);
+    v.chassis.setTranslation(
+      { x: s0.x - s0.nx * 9, y: v.restHeight + 0.05, z: s0.z - s0.nz * 9 },
+      true,
+    );
+    v.chassis.setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }, true);
+    v.chassis.setLinvel({ x: dx * 25, y: 0, z: dz * 25 }, true);
+    let maxAway = 0;
+    let minForward = Infinity;
+    for (let t = 0; t < 3; t += PHYSICS_STEP) {
+      v.step(PHYSICS_STEP, input({ throttle: 0.6 }));
+      const vel = v.chassis.linvel();
+      // Bariyerden uzaklaşma hızı: sol normal yönündeki hız (bariyer sağda)
+      maxAway = Math.max(maxAway, vel.x * s0.nx + vel.z * s0.nz);
+      minForward = Math.min(minForward, v.snapshot().forwardSpeed);
     }
     expect(v.snapshot().upY).toBeGreaterThan(0.7);
-    expect(maxBounce).toBeLessThan(1);
+    // Bariyer aracı paralele çevirip hafifçe piste yönlendirir; fırlatmaz
+    expect(maxAway).toBeLessThan(4);
+    // Eklem yerine takılmaz: hızın büyük kısmı korunur (90 km/s -> en az 72 km/s)
+    expect(minForward).toBeGreaterThan(20);
+    v.dispose();
+  });
+
+  it.each([
+    ['sola', 0.6],
+    ['sağa', -0.6],
+    ['düz (ilk virajda dışarı)', 0],
+  ])('tam gaz %s sürünce bariyer aracı pist alanında tutar', (_, steer) => {
+    const track = buildTrack();
+    const car = getCar('ford_mustang_gt_2013');
+    const spec = deriveVehicleSpec(
+      createDefaultBuild(car.manifest),
+      car.manifest,
+      car.parts,
+      car.driving,
+    );
+    const v = VehiclePhysics.create(R, spec, track);
+    const limit = track.widthM / 2 + track.config.barrierOffsetM + 1;
+    let worst = 0;
+    let hint: number | undefined;
+    for (let t = 0; t < 25; t += PHYSICS_STEP) {
+      v.step(PHYSICS_STEP, input({ throttle: 1, steer: t > 1.5 ? steer : 0 }));
+      const [x, , z] = v.snapshot().position;
+      const q = queryTrack(track, x, z, hint, 80);
+      hint = q.index;
+      worst = Math.max(worst, Math.abs(q.offset));
+    }
+    expect(worst).toBeLessThan(limit);
+    v.dispose();
+  });
+
+  it('başlangıç kapısının direği katı (içinden geçilmez)', () => {
+    const track = buildTrack();
+    const car = getCar('vanta_stallion_70');
+    const spec = deriveVehicleSpec(
+      createDefaultBuild(car.manifest),
+      car.manifest,
+      car.parts,
+      car.driving,
+    );
+    const v = VehiclePhysics.create(R, spec, track);
+    const g = startGantry(track);
+    // Direğin 12 m önünden, direğe doğru (pist yönünde) sür
+    const px = g.x + Math.cos(g.yaw) * (g.span / 2);
+    const pz = g.z - Math.sin(g.yaw) * (g.span / 2);
+    const fx = Math.sin(g.yaw);
+    const fz = Math.cos(g.yaw);
+    v.chassis.setTranslation({ x: px - fx * 12, y: v.restHeight + 0.05, z: pz - fz * 12 }, true);
+    v.chassis.setRotation({ x: 0, y: Math.sin(g.yaw / 2), z: 0, w: Math.cos(g.yaw / 2) }, true);
+    v.chassis.setLinvel({ x: fx * 15, y: 0, z: fz * 15 }, true);
+    for (let t = 0; t < 2; t += PHYSICS_STEP) v.step(PHYSICS_STEP, input({ throttle: 0.5 }));
+    const [x, , z] = v.snapshot().position;
+    // Direk düzlemini geçmemeli (ileri yöndeki izdüşüm direğin gerisinde kalır)
+    expect((x - px) * fx + (z - pz) * fz).toBeLessThan(0);
     v.dispose();
   });
 });

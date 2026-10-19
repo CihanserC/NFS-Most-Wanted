@@ -66,13 +66,27 @@
   text-transform: uppercase;
 }
 
-.dv-minimap {
+.dv-topright {
   position: absolute;
   top: 22px;
   right: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.dv-minimap {
+  display: block;
   padding: 4px;
   background: rgba(8, 9, 12, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dv-minimap-start {
+  fill: #f2efe8;
+  stroke: #0b0c0e;
+  stroke-width: 1;
 }
 
 .dv-minimap-track {
@@ -88,70 +102,148 @@
   stroke-width: 1;
 }
 
+/* Devir saati: analog kadran + ortada dijital hız ve vites */
 .dv-speedo {
   position: absolute;
-  right: 28px;
-  bottom: 26px;
-  width: 380px;
-  text-align: right;
+  right: 24px;
+  bottom: 18px;
+  width: 236px;
+  height: 236px;
 }
 
-.dv-rpm {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 3px;
-  height: 14px;
-  margin-bottom: 8px;
-  transform: skewX(-18deg);
+.dv-dial {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
 }
 
-.dv-rpm span {
-  background: rgba(255, 255, 255, 0.1);
+.dv-dial-bg {
+  fill: rgba(8, 9, 12, 0.72);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1;
 }
 
-.dv-rpm span.is-lit {
-  background: #ff9a3c;
-  box-shadow: 0 0 8px rgba(255, 122, 24, 0.7);
+.dv-dial-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 6;
 }
 
-.dv-rpm span.is-lit.is-red {
-  background: #ff3b2a;
-  box-shadow: 0 0 10px rgba(255, 59, 42, 0.8);
+.dv-dial-redzone {
+  fill: none;
+  stroke: rgba(255, 59, 42, 0.55);
+  stroke-width: 4;
 }
 
-.dv-speed-row {
+.dv-dial-fill {
+  fill: none;
+  stroke: #ff8a2a;
+  stroke-width: 6;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 4px rgba(255, 122, 24, 0.75));
+}
+
+.dv-dial-fill.is-red {
+  stroke: #ff3b2a;
+  filter: drop-shadow(0 0 6px rgba(255, 59, 42, 0.9));
+}
+
+.dv-dial-minor {
+  stroke: rgba(242, 239, 232, 0.35);
+  stroke-width: 1.5;
+}
+
+.dv-dial-major {
+  stroke: #f2efe8;
+  stroke-width: 2.5;
+}
+
+.dv-dial-major.is-red {
+  stroke: #ff3b2a;
+}
+
+.dv-dial-num {
+  fill: #d8d5ce;
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-dial-num.is-red {
+  fill: #ff5a3c;
+}
+
+.dv-dial-caption {
+  fill: #7d7a74;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-anchor: middle;
+}
+
+.dv-dial-needle {
+  /* HUD 80 ms'de bir güncellenir; geçiş ibreyi akıcı gösterir */
+  transition: transform 90ms linear;
+}
+
+.dv-dial-needle line {
+  stroke: #fff4e6;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(255, 138, 42, 0.9));
+}
+
+.dv-speed-block {
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 6px;
 }
 
 .dv-gear {
-  align-self: center;
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  font-size: 28px;
+  min-width: 34px;
+  padding: 1px 8px;
+  margin-bottom: 2px;
+  font-size: 22px;
   font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
   color: #0b0c0e;
-  background: #ff7a18;
-  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  background: #f2efe8;
+  border-radius: 4px;
+  transition:
+    background 80ms,
+    color 80ms;
+}
+
+.dv-gear.is-shift {
+  color: #fff;
+  background: #ff3b2a;
+  animation: dv-shift 0.18s steps(2) infinite;
+}
+
+@keyframes dv-shift {
+  50% {
+    background: #7a120a;
+  }
 }
 
 .dv-speed {
-  min-width: 150px;
-  font-size: 84px;
+  font-size: 52px;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 .dv-unit {
-  font-size: 16px;
-  letter-spacing: 0.2em;
+  margin-top: 2px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
   color: #a9a6a0;
 }
 
@@ -174,22 +266,101 @@
   border-bottom-color: #ff5a3c;
 }
 
-.dv-keys {
+.dv-menu-hint {
   position: absolute;
   left: 22px;
   bottom: 18px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  max-width: 55vw;
+  align-items: center;
+  gap: 8px;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  color: #a9a6a0;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: rgba(216, 213, 206, 0.7);
+}
+
+.dv-root kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: none;
+  color: #f2efe8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-bottom-width: 2px;
+  border-radius: 4px;
 }
 
 .dv-fps {
+  font-size: 12px;
+  letter-spacing: 0.08em;
   color: #2fd8ff;
+}
+
+/* Kontroller sayfası */
+.dv-controls {
+  min-width: 520px;
+  padding: 22px 28px 20px;
+  background: rgba(10, 11, 14, 0.94);
+  border-left: 5px solid #ff7a18;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+}
+
+.dv-controls .dv-pause-title {
+  padding: 0 0 14px;
+}
+
+.dv-controls table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.dv-controls th {
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-align: left;
+  text-transform: uppercase;
+  color: #7d7a74;
+}
+
+.dv-controls td {
+  padding: 7px 12px 7px 0;
+  color: #d8d5ce;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dv-controls td kbd + kbd {
+  margin-left: 4px;
+}
+
+.dv-controls-note {
+  max-width: 520px;
+  margin: 14px 0 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a9a6a0;
+}
+
+.dv-controls .dv-back {
+  display: inline-block;
+  width: auto;
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0b0c0e;
+  background: #ff7a18;
+  border: none;
+  cursor: pointer;
 }
 
 .dv-pause {

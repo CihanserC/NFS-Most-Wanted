@@ -21,16 +21,20 @@ const CAMERA_CONFIG: Record<
     fovSpeed: number;
   }
 > = {
-  chase: { distance: 6.8, height: 2.3, lookAhead: 4, lookHeight: 1, fov: 58, fovSpeed: 14 },
-  chase_low: { distance: 5.2, height: 1.15, lookAhead: 6, lookHeight: 0.8, fov: 62, fovSpeed: 14 },
+  chase: { distance: 6.8, height: 2.3, lookAhead: 4, lookHeight: 1, fov: 58, fovSpeed: 6 },
+  chase_low: { distance: 5.2, height: 1.15, lookAhead: 6, lookHeight: 0.8, fov: 62, fovSpeed: 6 },
   hood: { distance: 0, height: 0, lookAhead: 20, lookHeight: 0, fov: 72, fovSpeed: 8 },
   bumper: { distance: 0, height: 0, lookAhead: 20, lookHeight: 0, fov: 78, fovSpeed: 8 },
 };
 /** Kaput / tampon kamerası konumları, zemin hizalı araç uzayında (m) */
 const MOUNTS = { hood: { y: 1.12, z: 0.55 }, bumper: { y: 0.42, zExtra: 0.25 } };
 const TOP_SPEED_FOR_FOV = 70;
+/** Dikey takip hızı (1/sn): süspansiyon sekmesi kameraya birebir geçmesin */
 const FOLLOW_RATE = 6;
-const YAW_RATE = 4;
+/** Yön takip hızı (1/sn): virajda kamera aracın dışına hafifçe savrulur */
+const YAW_RATE = 5;
+/** Azami hızda kameranın ek geri çekilmesi (m) */
+const SPEED_PULLBACK = 0.8;
 
 /** Araç kamerası: `C` ile ardı sıra geçiş. Aracın konum/yönünü grup nesnesinden okur. */
 export function DriveCamera({
@@ -104,12 +108,16 @@ export function DriveCamera({
       camera.position.copy(desired);
       look.copy(forward).multiplyScalar(cfg.lookAhead).add(desired);
     } else {
+      // Konum araca kilitli (yalnız yön yumuşatılır): konumu lerp'lemek hızla orantılı gecikme
+      // verir ve yüksek hızda araç ekranda küçülür. Hız hissi için hafif geri çekilme.
+      const pull = SPEED_PULLBACK * Math.min(1, speed / TOP_SPEED_FOR_FOV);
       desired
         .copy(smoothed.current)
-        .multiplyScalar(-cfg.distance)
-        .add(p)
-        .setY(p.y - restHeight + cfg.height);
-      camera.position.lerp(desired, kf);
+        .multiplyScalar(-(cfg.distance + pull))
+        .add(p);
+      const y = p.y - restHeight + cfg.height;
+      desired.y = first.current ? y : camera.position.y + (y - camera.position.y) * kf;
+      camera.position.copy(desired);
       look
         .copy(smoothed.current)
         .multiplyScalar(cfg.lookAhead)

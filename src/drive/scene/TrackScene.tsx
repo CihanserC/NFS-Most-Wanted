@@ -10,17 +10,26 @@ import {
   SRGBColorSpace,
 } from 'three';
 import { computeBarriers } from '../../core/drive/barriers';
-import { buildScenery, type Grandstand } from '../../core/drive/scenery';
+import {
+  buildScenery,
+  GANTRY_PILLAR_M,
+  type Grandstand,
+  type StartGantry,
+} from '../../core/drive/scenery';
 import type { Track } from '../../core/drive/track';
 import {
   ASPHALT_TILE_M,
   createAsphaltTexture,
+  createCheckerTexture,
+  createGantryBannerTexture,
   createGrassTexture,
   createKerbTexture,
+  createVergeTexture,
   GRASS_TILE_M,
   KERB_TILE_M,
   ribbonGeometry,
   SURFACE_Y,
+  VERGE_TILE_M,
 } from './trackGeometry';
 
 const GROUND_SIZE = 4000;
@@ -28,6 +37,9 @@ const BARRIER_HEIGHT = 1.2;
 const LAMP_HEIGHT = 9;
 const TREE_TRUNK = { radius: 0.25, height: 2 };
 const TREE_CROWN = { radius: 1.6, height: 4.6 };
+const OAK_CROWN_RADIUS = 2.3;
+const GANTRY = { height: 7.2, beamHeight: 1.5, beamDepth: 1.1, pillar: GANTRY_PILLAR_M };
+const START_LINE_DEPTH = 1.8;
 
 const dummy = new Object3D();
 
@@ -89,24 +101,112 @@ function Grandstands({ stands }: { stands: Grandstand[] }) {
   );
 }
 
-/** Pist yüzeyi, kerbler, çim, bariyerler ve çevre (ağaç, kaya, direk, tribün). */
+/** Başlangıç/bitiş: damalı çizgi + pisti kesen afişli kapı. */
+function StartFinish({
+  gantry,
+  width,
+  title,
+}: {
+  gantry: StartGantry;
+  width: number;
+  title: string;
+}) {
+  const checker = useDisposable(() => createCheckerTexture());
+  const banner = useDisposable(() => createGantryBannerTexture(title));
+  const lineMat = useDisposable(
+    () => new MeshStandardMaterial({ map: checker, roughness: 0.8, metalness: 0 }),
+  );
+  const bannerMat = useDisposable(
+    () =>
+      new MeshStandardMaterial({
+        map: banner,
+        roughness: 0.6,
+        metalness: 0,
+        emissive: '#ffffff',
+        emissiveMap: banner,
+        emissiveIntensity: 0.35,
+      }),
+  );
+  const steel = useDisposable(
+    () => new MeshStandardMaterial({ color: '#2c3036', roughness: 0.5, metalness: 0.6 }),
+  );
+  const { span } = gantry;
+  const beamY = GANTRY.height - GANTRY.beamHeight / 2;
+  return (
+    <group position={[gantry.x, 0, gantry.z]} rotation-y={gantry.yaw}>
+      <mesh
+        rotation-x={-Math.PI / 2}
+        position-y={SURFACE_Y.kerb + 0.001}
+        material={lineMat}
+        receiveShadow
+      >
+        <planeGeometry args={[width, START_LINE_DEPTH]} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh
+          key={side}
+          position={[side * (span / 2), GANTRY.height / 2, 0]}
+          material={steel}
+          castShadow
+        >
+          <boxGeometry args={[GANTRY.pillar, GANTRY.height, GANTRY.pillar]} />
+        </mesh>
+      ))}
+      <mesh position-y={beamY} material={steel} castShadow>
+        <boxGeometry args={[span + GANTRY.pillar, GANTRY.beamHeight, GANTRY.beamDepth]} />
+      </mesh>
+      {/* Afiş iki yüzde: yaklaşan (-z) ve uzaklaşan (+z) taraf */}
+      {[-1, 1].map((face) => (
+        <mesh
+          key={face}
+          position={[0, beamY, face * (GANTRY.beamDepth / 2 + 0.01)]}
+          rotation-y={face < 0 ? Math.PI : 0}
+          material={bannerMat}
+        >
+          <planeGeometry args={[span - 0.4, GANTRY.beamHeight - 0.2]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** Pist yüzeyi, kerbler, çim, bariyerler ve çevre (ağaç, kaya, direk, tribün, başlangıç kapısı). */
 export function TrackScene({ track, night }: { track: Track; night: boolean }) {
   const half = track.widthM / 2;
   const kerb = track.config.kerbM;
+  /** Biçilmiş çim şeridinin dış kenarı: bariyerin hemen altı */
+  const vergeEdge = half + track.config.barrierOffsetM + 0.4;
 
   const asphaltTex = useDisposable(createAsphaltTexture);
   const kerbTex = useDisposable(createKerbTexture);
   const grassTex = useDisposable(createGrassTexture);
+  const vergeTex = useDisposable(createVergeTexture);
   grassTex.repeat.set(GROUND_SIZE / GRASS_TILE_M, GROUND_SIZE / GRASS_TILE_M);
 
   const asphalt = useDisposable(
-    () => new MeshStandardMaterial({ map: asphaltTex, roughness: 0.92, metalness: 0 }),
+    () =>
+      // Ortam yansıması düşük: sıyırma açısında asfalt ıslak gibi parlamasın
+      new MeshStandardMaterial({
+        map: asphaltTex,
+        roughness: 1,
+        metalness: 0,
+        envMapIntensity: 0.25,
+      }),
   );
   const kerbMat = useDisposable(
-    () => new MeshStandardMaterial({ map: kerbTex, roughness: 0.7, metalness: 0 }),
+    () =>
+      new MeshStandardMaterial({
+        map: kerbTex,
+        roughness: 0.85,
+        metalness: 0,
+        envMapIntensity: 0.4,
+      }),
   );
   const grass = useDisposable(
     () => new MeshStandardMaterial({ map: grassTex, roughness: 1, metalness: 0 }),
+  );
+  const verge = useDisposable(
+    () => new MeshStandardMaterial({ map: vergeTex, roughness: 1, metalness: 0 }),
   );
   const barrierMat = useDisposable(
     () => new MeshStandardMaterial({ color: '#ffffff', roughness: 0.75, metalness: 0.05 }),
@@ -116,6 +216,9 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
   );
   const crownMat = useDisposable(
     () => new MeshStandardMaterial({ color: '#2f4a28', roughness: 1, flatShading: true }),
+  );
+  const oakMat = useDisposable(
+    () => new MeshStandardMaterial({ color: '#4d6a2e', roughness: 1, flatShading: true }),
   );
   const rockMat = useDisposable(
     () => new MeshStandardMaterial({ color: '#7a6a58', roughness: 1, flatShading: true }),
@@ -138,8 +241,10 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
       asphalt: ribbonGeometry(track, -half, half, SURFACE_Y.asphalt, ASPHALT_TILE_M),
       kerbLeft: ribbonGeometry(track, half, half + kerb, SURFACE_Y.kerb, KERB_TILE_M),
       kerbRight: ribbonGeometry(track, -half - kerb, -half, SURFACE_Y.kerb, KERB_TILE_M),
+      vergeLeft: ribbonGeometry(track, half + kerb, vergeEdge, SURFACE_Y.verge, VERGE_TILE_M),
+      vergeRight: ribbonGeometry(track, -vergeEdge, -half - kerb, SURFACE_Y.verge, VERGE_TILE_M),
     }),
-    [track, half, kerb],
+    [track, half, kerb, vergeEdge],
   );
   useEffect(
     () => () => {
@@ -154,6 +259,8 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
   const barrierRef = useRef<InstancedMesh>(null);
   const trunkRef = useRef<InstancedMesh>(null);
   const crownRef = useRef<InstancedMesh>(null);
+  const oakTrunkRef = useRef<InstancedMesh>(null);
+  const oakCrownRef = useRef<InstancedMesh>(null);
   const rockRef = useRef<InstancedMesh>(null);
   const poleRef = useRef<InstancedMesh>(null);
   const lampRef = useRef<InstancedMesh>(null);
@@ -178,8 +285,23 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
   useLayoutEffect(() => {
     const trunk = trunkRef.current;
     const crown = crownRef.current;
+    const oakTrunk = oakTrunkRef.current;
+    const oakCrown = oakCrownRef.current;
+    if (oakTrunk && oakCrown)
+      scenery.oaks.forEach((t, i) => {
+        const trunkH = TREE_TRUNK.height * 1.3 * t.scale;
+        dummy.rotation.set(0, t.rotation, 0);
+        dummy.scale.set(t.scale, t.scale * 1.3, t.scale);
+        dummy.position.set(t.x, trunkH / 2, t.z);
+        dummy.updateMatrix();
+        oakTrunk.setMatrixAt(i, dummy.matrix);
+        dummy.scale.set(t.scale * 1.1, t.scale * 0.9, t.scale);
+        dummy.position.set(t.x, trunkH + OAK_CROWN_RADIUS * 0.6 * t.scale, t.z);
+        dummy.updateMatrix();
+        oakCrown.setMatrixAt(i, dummy.matrix);
+      });
     if (trunk && crown)
-      scenery.trees.forEach((t, i) => {
+      scenery.pines.forEach((t, i) => {
         dummy.rotation.set(0, t.rotation, 0);
         dummy.scale.setScalar(t.scale);
         dummy.position.set(t.x, (TREE_TRUNK.height / 2) * t.scale, t.z);
@@ -216,7 +338,7 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
         dummy.updateMatrix();
         lamps.setMatrixAt(i, dummy.matrix);
       });
-    for (const ref of [trunkRef, crownRef, rockRef, poleRef, lampRef])
+    for (const ref of [trunkRef, crownRef, oakTrunkRef, oakCrownRef, rockRef, poleRef, lampRef])
       if (ref.current) ref.current.instanceMatrix.needsUpdate = true;
   }, [scenery]);
 
@@ -225,6 +347,8 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
       <mesh rotation-x={-Math.PI / 2} position-y={SURFACE_Y.grass} material={grass} receiveShadow>
         <planeGeometry args={[GROUND_SIZE, GROUND_SIZE]} />
       </mesh>
+      <mesh geometry={geometries.vergeLeft} material={verge} receiveShadow />
+      <mesh geometry={geometries.vergeRight} material={verge} receiveShadow />
       <mesh geometry={geometries.asphalt} material={asphalt} receiveShadow />
       <mesh geometry={geometries.kerbLeft} material={kerbMat} receiveShadow />
       <mesh geometry={geometries.kerbRight} material={kerbMat} receiveShadow />
@@ -242,7 +366,7 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
 
       <instancedMesh
         ref={trunkRef}
-        args={[undefined, undefined, scenery.trees.length]}
+        args={[undefined, undefined, scenery.pines.length]}
         material={trunkMat}
         castShadow
         frustumCulled={false}
@@ -253,12 +377,32 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
       </instancedMesh>
       <instancedMesh
         ref={crownRef}
-        args={[undefined, undefined, scenery.trees.length]}
+        args={[undefined, undefined, scenery.pines.length]}
         material={crownMat}
         castShadow
         frustumCulled={false}
       >
         <coneGeometry args={[TREE_CROWN.radius, TREE_CROWN.height, 7]} />
+      </instancedMesh>
+      <instancedMesh
+        ref={oakTrunkRef}
+        args={[undefined, undefined, scenery.oaks.length]}
+        material={trunkMat}
+        castShadow
+        frustumCulled={false}
+      >
+        <cylinderGeometry
+          args={[TREE_TRUNK.radius, TREE_TRUNK.radius * 1.3, TREE_TRUNK.height, 6]}
+        />
+      </instancedMesh>
+      <instancedMesh
+        ref={oakCrownRef}
+        args={[undefined, undefined, scenery.oaks.length]}
+        material={oakMat}
+        castShadow
+        frustumCulled={false}
+      >
+        <icosahedronGeometry args={[OAK_CROWN_RADIUS, 1]} />
       </instancedMesh>
       <instancedMesh
         ref={rockRef}
@@ -289,6 +433,11 @@ export function TrackScene({ track, night }: { track: Track; night: boolean }) {
       </instancedMesh>
 
       <Grandstands stands={scenery.grandstands} />
+      <StartFinish
+        gantry={scenery.gantry}
+        width={track.widthM + 2 * kerb}
+        title={track.config.name.toUpperCase()}
+      />
     </group>
   );
 }

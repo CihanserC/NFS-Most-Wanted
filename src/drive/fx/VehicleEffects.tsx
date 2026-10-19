@@ -1,6 +1,7 @@
 import { useRef, type RefObject } from 'react';
 import { Quaternion, Vector3, type Group } from 'three';
 import { exhaustTails } from '../../car/slots/exhaustTails';
+import { useDriveStore } from '../../core/store/driveStore';
 import type { CarDefinition } from '../../data/cars';
 import type { VehicleSnapshot } from '../physics/VehiclePhysics';
 import type { ParticlePool } from './particles';
@@ -13,10 +14,13 @@ const FLAME_CAPACITY = 160;
 const SMOKE_RATE = 95;
 const DUST_RATE = 28;
 const FLAME_PER_TAIL = 5;
+/** Parçacıklar ışıksız çizilir; renkleri sahne ışığına göre ölçeklenir (gece beyaz balon olmasın) */
+const SMOKE_LIGHT = { sunset: 1, night: 0.28 } as const;
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const tmp = new Vector3();
 const dir = new Vector3();
+const carVel = new Vector3();
 const quat = new Quaternion();
 
 /** İz, lastik dumanı, çim tozu ve egzoz alevi. Aracın anlık durumunu snapshot'tan okur. */
@@ -36,6 +40,7 @@ export function VehicleEffects({
 }) {
   const smoke = useRef<ParticlePool | null>(null);
   const flame = useRef<ParticlePool | null>(null);
+  const light = SMOKE_LIGHT[useDriveStore((s) => s.timeOfDay)];
 
   const emitSmoke = (pool: ParticlePool, dt: number) => {
     const snap = snapshotRef.current;
@@ -63,10 +68,10 @@ export function VehicleEffects({
           life: grass ? rand(0.7, 1.2) : rand(1.1, 2),
           size0: grass ? 1.2 : 1.6,
           size1: grass ? 3.2 : 4.6,
-          alpha: grass ? 0.26 : 0.36 * Math.min(1, slip + 0.2),
-          r: grass ? 0.5 : 0.86,
-          g: grass ? 0.42 : 0.86,
-          b: grass ? 0.3 : 0.88,
+          alpha: grass ? 0.26 : 0.3 * Math.min(1, slip + 0.2),
+          r: (grass ? 0.5 : 0.62) * light,
+          g: (grass ? 0.42 : 0.6) * light,
+          b: (grass ? 0.3 : 0.6) * light,
         });
       }
     });
@@ -78,6 +83,8 @@ export function VehicleEffects({
     if (!snap?.liftOff || !group) return;
     const tails = exhaustTails(parts.exhaust ?? 'rear_dual', car);
     group.getWorldQuaternion(quat);
+    // Alev aracın hızını devralır; yoksa yüksek hızda arkada metrelerce uzun parlak iz kalır.
+    carVel.set(0, 0, snap.forwardSpeed).applyQuaternion(quat);
     for (const tail of tails) {
       tmp.set(...tail.at);
       group.localToWorld(tmp);
@@ -87,12 +94,12 @@ export function VehicleEffects({
           x: tmp.x,
           y: tmp.y,
           z: tmp.z,
-          vx: dir.x * rand(5, 9) + rand(-0.4, 0.4),
-          vy: dir.y * rand(5, 9) + rand(-0.2, 0.4),
-          vz: dir.z * rand(5, 9) + rand(-0.4, 0.4),
-          life: rand(0.08, 0.2),
-          size0: 0.5,
-          size1: 1.1,
+          vx: carVel.x + dir.x * rand(4, 7) + rand(-0.3, 0.3),
+          vy: dir.y * rand(4, 7) + rand(-0.1, 0.3),
+          vz: carVel.z + dir.z * rand(4, 7) + rand(-0.3, 0.3),
+          life: rand(0.06, 0.14),
+          size0: 0.22,
+          size1: 0.55,
           alpha: 0.95,
           r: 1,
           g: rand(0.35, 0.6),

@@ -44,7 +44,10 @@ export function applyAssists(input: DriveInput, ctx: AssistContext, assists: Ass
     // Hız vektörü gövdenin soluna kayıyorsa (β>0) sola, sağına kayıyorsa sağa direksiyon
     const beta = Math.atan2(ctx.lateralSpeed, ctx.forwardSpeed);
     const excess = Math.sign(beta) * Math.max(0, Math.abs(beta) - COUNTER_STEER_DEADZONE);
-    const add = Math.max(-COUNTER_STEER_MAX, Math.min(COUNTER_STEER_MAX, excess * COUNTER_STEER_GAIN));
+    const add = Math.max(
+      -COUNTER_STEER_MAX,
+      Math.min(COUNTER_STEER_MAX, excess * COUNTER_STEER_GAIN),
+    );
     steer = Math.max(-1, Math.min(1, steer + add));
   }
   return { ...input, throttle, steer };

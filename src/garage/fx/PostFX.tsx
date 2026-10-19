@@ -54,6 +54,7 @@ export function PostFX() {
     (s) => s.mode === 'garage' && categoryKind(s.categoryId) === 'photo',
   );
   const photo = usePhotoStore();
+  const driving = useAppStore((s) => s.mode === 'drive');
 
   const effects: ReactElement[] = [];
   if (q.ao)
@@ -84,9 +85,11 @@ export function PostFX() {
   effects.push(<Exposure key="exposure" stops={photoActive ? photo.exposure : 0} />);
   effects.push(<ToneMapping key={`tone-${toneMapping}`} mode={TONE_MAPPING_MODES[toneMapping]} />);
   effects.push(<LUT key="lut" lut={lut} />);
-  effects.push(
-    <Vignette key="vignette" offset={p.vignette.offset} darkness={p.vignette.darkness} />,
-  );
+  // Sürüşte vinyet yok: açık gökyüzünde geçiş kenarları eş merkezli halka gibi görünüyor.
+  if (!driving)
+    effects.push(
+      <Vignette key="vignette" offset={p.vignette.offset} darkness={p.vignette.darkness} />,
+    );
   effects.push(q.antialias === 'smaa' ? <SMAA key="smaa" /> : <FXAA key="fxaa" />);
 
   return (

@@ -23,9 +23,11 @@ const FRAGMENT = /* glsl */ `
     vec3 d = normalize(vDir);
     float h = clamp(d.y, 0.0, 1.0);
     vec3 col = mix(horizon, zenith, pow(h, 0.55));
-    // Güneş çevresinde geniş, yumuşak sıcak ışıma (disk yok)
+    // Güneş: küçük yumuşak disk + dar hale + çok hafif geniş ışıma. Geniş terim güçlü olursa
+    // ufukta çan biçimli soluk bir leke oluşuyor.
     float s = max(dot(d, normalize(sunDir)), 0.0);
-    col += glow * (pow(s, 24.0) * 0.55 + pow(s, 6.0) * 0.25) * (1.0 - h * 0.6);
+    col += glow * (pow(s, 64.0) * 0.6 + pow(s, 8.0) * 0.1) * (1.0 - h * 0.6);
+    col += glow * smoothstep(0.9992, 0.9997, s) * 1.6;
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
   }
@@ -65,7 +67,7 @@ export function SkyDome({
   useFrame((state) => mesh.current?.position.copy(state.camera.position));
   return (
     <mesh ref={mesh} material={material} frustumCulled={false} renderOrder={-1000}>
-      <sphereGeometry args={[1000, 24, 16]} />
+      <sphereGeometry args={[1000, 32, 16]} />
     </mesh>
   );
 }
