@@ -1,6 +1,44 @@
 # İlerleme
 
-## Durum: Tüm fazlar (0–11) tamamlandı — bkz. `docs/ANALYSIS.md` (analiz raporu, açık işler)
+## Durum: Fazlar 0–11 ve V2-1/V2-2 tamam; V2-3 büyük ölçüde tamam — bkz. `docs/PLAN_V2.md`, `docs/ANALYSIS.md`
+
+## V2-3 + kullanıcı geri bildirimi turu ✅ (2026-10-19)
+
+**Sürüş hissi (ölçümle)**
+
+- **Sorun:** klavyede tam direksiyon ön lastikleri tepe kayma açısının (≈8,5°) çok ötesine itiyordu (40 km/s'te tekerlek açısı 31°): tutuş düşüyor, araç "kayarak düz gidiyordu". Tam direksiyon yarım direksiyondan **daha az** döndürüyordu (100 km/s: 0,5 → 15,9°/sn, 1,0 → 14,7°/sn).
+- **Çözüm:** direksiyon açısı = min(tam kilit, kinematik açı `atan(L·a/v²)` + tepe kayma payı) (`steerAngle`, `drivetrain.ts`); `lateralMu` 1,05/1,0 → 1,55/1,5; direksiyon hızı 3,2 → 4,2 /sn.
+- **Sonuç (100 km/s, tam direksiyon):** yalpalama 14,7 → 24,2°/sn, yanal 0,65 → 1,13 g, dönüş yarıçapı 97 → 62 m. Kalıcı test: "tam direksiyon yarım direksiyondan keskin döner" (`handling.test.ts`).
+- **Sürüş yardımcıları** (`core/drive/assists.ts`): çekiş kontrolü (patinajda gazı kısar; varsayılan kapalı) ve ters direksiyon yardımı (≈4° ölü bölgeli, normal virajda araya girmez; varsayılan açık). Ayarlar arayüzü henüz yok.
+- **Çim:** boyuna çekiş ayrı katsayı (`tractionBySurface`, çim 0,85; yanal tutuş cezası 0,55 korunur), yuvarlanma direnci 4 → 2. Çimde geri vites 1 sn'de 8 → 24 km/s.
+- **Kamera:** konum araca kilitli (önceden hızla orantılı gecikme: 136 km/s'te araç ~6 m daha uzaklaşıyordu); yalnız yön ve yükseklik yumuşatılır, hızla 0,8 m geri çekilme + 6° FOV.
+
+**Pist**
+
+- **Bariyerler** her kenarda kesintisiz zincir (`barriers.ts`): uçlar ofsetli pist noktalarından alınır (viraj dışında segmentler arası aralık kalıyordu), iç virajda ofset daraltılır (önceden hiç bariyer konmuyordu). Fizikte kutu yerine **yatay kapsül**: eklem yerine takılıp savrulma yok (10° sürtmede 90 km/s → ≥72 km/s korunur). Testler: zincir uçları örtüşür; tam gazla her yöne sürüşte araç pist alanında kalır.
+- **Başlangıç kapısı** + damalı çizgi; direkler bariyerin dışında ve fizikte katı (önceden içinden geçiliyordu; test). Fren tabelaları kaldırıldı.
+- İnce taneli **mat asfalt** (sarı orta şerit yok, kauçuk izi; ortam yansıması 0,25 — "ıslak gibi parlama" giderildi), biçilmiş çim şeridi, iki tür ağaç (çam + yapraklı) ve korular.
+- **Gökyüzü:** gradyan kubbe + küçük güneş diski. Gökyüzündeki eş merkezli halkalar **vinyet** efektinin açık zeminde bantlaşmasıydı; sürüşte vinyet kapatıldı.
+- Efektler: egzoz alevi aracın hızını devralır (yüksek hızda arkada metrelerce parlak iz kalıyordu); lastik dumanı gece karartılır.
+
+**HUD**
+
+- Sağ alt **devir saati** baştan: SVG analog kadran (binlik çentikler, kırmızı bölge, akıcı ibre), ortada dijital hız ve vites (N/R/1–6); vites kutusu sınırda (%97) kırmızı yanıp söner.
+- Sol alttaki tuş listesi kaldırıldı: **Esc menüsü → Kontroller** sayfası (klavye + gamepad tablosu); ekranda yalnız "Esc · Menü · Kontroller" ipucu. Esc kontroller sayfasında menüye döner.
+
+**Atölye**
+
+- **Mustang parçaları gerçek gövdeye oturuyor:** gerçek modelden ışın izlemeyle yüzey haritası (`surface.json`, üretici + güncellik testi; bkz. ASSET_GUIDE §3b). Kaput pimi 13 cm, spoyler/kanat 15–22 cm havadaydı; lip tamponun içinde kalıyordu, cowl görünmüyordu. Şimdi: lip/splitter tamponun alt hattını izleyen levha, shaker/cowl gerçek kaput arka kenarından, kanat ayakları bagaj yüzeyinde, parçalar ayak izinin en alçak noktasına oturur. Model üzerinde iç mekân slotu yalnız takla kafesi çizer.
+- **Vinil:** şekil eklerken önünde çıkan opak dikdörtgen giderildi (gizmo taşıma alanı görünmez kalmalıydı; yansıma gizleme kodu `colorWrite`'ı eziyordu).
+- **Performans:** ayarlar soldaki editörde, istatistikler + dyno sağ üstte ayrı panelde. Motor slotu olmayan araçta süperşarjör notu düzeltildi.
+
+**Dil desteği**
+
+- **İngilizce (varsayılan) + Türkçe.** Ayarlar → Dil; seçim tarayıcıda saklanır, açılış ekranı da seçili dilde. Fiyat/sayı, tarih, yüzde ve vinil yazısında büyük harf dile göre (tr: i → İ). İçe aktarma hataları ve jenerik metinleri çeviride. Test: iki sözlük aynı anahtar kümesine sahip olmalı.
+
+**Testler:** 386 (385 + 1 geliştirme aracı, `GEN_SURFACE` ile çalışır) / 40 dosya; lint temiz.
+
+**Açık kalanlar:** sürüş yardımcıları için ayarlar arayüzü ve ABS; HUD'da gaz/fren çubukları, drift/boost göstergesi, ara zaman farkı; mobil (V2-4) ve Vanta iç mekân v2 (V2-5).
 
 ## Faz 11 — Optimizasyon ve Cila ✅ (2026-10-18)
 

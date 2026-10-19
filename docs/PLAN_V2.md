@@ -191,17 +191,23 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [x] GLB'yi `public/assets/cars/` altına al, `modelMap.json` (ölçek, zemin, gizle, boya bölgeleri, cam)
 - [x] `applyModelMap` + testler (gerçek GLB düğüm adlarıyla)
 - [x] Mustang manifest/parça kataloğu/`placeholder.json`/`fitment`/kamera ön ayarları/çeviriler
-- [x] Overlay parçalar Mustang gövdesine oturur (spoyler, etekler, çene, scoop, egzoz uçları, roll cage)
+- [x] Overlay parçalar Mustang gövdesine oturur (spoyler, etekler, çene, scoop, egzoz uçları, roll cage) — 2026-10-19: profil yerine gerçek modelden ölçülen yüzey haritası (`surface.json`) ile; bkz. ASSET_GUIDE §3b
 - [x] Kredi (CC-BY-NC-SA uyarısı) ve `credits` doğrulayıcı güncellemesi
 - [x] Tarayıcı doğrulama: boya, duruş, overlay parçalar, sürüş (Mustang modelinde ön/arka kit tek mesh: boya bölgeleri yalnız body ve hood; tampon ayrı bölge olamadı)
 
 ### V2-3 — Sürüş göstergeleri ve sürüş mekaniği
 
-- [ ] HUD yenileme (devir yayı, vites ışığı, pedallar, kayma/boost, ara zaman farkı)
-- [ ] Yardımcı sistemler (ABS, TC, direksiyon yardımı) + ayarlar
-- [~] Tutuş eğrisi (yanal lastik modeli) ve çarpışma yumuşatma (sekme yok) tamam; anti-roll gereksiz (gövde yatışı zaten <1°); direksiyon modeli ve kamera iyileştirme açık
+- [~] HUD yenileme: devir saati (SVG kadran, kırmızı bölge, ibre), dijital hız + vites, vites ışığı, kontroller Esc menüsünde ✅; pedallar, kayma/boost, ara zaman farkı açık
+- [~] Yardımcı sistemler: çekiş kontrolü + ters direksiyon yardımı (`assists.ts`, testli) ✅; ABS ve ayarlar arayüzü açık
+- [x] Tutuş eğrisi (yanal lastik modeli), çarpışma yumuşatma (kesintisiz bariyer zinciri, kapsül çarpışma), direksiyon modeli (tepe kayma açısıyla sınırlı açı; 100 km/s yarıçap 97 → 62 m), kamera (araca kilitli, hafif geri çekilme); anti-roll gereksiz (gövde yatışı <1°)
 - [x] Araca özel `driving.json` (Vanta, Mustang): tutuş, arka kayma, gevşeme, yatış, fren dağılımı, el freni
 - [x] Başsız test paketi: skidpad, slalom, 100→0, 0–100, drift, devrilme (`handling.test.ts`, her iki araç); otopilot turu `lap.test.ts`'te (yalnız Vanta)
+
+### Ek (kullanıcı isteği, 2026-10-19)
+
+- [x] İngilizce + Türkçe dil desteği, varsayılan İngilizce (Ayarlar → Dil; kalıcı)
+- [x] Pist: kesintisiz bariyerler, başlangıç kapısı (katı direkler), mat asfalt, çevre; fren tabelaları kaldırıldı
+- [x] Çimde geri/ileri çekiş, vinil gizmo dikdörtgeni, performans istatistikleri sağ üstte
 
 ### V2-4 — Mobil uyumluluk
 

@@ -22,6 +22,14 @@ Kabul ölçütleri (`npm run lint`, `npm test`, `npm run build`): hepsi yeşil �
 | 10 Gerçek model hattı    | ✅ hat ve yedekleme kanıtlandı; ⚠️ gerçek model/Draco-KTX2'li dosya yok       |
 | 11 Optimizasyon/cila     | ✅ ölçüm, bölünmüş paket, uyarlanabilir kalite, kredi, ses, gamepad           |
 
+## 1b. Güncelleme (2026-10-19, V2 + kullanıcı geri bildirimi)
+
+- **İki araç:** Vanta Stallion '70 (prosedürel) ve 2013 Ford Mustang GT (gerçek GLB, `modelMap.json` eşlemesi). Mustang'in overlay parçaları gerçek modelden ışın izlemeyle ölçülen **yüzey haritasına** (`surface.json`) oturur.
+- **Sürüş:** direksiyon açısı lastiğin tepe kayma açısıyla sınırlı (tam direksiyon artık tutuşu düşürmüyor; 100 km/s'te dönüş yarıçapı 97 → 62 m, yanal ≈1,1 g); kesintisiz bariyer zinciri (kapsül çarpışma); araca kilitli kamera; çekiş kontrolü + ters direksiyon yardımı; çimde ayrı boyuna çekiş.
+- **HUD:** analog devir saati + dijital hız/vites; kontroller Esc menüsünde.
+- **Dil:** İngilizce (varsayılan) + Türkçe, kalıcı seçim; iki sözlüğün anahtar eşitliği testte.
+- **Testler:** 386 / 40 dosya (bkz. `PROGRESS.md`).
+
 ## 2. Mimari
 
 - **Veri odaklı:** araç manifesti, parça kataloğu, boya/jant/duruş/performans/pist verileri JSON; kodda sihirli sayı yok (görsel ayarlar `sceneConfig`, `materialConfig`, fizik sabitleri adlandırılmış sabitlerde).
@@ -33,17 +41,17 @@ Kabul ölçütleri (`npm run lint`, `npm test`, `npm run build`): hepsi yeşil �
 
 ## 3. Metrikler
 
-| Ölçüt          | Değer                                                                                                                                |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Kod            | ≈18,1 bin satır TS/TSX (testler hariç), 3,7 bin satır test, 1,4 bin satır CSS, 1,5 bin satır veri JSON; 199 dosya                    |
-| Test           | 319 test / 30 dosya (≈15 sn): saf mantık, depolama (gerçek IndexedDB + bellek), GLB uçtan uca, **Rapier fiziği**, otopilotla tam tur |
-| Tip güvenliği  | `strict`, `noUncheckedIndexedAccess`; gerçek `any` yalnız bir testte (gerekçeli); 5 `eslint-disable` (gerekçeli)                     |
-| Paket (gzip)   | uygulama 79 KB + three 234 KB + r3f 260 KB + react 69 KB ≈ 640 KB; sürüş kodu 1,7 MB (tembel)                                        |
-| İlk çizim      | 2,67 sn (üretim, entegre GPU); DOM hazır 0,4 sn                                                                                      |
-| Atölye sahnesi | 168 mesh, 113 bin üçgen; çizim çağrısı 147 (Düşük) → 479 (Yüksek)                                                                    |
-| Sürüş sahnesi  | 113 mesh; Düşük 120 çağrı / 60 FPS, Orta 52 FPS, Yüksek 34 FPS (entegre GPU)                                                         |
-| Vinil          | 500 katmanda sürükleme ≈ 17,5 ms/kare (200 katmanla aynı)                                                                            |
-| Fizik          | 120 Hz sabit adım; stok 0–100 km/s ≈ 5,2 sn, otopilot turu ≈ 94 sn                                                                   |
+| Ölçüt          | Değer                                                                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kod            | ≈18,1 bin satır TS/TSX (testler hariç), 3,7 bin satır test, 1,4 bin satır CSS, 1,5 bin satır veri JSON; 199 dosya                                                                 |
+| Test           | 386 test / 40 dosya (2026-10-19): saf mantık, depolama (gerçek IndexedDB + bellek), gerçek Mustang GLB, **Rapier fiziği** (sürüş hissi, bariyer, kapı direği), otopilotla tam tur |
+| Tip güvenliği  | `strict`, `noUncheckedIndexedAccess`; gerçek `any` yalnız bir testte (gerekçeli); 5 `eslint-disable` (gerekçeli)                                                                  |
+| Paket (gzip)   | uygulama 79 KB + three 234 KB + r3f 260 KB + react 69 KB ≈ 640 KB; sürüş kodu 1,7 MB (tembel)                                                                                     |
+| İlk çizim      | 2,67 sn (üretim, entegre GPU); DOM hazır 0,4 sn                                                                                                                                   |
+| Atölye sahnesi | 168 mesh, 113 bin üçgen; çizim çağrısı 147 (Düşük) → 479 (Yüksek)                                                                                                                 |
+| Sürüş sahnesi  | 113 mesh; Düşük 120 çağrı / 60 FPS, Orta 52 FPS, Yüksek 34 FPS (entegre GPU)                                                                                                      |
+| Vinil          | 500 katmanda sürükleme ≈ 17,5 ms/kare (200 katmanla aynı)                                                                                                                         |
+| Fizik          | 120 Hz sabit adım; stok 0–100 km/s ≈ 5,2 sn, otopilot turu ≈ 94 sn                                                                                                                |
 
 ## 4. Spesifikasyona uygunluk
 
@@ -57,23 +65,23 @@ Kabul ölçütleri (`npm run lint`, `npm test`, `npm run build`): hepsi yeşil �
 - **Test sürüşü ağırlık merkezi / yuvarlanma:** Rapier raycast aracında yan yatma (roll) kontrolü yok; çok sert virajda devrilme 2 sn sonra otomatik düzeltiliyor.
 - **Gerçek model (§12 Faz 10):** hat tam, ancak yalnızca kutulardan oluşan örnek GLB ve sentetik GLB'lerle doğrulandı; Draco/KTX2 sıkıştırmalı gerçek dosya denenmedi.
 
-**Henüz yapılmayan (bilinçli kapsam dışı veya içerik bağımlı):** ikinci araç, ekonomi, online, mobil, hasar modeli (§16); gerçek 3D model ve gerçek ses dosyaları (içerik).
+**Henüz yapılmayan (bilinçli kapsam dışı veya içerik bağımlı):** ekonomi, online, mobil, hasar modeli (§16); gerçek 3D model ve gerçek ses dosyaları (içerik).
 
 ## 5. Riskler ve açık işler (öncelik sırasıyla)
 
-| #   | Konu                                                                     | Etki                   | Neden açık / önerilen adım                                                                                                                                                                                                          |
-| --- | ------------------------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Hedef donanımda performans doğrulanmadı** (§14: ≥60 FPS Yüksek, 1080p) | Yüksek                 | Test makinesi entegre GPU. Ölçüm altyapısı hazır (FPS + çizim çağrısı/üçgen göstergesi, uyarlanabilir kalite). Hedef donanımda Yüksek/Ultra ölçülmeli; gerekirse yansıma/AO maliyeti (dolgu oranı) ayarlanmalı.                     |
-| 2   | **Gerçek model yok**                                                     | Yüksek (görsel kalite) | Placeholder kaba. `docs/ASSET_GUIDE.md`'ye uygun bir GLB eklenince manifestteki `model` yolu yeterli. Gerçek modelle: çamurluk ölçüleri (`fitment`), egzoz uç konumları, tekerlek çapaları doğrulanmalı.                            |
-| 3   | **Sürüş hissi gerçek oyuncuyla ayarlanmadı**                             | Orta                   | Fizik parametreleri (tutuş, süspansiyon, fren) otopilot ve başsız testlerle makul aralıkta; "arcade-simülasyon dengesi" kullanıcı testi ister. Parametreler `data/performance`, `vehicleSpec.ts`, `VehiclePhysics.ts` sabitlerinde. |
-| 4   | **Sıkıştırmalı gerçek GLB (Draco/KTX2) denenmedi**                       | Orta                   | Çözücüler servis ediliyor (HTTP 200 doğrulandı) ama ilk gerçek dosyayla uçtan uca deneme gerekir.                                                                                                                                   |
-| 5   | Roll (yan yatma) kontrolü yok                                            | Düşük-Orta             | Rapier raycast aracında yok; gerekirse anti-roll torku eklenebilir.                                                                                                                                                                 |
-| 6   | PNG indirme ve dosyadan içe aktarma otomasyonla denenmedi                | Düşük                  | Tarayıcı dosya pencereleri otomatikleştirilemedi; mantık testli, 3× yakalama (3840×1894) elle doğrulandı.                                                                                                                           |
-| 7   | Gamepad gerçek cihazla denenmedi                                         | Düşük                  | Eşleme saf fonksiyonlarda test edildi (ölü bölge, tuş tekrarı, kenar algılama); standart eşleme varsayıldı.                                                                                                                         |
-| 8   | Duruş editöründe ön/arka bağlama yok                                     | Düşük                  | Presetler + iki aks ayrı kaydırıcı mevcut; "bağlı" kutusu eklenebilir (jant editöründeki gibi).                                                                                                                                     |
-| 9   | Çok eğimli yüzeylerde vinil gerilmesi                                    | Düşük (bilinen kısıt)  | Spesifikasyonun belirttiği kısıt; normal ağırlıklı yumuşak geçiş uygulandı.                                                                                                                                                         |
-| 10  | `dist` 9,3 MB (≈3 MB kullanılmayan Draco/Basis kopyası)                  | Çok düşük              | Yalnızca dağıtım boyutu; hiç indirilmez.                                                                                                                                                                                            |
-| 11  | Hacimli huzmeler 2×16 bin üçgenlik drei konileri                         | Çok düşük              | Geometri darboğaz değil; istenirse özel düşük poligonlu koniyle değiştirilebilir.                                                                                                                                                   |
+| #   | Konu                                                                     | Etki                   | Neden açık / önerilen adım                                                                                                                                                                                                                           |
+| --- | ------------------------------------------------------------------------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Hedef donanımda performans doğrulanmadı** (§14: ≥60 FPS Yüksek, 1080p) | Yüksek                 | Test makinesi entegre GPU. Ölçüm altyapısı hazır (FPS + çizim çağrısı/üçgen göstergesi, uyarlanabilir kalite). Hedef donanımda Yüksek/Ultra ölçülmeli; gerekirse yansıma/AO maliyeti (dolgu oranı) ayarlanmalı.                                      |
+| 2   | **Gerçek model yok**                                                     | Yüksek (görsel kalite) | Placeholder kaba. `docs/ASSET_GUIDE.md`'ye uygun bir GLB eklenince manifestteki `model` yolu yeterli. Gerçek modelle: çamurluk ölçüleri (`fitment`), egzoz uç konumları, tekerlek çapaları doğrulanmalı.                                             |
+| 3   | **Sürüş hissi gerçek oyuncuyla ayarlanmadı**                             | Orta                   | 2026-10-19: direksiyon/tutuş ölçümle düzeltildi (bkz. PROGRESS). Yardımcıların (TC, ters direksiyon) ayarlar arayüzü ve ABS yok; ince ayar için oyuncu testi gerekir. Sabitler: `driving.json`, `drivetrain.ts` (`steerAngle`), `VehiclePhysics.ts`. |
+| 4   | **Sıkıştırmalı gerçek GLB (Draco/KTX2) denenmedi**                       | Orta                   | Çözücüler servis ediliyor (HTTP 200 doğrulandı) ama ilk gerçek dosyayla uçtan uca deneme gerekir.                                                                                                                                                    |
+| 5   | Roll (yan yatma) kontrolü yok                                            | Düşük-Orta             | Rapier raycast aracında yok; gerekirse anti-roll torku eklenebilir.                                                                                                                                                                                  |
+| 6   | PNG indirme ve dosyadan içe aktarma otomasyonla denenmedi                | Düşük                  | Tarayıcı dosya pencereleri otomatikleştirilemedi; mantık testli, 3× yakalama (3840×1894) elle doğrulandı.                                                                                                                                            |
+| 7   | Gamepad gerçek cihazla denenmedi                                         | Düşük                  | Eşleme saf fonksiyonlarda test edildi (ölü bölge, tuş tekrarı, kenar algılama); standart eşleme varsayıldı.                                                                                                                                          |
+| 8   | Duruş editöründe ön/arka bağlama yok                                     | Düşük                  | Presetler + iki aks ayrı kaydırıcı mevcut; "bağlı" kutusu eklenebilir (jant editöründeki gibi).                                                                                                                                                      |
+| 9   | Çok eğimli yüzeylerde vinil gerilmesi                                    | Düşük (bilinen kısıt)  | Spesifikasyonun belirttiği kısıt; normal ağırlıklı yumuşak geçiş uygulandı.                                                                                                                                                                          |
+| 10  | `dist` 9,3 MB (≈3 MB kullanılmayan Draco/Basis kopyası)                  | Çok düşük              | Yalnızca dağıtım boyutu; hiç indirilmez.                                                                                                                                                                                                             |
+| 11  | Hacimli huzmeler 2×16 bin üçgenlik drei konileri                         | Çok düşük              | Geometri darboğaz değil; istenirse özel düşük poligonlu koniyle değiştirilebilir.                                                                                                                                                                    |
 
 ## 6. Bu turda (Faz 11) giderilen eski sorunlar
 

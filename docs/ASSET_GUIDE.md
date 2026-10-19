@@ -71,6 +71,17 @@ Notlar:
 - Tekerlek çapası gerekmez (eşlemeli modellerde `anchor_missing` uyarısı verilmez); tekerlek konumları manifestten alınır, modelden ölçülür.
 - Aracın stok jant/lastik kurulumu `manifest.defaultFitment` ile verilir.
 
+### Yüzey haritası (`surface.json`): overlay parçaların gövdeye oturması
+
+Overlay parçalar (lip/splitter, kaput scoop'u ve pimleri, marşpiyel, spoyler/kanat, takla kafesi) gerçek modelin yüzeyine **ölçülmüş bir haritayla** oturur; `placeholder.json` profili gerçek gövdeyi yalnızca kabaca izlediği için tek başına yetmez (Mustang'te profil kaput pimlerini 13 cm, spoyleri 15–22 cm havada bırakıyordu).
+
+- Harita, hazırlanmış (eşlenmiş, ölçeklenmiş) model **ışın izlenerek** üretilir: 5 cm aralıklı üst yüzey yüksekliği (z × x), yan yüzey (z × y), x=0'da alt çizgi ve burun/kuyruk uçları. Dosya: `src/data/cars/<id>/surface.json`, `data/cars/index.ts`'te araca bağlanır.
+- Model ya da `modelMap.json` değişince yeniden üretin:
+  `GEN_SURFACE=1 node node_modules/vitest/vitest.mjs run src/car/model/surface.gen.test.ts` (aracı `CARS` listesine ekleyin).
+- `mustang.test.ts`'teki güncellik testi, harita modelden saparsa (±1 cm) kırılır.
+- Parçalar `src/car/slots/pose.ts` yardımcılarını kullanır (`topY`, `sideX`, `noseZ`, `tailZ`, `bottomY`, `hoodRearZ`, `deckHalfWidth`, `restY`); harita yoksa profil kullanılır. Kutu biçimli parçalar ayak izinin en alçak noktasına oturur (kavisli yüzeyde kenarlar havada kalmaz).
+- Modelin kendi iç mekânı varsa iç mekân slotu yalnız takla kafesini ekler (prosedürel koltuk/torpido çizilmez).
+
 ## 4. Materyal isimleri
 
 Aşağıdaki adlara sahip materyaller oyunun paylaşılan materyalleriyle **değiştirilir**; böylece boya, cam filmi, vinil ve far rengi modele de uygulanır. Başka adlar modelin kendi materyali olarak kalır.
@@ -154,5 +165,6 @@ Gerçek marka/model adı, logo veya birebir kopya tasarım **kullanılmaz** (pro
 - [ ] Boya bölgeleri `paint_<bölge>` materyali, krom/cam/kauçuk `mat_*` adlarıyla
 - [ ] Toplam ≤ 300k üçgen, dosya sıkıştırılmış
 - [ ] Gerçek modelde çamurluk ölçüleri manifestin `fitment` alanında
+- [ ] Overlay parça kullanan eşlemeli modelde `surface.json` üretildi ve güncellik testi yeşil
 - [ ] Atıf `public/assets/CREDITS.json` içinde
 - [ ] Konsolda beklenmeyen `[Model]` uyarısı yok
