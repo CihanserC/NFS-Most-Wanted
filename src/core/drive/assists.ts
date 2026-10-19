@@ -18,6 +18,8 @@ const TC_FULL_CUT_SLIP = 5;
 const COUNTER_STEER_GAIN = 1.6;
 /** Bu boyuna hızın altında yardım yok (m/s) */
 const ASSIST_MIN_SPEED = 6;
+/** Bu gövde kayma açısının (rad, ≈4°) altında yardım devreye girmez: normal virajda araya girmesin */
+const COUNTER_STEER_DEADZONE = 0.07;
 /** Yardımın direksiyona ekleyebileceği azami miktar */
 const COUNTER_STEER_MAX = 0.6;
 
@@ -41,7 +43,8 @@ export function applyAssists(input: DriveInput, ctx: AssistContext, assists: Ass
   if (assists.steeringAssist && ctx.forwardSpeed > ASSIST_MIN_SPEED) {
     // Hız vektörü gövdenin soluna kayıyorsa (β>0) sola, sağına kayıyorsa sağa direksiyon
     const beta = Math.atan2(ctx.lateralSpeed, ctx.forwardSpeed);
-    const add = Math.max(-COUNTER_STEER_MAX, Math.min(COUNTER_STEER_MAX, beta * COUNTER_STEER_GAIN));
+    const excess = Math.sign(beta) * Math.max(0, Math.abs(beta) - COUNTER_STEER_DEADZONE);
+    const add = Math.max(-COUNTER_STEER_MAX, Math.min(COUNTER_STEER_MAX, excess * COUNTER_STEER_GAIN));
     steer = Math.max(-1, Math.min(1, steer + add));
   }
   return { ...input, throttle, steer };

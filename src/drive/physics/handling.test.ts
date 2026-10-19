@@ -97,6 +97,24 @@ describe.each(listCars().map((c) => c.manifest.id))('sürüş testleri: %s', (id
     v.dispose();
   });
 
+  it('100 km/s tam direksiyon yarım direksiyondan daha keskin döner (ön lastik doymaz)', () => {
+    const yawRate = (steer: number) => {
+      const v = launch(id, 100 / 3.6);
+      step(v, 2, input({ throttle: 0.35, steer }));
+      const s = v.snapshot();
+      const yaw = Math.abs(v.chassis.angvel().y);
+      const lat = (s.speed * yaw) / G;
+      v.dispose();
+      return { yaw, lat };
+    };
+    const half = yawRate(0.5);
+    const full = yawRate(1);
+    expect(full.yaw).toBeGreaterThan(half.yaw);
+    // 100 km/s'te ≈ 20°/sn ve üzeri: dönüş yarıçapı ~80 m'nin altında
+    expect((full.yaw * 180) / Math.PI).toBeGreaterThan(20);
+    expect(full.lat).toBeGreaterThan(0.95);
+  });
+
   it('slalom: hızlı sol-sağ geçişte devrilmez, kontrol kaybolmaz', () => {
     const v = launch(id, 25);
     step(v, 8, (t) => input({ throttle: 0.4, steer: Math.sin(t * 2.5) }));
@@ -133,11 +151,11 @@ describe('bariyer çarpışması', () => {
       car.driving,
     );
     const v = VehiclePhysics.create(R, spec, track);
-    // Düzlükte tam gaz + sola tam direksiyon: bariyere girer
+    // Düzlükte tam gaz + hafif sol direksiyon: bariyere sığ açıyla (≈10°) girip sürtünür
     let hit = false;
     let maxBounce = 0;
     for (let t = 0; t < 12; t += PHYSICS_STEP) {
-      v.step(PHYSICS_STEP, input({ throttle: 1, steer: t > 2 ? 0.35 : 0 }));
+      v.step(PHYSICS_STEP, input({ throttle: 1, steer: t > 2 ? 0.2 : 0 }));
       const s = v.snapshot();
       if (s.speed > 8 && Math.abs(s.lateralSpeed) > 0.5) hit = true;
       if (hit) maxBounce = Math.max(maxBounce, -s.forwardSpeed);

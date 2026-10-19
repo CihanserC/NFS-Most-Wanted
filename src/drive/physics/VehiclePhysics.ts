@@ -29,8 +29,8 @@ const CHASSIS_CENTER_Y = 0.12;
 const FRICTION_BASE = 1.25;
 const ROLLING_RESISTANCE = 0.015;
 /** Direksiyon girişinin tam kilitten kilide çıkma hızı (1/sn) ve bırakınca merkeze dönme hızı */
-const STEER_RATE = 3.2;
-const STEER_RETURN_RATE = 5.5;
+const STEER_RATE = 4.2;
+const STEER_RETURN_RATE = 6.5;
 /** Tekerlek patinaj hızının (m/s) boşalma hızı */
 const SLIP_DECAY = 10;
 const SPIN_INERTIA_MASS = 110;
@@ -252,7 +252,7 @@ export class VehiclePhysics {
     // Direksiyon: hıza duyarlı açı, yumuşatılmış giriş
     const rate = Math.abs(input.steer) < Math.abs(this.steer) ? STEER_RETURN_RATE : STEER_RATE;
     this.steer += Math.max(-rate * dt, Math.min(rate * dt, input.steer - this.steer));
-    const steerRad = steerAngle(this.steer, speed);
+    const steerRad = steerAngle(this.steer, Math.abs(forwardSpeed), spec.wheelbase);
 
     const driven = forwardSpeed + this.slipSpeed * Math.sign(this.drivetrain.reverse ? -1 : 1);
     const out = stepDrivetrain(this.drivetrain, input, spec, forwardSpeed, driven, dt);

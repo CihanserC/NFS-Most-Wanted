@@ -22,3 +22,14 @@ describe('applyAssists', () => {
     expect(out.throttle).toBeGreaterThanOrEqual(0.25);
   });
 });
+
+describe('ters direksiyon ölü bölgesi', () => {
+  it('normal virajdaki küçük kayma açısında direksiyona dokunmaz', () => {
+    const out = applyAssists(
+      { throttle: 0.5, brake: 0, steer: 1, handbrake: false },
+      { forwardSpeed: 28, lateralSpeed: -0.5, slipSpeed: 0 },
+      DEFAULT_ASSISTS,
+    );
+    expect(out.steer).toBe(1);
+  });
+});

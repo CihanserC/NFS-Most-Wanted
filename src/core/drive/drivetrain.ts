@@ -126,10 +126,20 @@ export function stepDrivetrain(
   };
 }
 
-/** Hıza duyarlı direksiyon açısı (rad): yavaşken geniş, hızlıyken dar. */
-export function steerAngle(steerInput: number, speedMs: number): number {
-  const maxLow = 0.55;
-  const maxHigh = 0.1;
-  const k = Math.min(1, Math.abs(speedMs) / 55);
-  return steerInput * (maxLow + (maxHigh - maxLow) * k * k);
+/** Kilitten kilide ön tekerlek açısı (rad), park hızında */
+const STEER_MAX = 0.55;
+/** Direksiyonun hedeflediği yanal ivme (m/s²): kinematik açı bu ivmeye göre hesaplanır */
+const STEER_TARGET_ACCEL = 12;
+/** Lastiğin tepe kayma açısı (rad, tire.ts'deki PEAK_SLIP_ANGLE ile uyumlu) üzerine pay */
+const STEER_SLIP_MARGIN = 0.13;
+
+/**
+ * Hıza duyarlı direksiyon açısı (rad). Tam kilit; aracı hedef yanal ivmede döndüren kinematik açı
+ * (Ackermann: L·a/v²) + lastiğin tepe kayma açısı ile sınırlanır. Böylece klavyeyle tam direksiyon
+ * ön lastikleri tepe noktasının ötesine itip tutuşu düşürmez (yüksek hızda "düz gitme" olmaz).
+ */
+export function steerAngle(steerInput: number, speedMs: number, wheelbase = 2.7): number {
+  const v2 = Math.max(speedMs * speedMs, 1);
+  const kinematic = Math.atan((wheelbase * STEER_TARGET_ACCEL) / v2);
+  return steerInput * Math.min(STEER_MAX, kinematic + STEER_SLIP_MARGIN);
 }

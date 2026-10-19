@@ -1,5 +1,5 @@
 {
-  "lateralMu": 1.0,
+  "lateralMu": 1.5,
   "rearSlipScale": 1.2,
   "tireRelaxLength": 0.55,
   "rollInfluence": 0.15,
