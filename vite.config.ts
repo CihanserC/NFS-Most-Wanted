@@ -21,6 +21,8 @@ const vendorGroups = [
 ];
 
 export default defineConfig({
+  // GitHub Pages alt yolda yayınlar (/<depo>/); yerelde ve testte kök
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
   build: {
     rolldownOptions: {
