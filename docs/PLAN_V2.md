@@ -210,6 +210,8 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [x] Çimde geri/ileri çekiş, vinil gizmo dikdörtgeni, performans istatistikleri sağ üstte
 - [x] (2026-10-20) Arcade direksiyon (≈2 g), nitro (3 kademe, mavi-kırmızı alev), bariyer titremesi, kaput pimleri kaldırıldı, marşpiyel/spoyler seçenekleri, "tüm araç" + parça parça boya (Mustang tavan/kapı/bagaj/tampon), garaj ayrıntıları, GLB sıkıştırma (5,46 → 1,25 MB), statik mesh birleştirme (255 → 123 çizim çağrısı)
 
+- [x] (2026-10-20) Üçüncü araç 2001 BMW M3 GTR; minimal tur paneli ve yeni minimap
+
 ### V2-4 — Mobil uyumluluk
 
 - [ ] Cihaz algılama, mobil kalite varsayılanları, viewport/safe-area/dokunma ayarları
