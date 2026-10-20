@@ -55,10 +55,29 @@ if (parsedDefault.length > 0)
 export const DEFAULT_PAINT: PaintConfig = defaultPaintJson as PaintConfig;
 
 /** Manifestteki her boya bölgesi için geçerli bir boya döndürür. */
+/**
+ * Boya haritasını araç bölgelerine uydurur. Kayıtta olmayan bölge (ör. araca sonradan eklenen
+ * kapı/tavan bölgesi) gövde ("body") boyasını devralır: eski kayıtlar yamalı görünmesin.
+ */
 export function normalizePaintMap(input: unknown, zones: string[]): Record<string, PaintConfig> {
   const src = isObj(input) ? input : {};
-  return Object.fromEntries(zones.map((z) => [z, sanitizePaint(src[z])]));
+  const fallback = src.body;
+  return Object.fromEntries(zones.map((z) => [z, sanitizePaint(src[z] ?? fallback)]));
 }
+
+/**
+ * Boya menüsündeki "tüm araç" seçimi: düzenlemeler bütün bölgelere aynı anda uygulanır.
+ * Manifest bölgesi değildir (kayıtta tutulmaz).
+ */
+export const WHOLE_CAR_ZONE = 'all';
+
+/** Seçili menü bölgesinin etkilediği gerçek bölgeler. */
+export const paintTargets = (zone: string, zones: string[]): string[] =>
+  zone === WHOLE_CAR_ZONE ? zones : [zone];
+
+/** Seçimin gösterdiği referans bölge (tüm araçta "body"). */
+export const paintReferenceZone = (zone: string, zones: string[]): string =>
+  zone === WHOLE_CAR_ZONE ? (zones.includes('body') ? 'body' : (zones[0] ?? 'body')) : zone;
 
 export const PAINT_EXPORT_FORMAT = 'muscle-garage/paint';
 export const PAINT_EXPORT_VERSION = 1;

@@ -5,6 +5,9 @@ import {
   DEFAULT_PAINT,
   PaintImportError,
   normalizePaintMap,
+  paintReferenceZone,
+  paintTargets,
+  WHOLE_CAR_ZONE,
   parsePaintExport,
   sanitizePaint,
   serializePaintMap,
@@ -139,5 +142,23 @@ describe('boya tipleri', () => {
     const fine = resolvePaint({ ...DEFAULT_PAINT, flakeSize: 0 });
     const coarse = resolvePaint({ ...DEFAULT_PAINT, flakeSize: 1 });
     expect(coarse.flakeScale).toBeLessThan(fine.flakeScale);
+  });
+});
+
+describe('tüm araç ve parça parça boya', () => {
+  const zones = ['body', 'hood', 'roof', 'doors'];
+
+  it('"tüm araç" bütün bölgeleri hedefler, gövdeyi gösterir; parça yalnız kendini', () => {
+    expect(paintTargets(WHOLE_CAR_ZONE, zones)).toEqual(zones);
+    expect(paintReferenceZone(WHOLE_CAR_ZONE, zones)).toBe('body');
+    expect(paintTargets('roof', zones)).toEqual(['roof']);
+    expect(paintReferenceZone('roof', zones)).toBe('roof');
+  });
+
+  it('kayıtta olmayan yeni bölge gövde boyasını devralır (eski kayıt yamalı görünmez)', () => {
+    const body = { ...normalizePaintMap({}, ['body']).body!, color: '#123456' };
+    const map = normalizePaintMap({ body, hood: body }, zones);
+    expect(map.roof?.color).toBe('#123456');
+    expect(map.doors?.color).toBe('#123456');
   });
 });

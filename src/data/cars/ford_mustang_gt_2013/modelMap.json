@@ -10,6 +10,50 @@
     },
     {
       "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "ANC_Door",
+      "zone": "doors"
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "SM_RearKit",
+      "zone": "roof",
+      "region": {
+        "absX": [0, 0.75],
+        "y": [1.2, 2],
+        "z": [-1.1, 0.4]
+      },
+      "whole": true
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "SM_RearKit",
+      "zone": "trunk",
+      "region": {
+        "absX": [0, 0.62],
+        "y": [0.98, 1.2],
+        "z": [-2.4, -1.84]
+      }
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "SM_RearKit",
+      "zone": "bumpers",
+      "region": {
+        "y": [0, 0.74],
+        "z": [-2.6, -2.02]
+      }
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
+      "nodes": "SM_FrontKit",
+      "zone": "bumpers",
+      "region": {
+        "y": [0, 0.7],
+        "z": [2.02, 2.6]
+      }
+    },
+    {
+      "material": "fMAT_Ford_Mustang_2014_Base1",
       "zone": "body"
     }
   ],

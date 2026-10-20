@@ -108,7 +108,10 @@ export const tr: Record<string, string> = {
   'part.interior.stock': 'Stok',
   'part.interior.roll_cage': 'Roll Cage',
 
-  'paintZone.body': 'Gövde',
+  'paintZone.body': 'Çamurluklar & yan paneller',
+  'paintZone.all': 'Kaporta (tüm araç)',
+  'paintZone.doors': 'Kapılar',
+  'paintZone.trunk': 'Bagaj',
   'paintZone.roof': 'Tavan',
   'paintZone.hood': 'Kaput',
   'paintZone.mirrors': 'Aynalar',

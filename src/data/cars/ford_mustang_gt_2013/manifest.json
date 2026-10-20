@@ -30,10 +30,14 @@
       "rear": 65
     }
   },
-  "paintZones": ["body", "hood"],
+  "paintZones": ["body", "hood", "roof", "doors", "trunk", "bumpers"],
   "paintZoneCameras": {
     "body": "paint_side",
-    "hood": "hood_top"
+    "hood": "hood_top",
+    "roof": "roof_top",
+    "doors": "side",
+    "trunk": "rear_top",
+    "bumpers": "front_three_quarter"
   },
   "wheelCameras": {
     "front": "wheel_front",

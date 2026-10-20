@@ -108,7 +108,10 @@ export const en: Record<string, string> = {
   'part.interior.stock': 'Stock',
   'part.interior.roll_cage': 'Roll Cage',
 
-  'paintZone.body': 'Body',
+  'paintZone.body': 'Fenders & side panels',
+  'paintZone.all': 'Body (whole car)',
+  'paintZone.doors': 'Doors',
+  'paintZone.trunk': 'Trunk',
   'paintZone.roof': 'Roof',
   'paintZone.hood': 'Hood',
   'paintZone.mirrors': 'Mirrors',

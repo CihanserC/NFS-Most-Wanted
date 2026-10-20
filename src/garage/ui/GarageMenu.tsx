@@ -6,6 +6,7 @@ import { useBuildStore } from '../../core/store/stores';
 import { getCar } from '../../data/cars';
 import { isCategoryEnabled, menuCategories } from './categories';
 import { PaintEditor } from './paint/PaintEditor';
+import { paintReferenceZone, WHOLE_CAR_ZONE } from '../../core/paint/paint';
 import { useDriveStore } from '../../core/store/driveStore';
 import { GarageEditor } from './garage/GarageEditor';
 import { LookEditor } from './look/LookEditor';
@@ -109,11 +110,15 @@ export function GarageMenu() {
         }));
       }
       case 'zones':
-        return car.manifest.paintZones.map((z) => ({
-          id: z,
-          label: t(`paintZone.${z}`),
-          meta: paint[z] ? t(`paintType.${paint[z].type}`) : undefined,
-        }));
+        // İlk seçenek tüm aracı boyar; altındakiler parça parça boyar
+        return [WHOLE_CAR_ZONE, ...car.manifest.paintZones].map((z) => {
+          const shown = paint[paintReferenceZone(z, car.manifest.paintZones)];
+          return {
+            id: z,
+            label: t(`paintZone.${z}`),
+            meta: shown ? t(`paintType.${shown.type}`) : undefined,
+          };
+        });
       case 'paint':
       case 'wheels':
       case 'vinyl':

@@ -49,5 +49,8 @@ export function loadGlbScene(url: URL): Promise<Object3D> {
 
 /** prepareModel'in beklediği paylaşılan materyaller (adları yeterli). */
 export const sharedTestMaterials = new Map<string, Material>(
-  ['paint_body', 'paint_hood', 'mat_glass'].map((n) => [n, new MeshStandardMaterial({ name: n })]),
+  [
+    ...['body', 'hood', 'roof', 'doors', 'trunk', 'bumpers', 'mirrors'].map((z) => `paint_${z}`),
+    'mat_glass',
+  ].map((n) => [n, new MeshStandardMaterial({ name: n })]),
 );

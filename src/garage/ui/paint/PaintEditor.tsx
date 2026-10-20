@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { normalizeHex } from '../../../core/color/color';
-import { PaintImportError, parsePaintExport, serializePaintMap } from '../../../core/paint/paint';
+import {
+  PaintImportError,
+  paintReferenceZone,
+  paintTargets,
+  parsePaintExport,
+  serializePaintMap,
+} from '../../../core/paint/paint';
 import { FLAKE_PAINT_TYPES, PAINT_TYPES, type PaintConfig } from '../../../core/paint/types';
 import { usePaintPresetStore } from '../../../core/store/paintPresetStore';
 import { useBuildStore, useEffectivePaint } from '../../../core/store/stores';
@@ -41,7 +47,11 @@ function swatchStyle(p: PaintConfig) {
   return { background: p.color };
 }
 
-export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) {
+export function PaintEditor({ zone: selected, zones }: { zone: string; zones: string[] }) {
+  // "Tüm araç" seçiliyse düzenleme bütün bölgelere gider; gösterilen değerler gövdeden okunur
+  const zone = paintReferenceZone(selected, zones);
+  const targets = paintTargets(selected, zones);
+  const fanout = (config: PaintConfig) => Object.fromEntries(targets.map((z) => [z, config]));
   const paint = useEffectivePaint()[zone];
   const saved = useBuildStore((s) => s.build.paint);
   const { setPaint, previewPaint, commitPaintPreview, clearPaintPreview } =
@@ -63,16 +73,15 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
   // Yerleşim kayıtlı boyaya göre belirlenir: hover önizlemesi türü değiştirince bölümler
   // açılıp kapanmasın (içerik kayar, fare başka öğeye düşer ve titreme olur).
   const base = saved[zone] ?? paint;
-  const targets = colorTargets(base);
-  const activeTarget = targets.some((x) => x.field === target) ? target : 'color';
+  const colorFields = colorTargets(base);
+  const activeTarget = colorFields.some((x) => x.field === target) ? target : 'color';
   const hasFlakes = FLAKE_PAINT_TYPES.includes(base.type);
 
-  const preview = (patch: Partial<PaintConfig>) => previewPaint({ [zone]: { ...paint, ...patch } });
-  const commit = (patch: Partial<PaintConfig>) => setPaint({ [zone]: { ...paint, ...patch } });
+  const preview = (patch: Partial<PaintConfig>) => previewPaint(fanout({ ...paint, ...patch }));
+  const commit = (patch: Partial<PaintConfig>) => setPaint(fanout({ ...paint, ...patch }));
   // Hover önizlemesi kayıtlı boya üzerinden yapılır ki birikmesin.
-  const hoverPreview = (patch: Partial<PaintConfig>) =>
-    previewPaint({ [zone]: { ...base, ...patch } });
-  const hoverCommit = (patch: Partial<PaintConfig>) => setPaint({ [zone]: { ...base, ...patch } });
+  const hoverPreview = (patch: Partial<PaintConfig>) => previewPaint(fanout({ ...base, ...patch }));
+  const hoverCommit = (patch: Partial<PaintConfig>) => setPaint(fanout({ ...base, ...patch }));
 
   const slider = (field: SliderField, label: string) => (
     <label className="pe-slider" key={field}>
@@ -135,7 +144,7 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
 
       <section>
         <div className="pe-tabs">
-          {targets.map(({ field, label }) => (
+          {colorFields.map(({ field, label }) => (
             <button
               key={field}
               type="button"
@@ -204,8 +213,8 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
               key={p.id}
               type="button"
               className="pe-preset"
-              onMouseEnter={() => previewPaint({ [zone]: p.paint })}
-              onClick={() => setPaint({ [zone]: p.paint })}
+              onMouseEnter={() => previewPaint(fanout(p.paint))}
+              onClick={() => setPaint(fanout(p.paint))}
             >
               <i style={swatchStyle(p.paint)} />
               {t(`paintPreset.${p.id}`)}
@@ -218,8 +227,8 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
             <span key={p.id} className="pe-preset is-user">
               <button
                 type="button"
-                onMouseEnter={() => previewPaint({ [zone]: p.paint })}
-                onClick={() => setPaint({ [zone]: p.paint })}
+                onMouseEnter={() => previewPaint(fanout(p.paint))}
+                onClick={() => setPaint(fanout(p.paint))}
               >
                 <i style={swatchStyle(p.paint)} />
                 {p.name}
@@ -258,13 +267,15 @@ export function PaintEditor({ zone, zones }: { zone: string; zones: string[] }) 
       </section>
 
       <section>
-        <button
-          type="button"
-          className="gm-chip pe-wide"
-          onClick={() => setPaint(Object.fromEntries(zones.map((z) => [z, base])))}
-        >
-          {t('paint.applyAll')}
-        </button>
+        {targets.length === 1 && (
+          <button
+            type="button"
+            className="gm-chip pe-wide"
+            onClick={() => setPaint(Object.fromEntries(zones.map((z) => [z, base])))}
+          >
+            {t('paint.applyAll')}
+          </button>
+        )}
         <details className="pe-json">
           <summary>{t('paint.json')}</summary>
           <textarea value={json} spellCheck={false} onChange={(e) => setJson(e.target.value)} />
