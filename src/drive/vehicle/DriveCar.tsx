@@ -246,6 +246,8 @@ export function DriveCar({
         z: snap.position[2],
         heading: Math.atan2(tmpForward.x, tmpForward.z),
         offTrack: snap.surface === 'grass',
+        nitro: ph.spec.nitro ? snap.nitro : null,
+        nitroActive: snap.nitroActive,
       });
     }
   });

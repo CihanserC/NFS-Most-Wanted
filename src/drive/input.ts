@@ -7,6 +7,7 @@ const KEYS = {
   left: ['KeyA', 'ArrowLeft'],
   right: ['KeyD', 'ArrowRight'],
   handbrake: ['Space'],
+  nitro: ['ShiftLeft', 'ShiftRight'],
 } as const;
 
 export type InputSource = {
@@ -38,6 +39,7 @@ export function createInputSource(): InputSource {
         brake: any(KEYS.brake) ? 1 : 0,
         steer: (any(KEYS.left) ? 1 : 0) - (any(KEYS.right) ? 1 : 0),
         handbrake: any(KEYS.handbrake),
+        nitro: any(KEYS.nitro),
       };
       // Gamepad varsa analog değerlerle birleştirilir (daha büyük olan kazanır)
       const pad = readGamepadDrive();
@@ -47,6 +49,7 @@ export function createInputSource(): InputSource {
         brake: Math.max(keyboard.brake, pad.brake),
         steer: Math.max(-1, Math.min(1, keyboard.steer + pad.steer)),
         handbrake: keyboard.handbrake || pad.handbrake,
+        nitro: keyboard.nitro || pad.nitro,
       };
     },
     override: (input) => {

@@ -104,7 +104,13 @@ describe('gamepad: sürüş', () => {
 
   it('eksik düğme/eksen verisinde güvenli varsayılanlar', () => {
     const empty: PadSnapshot = { axes: [], buttons: [] };
-    expect(driveAxes(empty)).toEqual({ steer: 0, throttle: 0, brake: 0, handbrake: false });
+    expect(driveAxes(empty)).toEqual({
+      steer: 0,
+      throttle: 0,
+      brake: 0,
+      handbrake: false,
+      nitro: false,
+    });
     expect(menuKeys(empty, initialPadState(), 0).keys).toEqual([]);
   });
 });

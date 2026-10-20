@@ -11,6 +11,8 @@ import {
   sumDownforce,
   tireGrip,
   type EngineSpec,
+  nitroSpec,
+  type NitroSpec,
 } from '../performance/performance';
 import { effectiveTrackMm } from '../stance/stance';
 import type { Axle } from '../wheels/types';
@@ -62,6 +64,8 @@ export type VehicleSpec = {
   exhaust: string;
   /** Araca özel sürüş ayarları */
   driving: DrivingTuning;
+  /** Nitro (takılı değilse null) */
+  nitro: NitroSpec | null;
 };
 
 export function deriveVehicleSpec(
@@ -126,5 +130,6 @@ export function deriveVehicleSpec(
     supercharged,
     exhaust: build.parts.exhaust ?? 'rear_dual',
     driving,
+    nitro: nitroSpec(build.performance.nitro),
   };
 }

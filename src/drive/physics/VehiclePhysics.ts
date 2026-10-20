@@ -89,6 +89,10 @@ export type VehicleSnapshot = {
   wheels: WheelSnapshot[];
   /** Şasinin dünya yukarı vektörünün y bileşeni (1 = dik) */
   upY: number;
+  /** Nitro tüpü 0..1 (nitro yoksa 0) */
+  nitro: number;
+  /** Nitro şu an itiyor mu (alev, ses, HUD) */
+  nitroActive: boolean;
 };
 
 type Vec3 = { x: number; y: number; z: number };
@@ -259,6 +263,7 @@ export class VehiclePhysics {
     this.slipSpeed = 0;
     this.slipAngles = [0, 0, 0, 0];
     this.flipTime = 0;
+    this.nitro = 1;
     this.drivetrain = initialDrivetrain(this.spec.engine.idleRpm);
   }
 
@@ -419,6 +424,7 @@ export class VehiclePhysics {
       );
     }
 
+    this.applyNitro(dt, input, fwd, forwardSpeed, wheels, live);
     this.applyArcadeSteering(dt, input, forwardSpeed, wheels);
     controller.updateVehicle(dt);
     this.world.step();
@@ -446,6 +452,41 @@ export class VehiclePhysics {
     this.liftOff = this.flameTimer > 0;
     this.prevThrottle = o.throttle;
     this.lastBrake = o.brake;
+  }
+
+  /** Nitro tüpü 0..1 */
+  nitro = 1;
+  private nitroActive = false;
+
+  /**
+   * Nitro: düğme basılı, tüpte gaz var, ileri gidiliyor ve tekerlekler yerdeyse aracı gövde
+   * yönünde ek ivmeyle iter (çekiş sınırından bağımsız: arcade). Tüp kullanılırken boşalır,
+   * bırakınca kendiliğinden dolar.
+   */
+  private applyNitro(
+    dt: number,
+    input: DriveInput,
+    fwd: Vec3,
+    forwardSpeed: number,
+    wheels: { contact: boolean }[],
+    live: boolean,
+  ): void {
+    const n = this.spec.nitro;
+    if (!n || !live) {
+      this.nitroActive = false;
+      return;
+    }
+    const grounded = wheels.filter((w) => w.contact).length >= 2;
+    const wants = Boolean(input.nitro) && !this.drivetrain.reverse && forwardSpeed > -0.5;
+    this.nitroActive = wants && grounded && this.nitro > 0;
+    if (this.nitroActive) {
+      this.nitro = Math.max(0, this.nitro - dt / n.durationS);
+      const f = this.spec.massKg * n.accel;
+      this.chassis.addForce({ x: fwd.x * f, y: 0, z: fwd.z * f }, true);
+    } else if (!input.nitro) {
+      // Düğme bırakılmadan dolmaz: boşalınca basılı tutmak tüpü titretmesin
+      this.nitro = Math.min(1, this.nitro + dt / n.rechargeS);
+    }
   }
 
   /**
@@ -573,6 +614,8 @@ export class VehiclePhysics {
       surface: tq.surface,
       wheels,
       upY: up.y,
+      nitro: this.spec.nitro ? this.nitro : 0,
+      nitroActive: this.nitroActive,
     };
   }
 

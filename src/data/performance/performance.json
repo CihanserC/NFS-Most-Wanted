@@ -1,10 +1,28 @@
 {
   "engine": {
-    "stock": { "torqueNm": 540, "redline": 5800, "price": 0, "weightKg": 0 },
-    "street": { "torqueNm": 640, "redline": 6400, "price": 3200, "weightKg": 10 },
-    "race": { "torqueNm": 760, "redline": 7200, "price": 9800, "weightKg": 22 }
+    "stock": {
+      "torqueNm": 540,
+      "redline": 5800,
+      "price": 0,
+      "weightKg": 0
+    },
+    "street": {
+      "torqueNm": 640,
+      "redline": 6400,
+      "price": 3200,
+      "weightKg": 10
+    },
+    "race": {
+      "torqueNm": 760,
+      "redline": 7200,
+      "price": 9800,
+      "weightKg": 22
+    }
   },
-  "supercharger": { "torqueMul": 1.22, "redlineAdd": 200 },
+  "supercharger": {
+    "torqueMul": 1.22,
+    "redlineAdd": 200
+  },
   "idleRpm": 850,
   "torqueCurve": [
     [0.12, 0.55],
@@ -15,7 +33,12 @@
     [1, 0.66]
   ],
   "transmission": {
-    "stock4": { "gears": [2.6, 1.75, 1.3, 1], "finalDrive": 3.6, "price": 0, "weightKg": 0 },
+    "stock4": {
+      "gears": [2.6, 1.75, 1.3, 1],
+      "finalDrive": 3.6,
+      "price": 0,
+      "weightKg": 0
+    },
     "sport5": {
       "gears": [3.1, 2.1, 1.55, 1.2, 0.95],
       "finalDrive": 3.7,
@@ -32,19 +55,88 @@
   "reverseGear": 2.9,
   "drivelineEfficiency": 0.88,
   "brakes": {
-    "stock": { "force": 1, "price": 0, "weightKg": 0 },
-    "sport": { "force": 1.2, "price": 1800, "weightKg": 3 },
-    "race": { "force": 1.45, "price": 4600, "weightKg": 6 }
+    "stock": {
+      "force": 1,
+      "price": 0,
+      "weightKg": 0
+    },
+    "sport": {
+      "force": 1.2,
+      "price": 1800,
+      "weightKg": 3
+    },
+    "race": {
+      "force": 1.45,
+      "price": 4600,
+      "weightKg": 6
+    }
   },
   "suspension": {
-    "soft": { "stiffness": 22, "compression": 2.8, "relaxation": 3.2, "roll": 0.8, "price": 0 },
-    "sport": { "stiffness": 30, "compression": 3.2, "relaxation": 3.6, "roll": 1, "price": 1500 },
-    "stiff": { "stiffness": 42, "compression": 3.6, "relaxation": 4, "roll": 1.25, "price": 3600 }
+    "soft": {
+      "stiffness": 22,
+      "compression": 2.8,
+      "relaxation": 3.2,
+      "roll": 0.8,
+      "price": 0
+    },
+    "sport": {
+      "stiffness": 30,
+      "compression": 3.2,
+      "relaxation": 3.6,
+      "roll": 1,
+      "price": 1500
+    },
+    "stiff": {
+      "stiffness": 42,
+      "compression": 3.6,
+      "relaxation": 4,
+      "roll": 1.25,
+      "price": 3600
+    }
+  },
+  "nitro": {
+    "none": {
+      "accel": 0,
+      "durationS": 0,
+      "rechargeS": 0,
+      "price": 0,
+      "weightKg": 0
+    },
+    "stage1": {
+      "accel": 3,
+      "durationS": 4,
+      "rechargeS": 14,
+      "price": 2500,
+      "weightKg": 9
+    },
+    "stage2": {
+      "accel": 4.5,
+      "durationS": 5,
+      "rechargeS": 11,
+      "price": 5200,
+      "weightKg": 11
+    },
+    "stage3": {
+      "accel": 6.5,
+      "durationS": 6,
+      "rechargeS": 8,
+      "price": 9500,
+      "weightKg": 13
+    }
   },
   "tireGrip": {
-    "street": { "lateral": 1, "longitudinal": 1 },
-    "semi_slick": { "lateral": 1.28, "longitudinal": 1.2 },
-    "drag_radial": { "lateral": 0.92, "longitudinal": 1.4 }
+    "street": {
+      "lateral": 1,
+      "longitudinal": 1
+    },
+    "semi_slick": {
+      "lateral": 1.28,
+      "longitudinal": 1.2
+    },
+    "drag_radial": {
+      "lateral": 0.92,
+      "longitudinal": 1.4
+    }
   },
   "referenceTireWidthMm": 245,
   "statRanges": {
@@ -58,6 +150,7 @@
     "engine": "stock",
     "transmission": "stock4",
     "brakes": "stock",
-    "suspension": "sport"
+    "suspension": "sport",
+    "nitro": "none"
   }
 }

@@ -570,4 +570,13 @@ export const en: Record<string, string> = {
   'software.zustand': 'State management',
   'software.immer': 'Immutable state updates',
   'software.decoders': 'Model and texture compression decoders',
+  'perf.nitro': 'Nitro',
+  'perf.nitroHint':
+    'Use it while driving with Shift (gamepad: RB); the bottle empties and refills when released. Higher stages give more thrust, longer bursts and faster refills.',
+  'perfNitro.none': 'None',
+  'perfNitro.stage1': 'Stage 1',
+  'perfNitro.stage2': 'Stage 2',
+  'perfNitro.stage3': 'Stage 3',
+  'drive.controls.nitro': 'Nitro',
+  'drive.nitro': 'Nitro',
 };

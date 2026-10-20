@@ -571,4 +571,13 @@ export const tr: Record<string, string> = {
   'software.zustand': 'Durum yönetimi',
   'software.immer': 'Değişmez durum güncellemeleri',
   'software.decoders': 'Model ve doku sıkıştırma çözücüleri',
+  'perf.nitro': 'Nitro',
+  'perf.nitroHint':
+    'Sürüşte Shift (gamepad: RB) ile kullanılır; tüp boşalır, bırakınca dolar. Kademe arttıkça itiş, süre ve dolum hızı artar.',
+  'perfNitro.none': 'Yok',
+  'perfNitro.stage1': 'Kademe 1',
+  'perfNitro.stage2': 'Kademe 2',
+  'perfNitro.stage3': 'Kademe 3',
+  'drive.controls.nitro': 'Nitro',
+  'drive.nitro': 'Nitro',
 };

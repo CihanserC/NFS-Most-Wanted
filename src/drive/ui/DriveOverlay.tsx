@@ -149,6 +149,24 @@ function Speedometer() {
   );
 }
 
+/** Nitro tüpü: devir saatinin solunda dikey çubuk; kullanılırken mavi parlar. */
+function NitroGauge() {
+  const level = useDriveStore((s) => s.hud.nitro);
+  const active = useDriveStore((s) => s.hud.nitroActive);
+  if (level === null) return null;
+  return (
+    <div
+      className={`dv-nitro${active ? ' is-active' : ''}${level <= 0.02 ? ' is-empty' : ''}`}
+      aria-label={`${t('drive.nitro')} ${Math.round(level * 100)}%`}
+    >
+      <div className="dv-nitro-tube">
+        <span style={{ height: `${level * 100}%` }} />
+      </div>
+      <div className="dv-nitro-label">N₂O</div>
+    </div>
+  );
+}
+
 function Hud() {
   const hud = useDriveStore((s) => s.hud);
   const fps = useGraphicsStore((s) => s.fps);
@@ -177,6 +195,7 @@ function Hud() {
         {showFps && <div className="dv-fps">{fps} FPS</div>}
       </div>
       <Speedometer />
+      <NitroGauge />
       {!lap.running && <div className="dv-banner">{t('drive.crossLine')}</div>}
       {hud.offTrack && <div className="dv-banner is-warn">{t('drive.offTrack')}</div>}
       <div className="dv-menu-hint">
@@ -200,6 +219,7 @@ function ControlsPanel() {
       action: t('drive.controls.steer'),
     },
     { keys: [t('drive.controls.space')], pad: 'A / X', action: t('drive.controls.handbrake') },
+    { keys: ['Shift'], pad: 'RB', action: t('drive.controls.nitro') },
     {
       keys: ['C'],
       pad: 'Y',

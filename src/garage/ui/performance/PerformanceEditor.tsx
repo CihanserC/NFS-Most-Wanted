@@ -5,6 +5,7 @@ import {
   buildStats,
   dynoCurve,
   ENGINE_LEVELS,
+  NITRO_LEVELS,
   engineSpec,
   hasSupercharger,
   statFraction,
@@ -142,6 +143,10 @@ export function PerformanceEditor() {
       <Section title={t('perf.brakes')}>{choice('brakes', BRAKE_LEVELS, 'perfBrakes')}</Section>
       <Section title={t('perf.suspension')}>
         {choice('suspension', SUSPENSION_LEVELS, 'perfSuspension')}
+      </Section>
+      <Section title={t('perf.nitro')}>
+        {choice('nitro', NITRO_LEVELS, 'perfNitro')}
+        <p className="we-info">{t('perf.nitroHint')}</p>
       </Section>
       {createPortal(
         <aside className="pf-stats-panel" aria-label={t('perf.stats')}>

@@ -10,6 +10,7 @@ export const PAD = {
   B: 1,
   X: 2,
   Y: 3,
+  RB: 5,
   LT: 6,
   RT: 7,
   START: 9,
@@ -96,9 +97,15 @@ export function menuKeys(
   return { keys, state: { held, pressed: rememberButtons(pad, TRACKED) } };
 }
 
-export type DriveAxes = { steer: number; throttle: number; brake: number; handbrake: boolean };
+export type DriveAxes = {
+  steer: number;
+  throttle: number;
+  brake: number;
+  handbrake: boolean;
+  nitro: boolean;
+};
 
-/** Sürüş girişi: sol çubuk direksiyon (sol +), RT gaz, LT fren, A/X el freni. */
+/** Sürüş girişi: sol çubuk direksiyon (sol +), RT gaz, LT fren, A/X el freni, RB nitro. */
 export function driveAxes(pad: PadSnapshot): DriveAxes {
   return {
     // 0 - x: eksen tam ortadayken -0 yerine 0 üretir
@@ -106,6 +113,7 @@ export function driveAxes(pad: PadSnapshot): DriveAxes {
     throttle: Math.max(0, Math.min(1, pad.buttons[PAD.RT]?.value ?? 0)),
     brake: Math.max(0, Math.min(1, pad.buttons[PAD.LT]?.value ?? 0)),
     handbrake: button(pad, PAD.A) || button(pad, PAD.X),
+    nitro: button(pad, PAD.RB),
   };
 }
 

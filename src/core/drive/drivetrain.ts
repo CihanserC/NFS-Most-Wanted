@@ -9,6 +9,8 @@ export type DriveInput = {
   /** -1 (sağ) .. 1 (sol) */
   steer: number;
   handbrake: boolean;
+  /** Nitro düğmesi basılı (Shift / RB) */
+  nitro?: boolean;
 };
 
 export type DrivetrainState = {

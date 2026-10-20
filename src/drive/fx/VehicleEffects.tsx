@@ -9,11 +9,13 @@ import { ParticleSystem } from './ParticleSystem';
 import { SkidMarks } from './SkidMarks';
 
 const SMOKE_CAPACITY = 700;
-const FLAME_CAPACITY = 160;
+const FLAME_CAPACITY = 420;
 /** Lastik dumanı: kayma 1.0'da saniyedeki parçacık sayısı */
 const SMOKE_RATE = 95;
 const DUST_RATE = 28;
 const FLAME_PER_TAIL = 5;
+/** Nitro: kare başına egzoz başına parçacık (yarısı mavi çekirdek, yarısı kırmızı dış alev) */
+const NITRO_PER_TAIL = 6;
 /** Parçacıklar ışıksız çizilir; renkleri sahne ışığına göre ölçeklenir (gece beyaz balon olmasın) */
 const SMOKE_LIGHT = { sunset: 1, night: 0.28 } as const;
 
@@ -80,7 +82,12 @@ export function VehicleEffects({
   const emitFlames = (pool: ParticlePool) => {
     const snap = snapshotRef.current;
     const group = rigRef.current;
-    if (!snap?.liftOff || !group) return;
+    if (!snap || !group) return;
+    if (snap.nitroActive) {
+      emitNitro(pool, snap, group);
+      return;
+    }
+    if (!snap.liftOff) return;
     const tails = exhaustTails(parts.exhaust ?? 'rear_dual', car);
     group.getWorldQuaternion(quat);
     // Alev aracın hızını devralır; yoksa yüksek hızda arkada metrelerce uzun parlak iz kalır.
@@ -105,6 +112,40 @@ export function VehicleEffects({
           g: rand(0.35, 0.6),
           b: 0.1,
         });
+    }
+  };
+
+  /**
+   * Nitro alevi: her egzozdan uzun, sürekli jet. Çekirdek mavi-beyaz, dış katman kırmızı-turuncu
+   * (eklemeli karışım: üst üste binince parlak). Araç hızını devralır, egzoz ekseninde akar.
+   */
+  const emitNitro = (pool: ParticlePool, snap: VehicleSnapshot, group: Group) => {
+    const tails = exhaustTails(parts.exhaust ?? 'rear_dual', car);
+    group.getWorldQuaternion(quat);
+    carVel.set(0, 0, snap.forwardSpeed).applyQuaternion(quat);
+    for (const tail of tails) {
+      tmp.set(...tail.at);
+      group.localToWorld(tmp);
+      dir.set(...tail.direction).applyQuaternion(quat);
+      for (let k = 0; k < NITRO_PER_TAIL; k++) {
+        const core = k % 2 === 0;
+        const speed = rand(7, 12);
+        pool.emit({
+          x: tmp.x,
+          y: tmp.y,
+          z: tmp.z,
+          vx: carVel.x + dir.x * speed + rand(-0.25, 0.25),
+          vy: dir.y * speed + rand(-0.1, 0.2),
+          vz: carVel.z + dir.z * speed + rand(-0.25, 0.25),
+          life: core ? rand(0.05, 0.09) : rand(0.08, 0.16),
+          size0: core ? 0.16 : 0.26,
+          size1: core ? 0.3 : 0.6,
+          alpha: core ? 1 : 0.85,
+          r: core ? 0.35 : 1,
+          g: core ? 0.6 : rand(0.15, 0.35),
+          b: core ? 1 : 0.12,
+        });
+      }
     }
   };
 

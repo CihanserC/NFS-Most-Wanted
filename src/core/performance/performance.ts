@@ -7,6 +7,7 @@ type EngineLevel = keyof typeof perfJson.engine;
 type TransmissionId = keyof typeof perfJson.transmission;
 type BrakeLevel = keyof typeof perfJson.brakes;
 type SuspensionLevel = keyof typeof perfJson.suspension;
+export type NitroLevel = keyof typeof perfJson.nitro;
 
 /** Basit performans parçaları (§10.3). Süperşarjör, takılı motor görünümünden (blower_v8) gelir. */
 export type PerformanceConfig = {
@@ -14,6 +15,8 @@ export type PerformanceConfig = {
   transmission: TransmissionId;
   brakes: BrakeLevel;
   suspension: SuspensionLevel;
+  /** Nitro kademesi (none = yok): Shift ile ek itiş, tüp boşalır ve kendiliğinden dolar */
+  nitro: NitroLevel;
 };
 
 export const perfData = perfJson;
@@ -21,6 +24,7 @@ export const ENGINE_LEVELS = Object.keys(perfJson.engine) as EngineLevel[];
 export const TRANSMISSIONS = Object.keys(perfJson.transmission) as TransmissionId[];
 export const BRAKE_LEVELS = Object.keys(perfJson.brakes) as BrakeLevel[];
 export const SUSPENSION_LEVELS = Object.keys(perfJson.suspension) as SuspensionLevel[];
+export const NITRO_LEVELS = Object.keys(perfJson.nitro) as NitroLevel[];
 
 const pick = <T extends string>(v: unknown, all: readonly T[], fallback: T): T =>
   typeof v === 'string' && (all as readonly string[]).includes(v) ? (v as T) : fallback;
@@ -33,6 +37,7 @@ export function normalizePerformance(input: unknown): PerformanceConfig {
     transmission: pick(src.transmission, TRANSMISSIONS, d.transmission),
     brakes: pick(src.brakes, BRAKE_LEVELS, d.brakes),
     suspension: pick(src.suspension, SUSPENSION_LEVELS, d.suspension),
+    nitro: pick(src.nitro, NITRO_LEVELS, d.nitro),
   };
 }
 
@@ -74,6 +79,21 @@ export function engineSpec(perf: PerformanceConfig, supercharged: boolean): Engi
     gears: t.gears,
     finalDrive: t.finalDrive,
   };
+}
+
+export type NitroSpec = {
+  /** Etkinken eklenen ileri ivme (m/s²) */
+  accel: number;
+  /** Dolu tüpün yetme süresi (sn) */
+  durationS: number;
+  /** Boş tüpün dolma süresi (sn) */
+  rechargeS: number;
+};
+
+/** Nitro kademesinin fizik değerleri; takılı değilse null. */
+export function nitroSpec(level: NitroLevel): NitroSpec | null {
+  const n = perfJson.nitro[level];
+  return n.accel > 0 ? { accel: n.accel, durationS: n.durationS, rechargeS: n.rechargeS } : null;
 }
 
 /** Beygir gücü: Nm × rpm / 7121 */
@@ -145,7 +165,8 @@ export function buildWeightKg(
     sumPartWeight(build.parts, catalog) +
     perfJson.engine[p.engine].weightKg +
     perfJson.transmission[p.transmission].weightKg +
-    perfJson.brakes[p.brakes].weightKg
+    perfJson.brakes[p.brakes].weightKg +
+    perfJson.nitro[p.nitro].weightKg
   );
 }
 

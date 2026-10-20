@@ -413,3 +413,52 @@
   color: #0b0c0e;
   background: #ff7a18;
 }
+
+/* Nitro tüpü: devir saatinin solunda */
+.dv-nitro {
+  position: absolute;
+  right: 270px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.dv-nitro-tube {
+  position: relative;
+  width: 14px;
+  height: 150px;
+  overflow: hidden;
+  background: rgba(8, 9, 12, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 7px;
+}
+
+.dv-nitro-tube span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(0deg, #1f6bff, #5fd0ff);
+  transition: height 90ms linear;
+}
+
+.dv-nitro.is-active .dv-nitro-tube {
+  box-shadow: 0 0 14px rgba(80, 170, 255, 0.85);
+}
+
+.dv-nitro.is-active .dv-nitro-tube span {
+  background: linear-gradient(0deg, #3a7bff, #d8f4ff);
+}
+
+.dv-nitro-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #5fd0ff;
+}
+
+.dv-nitro.is-empty .dv-nitro-label {
+  color: #7d7a74;
+}

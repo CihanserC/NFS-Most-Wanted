@@ -23,6 +23,9 @@ export type DriveHud = {
   z: number;
   heading: number;
   offTrack: boolean;
+  /** Nitro tüpü 0..1; null = nitro takılı değil */
+  nitro: number | null;
+  nitroActive: boolean;
 };
 
 /** Duraklatma menüsünün gösterdiği sayfa */
@@ -66,6 +69,8 @@ export const initialHud = (): DriveHud => ({
   z: 0,
   heading: 0,
   offTrack: false,
+  nitro: null,
+  nitroActive: false,
 });
 
 export const useDriveStore = create<DriveState>()((set) => ({
