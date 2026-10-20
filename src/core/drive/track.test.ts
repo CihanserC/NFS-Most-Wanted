@@ -122,8 +122,9 @@ describe('tur zamanı', () => {
   });
 
   it('zaman biçimi', () => {
-    expect(formatLapTime(null)).toBe('--:--.---');
-    expect(formatLapTime(83.456)).toBe('1:23.456');
-    expect(formatLapTime(5.0049)).toBe('0:05.005');
+    expect(formatLapTime(null)).toBe('-:--.--');
+    expect(formatLapTime(83.456)).toBe('1:23.45');
+    expect(formatLapTime(5.0049)).toBe('0:05.00');
+    expect(formatLapTime(59.999)).toBe('0:59.99');
   });
 });

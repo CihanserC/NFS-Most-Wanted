@@ -245,6 +245,7 @@ export function DriveCar({
         x: snap.position[0],
         z: snap.position[2],
         heading: Math.atan2(tmpForward.x, tmpForward.z),
+        trackIndex: snap.trackIndex,
         offTrack: snap.surface === 'grass',
         nitro: ph.spec.nitro ? snap.nitro : null,
         nitroActive: snap.nitroActive,

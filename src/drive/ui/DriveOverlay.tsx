@@ -10,7 +10,7 @@ import {
   GAUGE_SWEEP_DEG,
 } from '../../core/drive/gauge';
 import { formatLapTime } from '../../core/drive/lap';
-import { getDefaultTrack } from '../../core/drive/track';
+import { getDefaultTrack, type TrackSample } from '../../core/drive/track';
 import { useAppStore } from '../../core/store/appStore';
 import { useAudioStore } from '../../core/store/audioStore';
 import { playUiSound } from '../../audio/uiSound';
@@ -20,39 +20,72 @@ import { useGraphicsStore } from '../../core/store/graphicsStore';
 import { t } from '../../i18n';
 import './drive.css';
 
-const MINIMAP = { size: 150, pad: 10, step: 6 };
+const MINIMAP = { size: 168, pad: 14, step: 4 };
 /** Devir saati SVG ölçüleri */
 const DIAL = { size: 236, r: 100, tickOuter: 98, labelR: 76, needleIn: 60, needleOut: 96 };
 
+type Point = [number, number];
+const toPath = (pts: Point[], close: boolean) =>
+  pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ') +
+  (close ? ' Z' : '');
+
+/**
+ * Pist haritası: koyu kenarlı yol + açık orta çizgi, başlangıç çizgisi, turun gidilen kısmı
+ * turuncu ve yönünü gösteren parlak araç işareti.
+ */
 function Minimap() {
   const track = getDefaultTrack();
   const hud = useDriveStore((s) => s.hud);
-  const { path, project, start } = useMemo(() => {
-    const pts = track.samples.filter((_, i) => i % MINIMAP.step === 0);
-    const xs = pts.map((p) => p.x);
-    const zs = pts.map((p) => p.z);
+  const geo = useMemo(() => {
+    const n = track.samples.length;
+    const xs = track.samples.map((p) => p.x);
+    const zs = track.samples.map((p) => p.z);
     const minX = Math.min(...xs);
     const minZ = Math.min(...zs);
-    const span = Math.max(Math.max(...xs) - minX, Math.max(...zs) - minZ);
-    const scale = (MINIMAP.size - MINIMAP.pad * 2) / span;
-    const proj = (x: number, z: number): [number, number] => [
-      MINIMAP.pad + (x - minX) * scale,
-      MINIMAP.pad + (z - minZ) * scale,
+    const spanX = Math.max(...xs) - minX;
+    const spanZ = Math.max(...zs) - minZ;
+    const inner = MINIMAP.size - MINIMAP.pad * 2;
+    const scale = inner / Math.max(spanX, spanZ);
+    // Harita kutunun ortasında
+    const ox = MINIMAP.pad + (inner - spanX * scale) / 2;
+    const oz = MINIMAP.pad + (inner - spanZ * scale) / 2;
+    const proj = (x: number, z: number): Point => [
+      ox + (x - minX) * scale,
+      oz + (z - minZ) * scale,
     ];
-    const d =
-      pts
-        .map((p, i) => `${i === 0 ? 'M' : 'L'}${proj(p.x, p.z).map((v) => v.toFixed(1))}`)
-        .join(' ') + ' Z';
-    const s = track.samples[track.startIndex];
-    return { path: d, project: proj, start: s ? proj(s.x, s.z) : null };
+    // Başlangıç çizgisinden sıralı noktalar: gidilen kısım bunun ön parçası
+    const ordered: Point[] = [];
+    for (let k = 0; k < n; k += MINIMAP.step) {
+      const smp = track.samples[(track.startIndex + k) % n] as TrackSample;
+      ordered.push(proj(smp.x, smp.z));
+    }
+    const s0 = track.samples[track.startIndex] as TrackSample;
+    const [sx, sy] = proj(s0.x, s0.z);
+    return {
+      n,
+      proj,
+      ordered,
+      full: toPath(ordered, true),
+      start: { x: sx, y: sy, angle: (Math.atan2(s0.tz, s0.tx) * 180) / Math.PI },
+    };
   }, [track]);
-  const [cx, cy] = project(hud.x, hud.z);
+
+  const progress = hud.lap.running
+    ? Math.floor(((hud.trackIndex - track.startIndex + geo.n) % geo.n) / MINIMAP.step) + 1
+    : 0;
+  const done = progress > 1 ? toPath(geo.ordered.slice(0, progress), false) : null;
+  const [cx, cy] = geo.proj(hud.x, hud.z);
   return (
     <svg className="dv-minimap" width={MINIMAP.size} height={MINIMAP.size} aria-hidden>
-      <path d={path} className="dv-minimap-track" />
-      {start && <circle cx={start[0]} cy={start[1]} r={3} className="dv-minimap-start" />}
+      <path d={geo.full} className="dv-minimap-edge" />
+      <path d={geo.full} className="dv-minimap-road" />
+      {done && <path d={done} className="dv-minimap-done" />}
+      <g transform={`translate(${geo.start.x} ${geo.start.y}) rotate(${geo.start.angle})`}>
+        <rect x={-1.5} y={-6} width={3} height={12} className="dv-minimap-start" />
+      </g>
       <g transform={`translate(${cx} ${cy}) rotate(${(-hud.heading * 180) / Math.PI + 180})`}>
-        <path d="M0 -6 L4 5 L0 3 L-4 5 Z" className="dv-minimap-car" />
+        <circle r={7} className="dv-minimap-glow" />
+        <path d="M0 -6 L4.5 4.5 L0 2.2 L-4.5 4.5 Z" className="dv-minimap-car" />
       </g>
     </svg>
   );
@@ -175,20 +208,24 @@ function Hud() {
   return (
     <>
       <div className="dv-lap">
-        <div className="dv-lap-row">
+        <div className="dv-lap-head">
           <span>{t('drive.lap')}</span>
           <strong>{lap.running ? lap.laps + 1 : '–'}</strong>
+          {lap.invalid && <em className="dv-lap-invalid">{t('drive.lapInvalid')}</em>}
         </div>
-        <div className="dv-lap-time">{formatLapTime(hud.currentLap)}</div>
-        <div className="dv-lap-row">
-          <span>{t('drive.last')}</span>
-          <strong>{formatLapTime(lap.lastLap)}</strong>
+        <div className={`dv-lap-time${lap.running ? '' : ' is-idle'}`}>
+          {formatLapTime(hud.currentLap)}
         </div>
-        <div className="dv-lap-row is-best">
-          <span>{t('drive.best')}</span>
-          <strong>{formatLapTime(lap.bestLap)}</strong>
-        </div>
-        {lap.invalid && <div className="dv-warn">{t('drive.lapInvalid')}</div>}
+        {(lap.bestLap !== null || lap.lastLap !== null) && (
+          <div className="dv-lap-sub">
+            <span>
+              {t('drive.best')} <b className="is-best">{formatLapTime(lap.bestLap)}</b>
+            </span>
+            <span>
+              {t('drive.last')} <b>{formatLapTime(lap.lastLap)}</b>
+            </span>
+          </div>
+        )}
       </div>
       <div className="dv-topright">
         <Minimap />

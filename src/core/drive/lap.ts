@@ -76,10 +76,11 @@ export function updateLap(state: LapState, track: Track, s: number, time: number
 }
 
 /** m:ss.mmm biçimi */
+/** Tur süresi `d:ss.cc` (salise: yüzde bir saniye, aşağı yuvarlanır — yarış saatleri gibi). */
 export function formatLapTime(seconds: number | null): string {
-  if (seconds === null) return '--:--.---';
-  const ms = Math.round(seconds * 1000);
-  const m = Math.floor(ms / 60000);
-  const s = Math.floor((ms % 60000) / 1000);
-  return `${m}:${String(s).padStart(2, '0')}.${String(ms % 1000).padStart(3, '0')}`;
+  if (seconds === null) return '-:--.--';
+  const cs = Math.floor(seconds * 100 + 1e-6);
+  const m = Math.floor(cs / 6000);
+  const s = Math.floor((cs % 6000) / 100);
+  return `${m}:${String(s).padStart(2, '0')}.${String(cs % 100).padStart(2, '0')}`;
 }

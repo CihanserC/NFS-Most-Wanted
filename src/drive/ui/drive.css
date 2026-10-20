@@ -19,51 +19,79 @@
   background: rgba(5, 6, 8, 0.65);
 }
 
+/* Tur: minimal — küçük başlık, büyük canlı süre, tek satır en iyi / son */
 .dv-lap {
   position: absolute;
-  top: 22px;
+  top: 20px;
   left: 22px;
-  min-width: 230px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(8, 9, 12, 0.82), rgba(8, 9, 12, 0.55));
-  border-left: 4px solid #ff7a18;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  padding: 8px 14px 10px;
+  background: rgba(8, 9, 12, 0.42);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
 }
 
-.dv-lap-row {
+.dv-lap-head {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  font-size: 13px;
-  letter-spacing: 0.12em;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #a9a6a0;
+  color: rgba(216, 213, 206, 0.6);
 }
 
-.dv-lap-row strong {
+.dv-lap-head strong {
+  font-size: 13px;
   color: #f2efe8;
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.dv-lap-row.is-best strong {
-  color: #2fd8ff;
+.dv-lap-invalid {
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: rgba(255, 59, 42, 0.8);
+  border-radius: 4px;
 }
 
 .dv-lap-time {
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 700;
-  line-height: 1.1;
-  margin: 4px 0 8px;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: #f8f5ee;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.dv-lap-time.is-idle {
+  color: rgba(242, 239, 232, 0.35);
+}
+
+.dv-lap-sub {
+  display: flex;
+  gap: 14px;
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(216, 213, 206, 0.55);
+}
+
+.dv-lap-sub b {
+  margin-left: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f2efe8;
   font-variant-numeric: tabular-nums;
 }
 
-.dv-warn {
-  margin-top: 6px;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: #ff5a3c;
-  text-transform: uppercase;
+.dv-lap-sub b.is-best {
+  color: #2fd8ff;
 }
 
 .dv-topright {
@@ -78,9 +106,33 @@
 
 .dv-minimap {
   display: block;
-  padding: 4px;
-  background: rgba(8, 9, 12, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 9, 12, 0.58);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+}
+
+/* Yol: koyu geniş kenar + açık ince orta çizgi */
+.dv-minimap-edge {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 7;
+  stroke-linejoin: round;
+}
+
+.dv-minimap-road {
+  fill: none;
+  stroke: rgba(242, 239, 232, 0.7);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+/* Turun gidilen kısmı */
+.dv-minimap-done {
+  fill: none;
+  stroke: #ff8a2a;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .dv-minimap-start {
@@ -89,17 +141,15 @@
   stroke-width: 1;
 }
 
-.dv-minimap-track {
-  fill: none;
-  stroke: rgba(242, 239, 232, 0.55);
-  stroke-width: 3;
-  stroke-linejoin: round;
+.dv-minimap-glow {
+  fill: rgba(255, 138, 42, 0.28);
 }
 
 .dv-minimap-car {
-  fill: #ff7a18;
+  fill: #ffb35a;
   stroke: #0b0c0e;
-  stroke-width: 1;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
 }
 
 /* Devir saati: analog kadran + ortada dijital hız ve vites */

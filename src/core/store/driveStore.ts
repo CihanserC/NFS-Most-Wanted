@@ -22,6 +22,8 @@ export type DriveHud = {
   x: number;
   z: number;
   heading: number;
+  /** Aracın en yakın pist örneği (minimapte turun gidilen kısmı) */
+  trackIndex: number;
   offTrack: boolean;
   /** Nitro tüpü 0..1; null = nitro takılı değil */
   nitro: number | null;
@@ -68,6 +70,7 @@ export const initialHud = (): DriveHud => ({
   x: 0,
   z: 0,
   heading: 0,
+  trackIndex: 0,
   offTrack: false,
   nitro: null,
   nitroActive: false,
