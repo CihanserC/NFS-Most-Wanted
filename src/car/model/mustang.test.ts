@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Box3, Vector3, type Mesh } from 'three';
 import { loadGlbScene, sharedTestMaterials } from './glbTestUtils';
 import { sampleSurface } from './surfaceMap';
+import { mergeStaticMeshes } from '../../core/model/mergeStatic';
 import { sample2 } from '../surface';
 import { defaultParts } from '../../core/build/build';
 import { slotsNeedingPlaceholder } from '../../core/model/modelRules';
@@ -120,6 +121,29 @@ describe('2013 Ford Mustang GT (gerçek GLB)', () => {
       expect(Math.abs((a ?? 0) - (b ?? 0))).toBeLessThan(0.01);
     }
     expect(fresh.nose.values).toEqual(stored!.nose.values);
+  });
+
+  it('statik mesh birleştirme: çizim çağrısı azalır, sınır kutusu ve boya bölgeleri aynı kalır', async () => {
+    const prepared = prepareModel(await loadScene(), car.manifest, shared, car.modelMap);
+    prepared.root.updateMatrixWorld(true);
+    const boxBefore = new Box3().setFromObject(prepared.root);
+    const materialsOf = () => {
+      const names = new Set<string>();
+      prepared.root.traverse((o) => {
+        if ('isMesh' in o && o.isMesh)
+          for (const m of [(o as Mesh).material].flat()) names.add(m.name);
+      });
+      return names;
+    };
+    const before = materialsOf();
+    const { before: n0, after: n1 } = mergeStaticMeshes(prepared.root);
+    prepared.root.updateMatrixWorld(true);
+    const boxAfter = new Box3().setFromObject(prepared.root);
+    expect(n0).toBeGreaterThan(100);
+    expect(n1).toBeLessThan(n0 / 3);
+    expect(boxAfter.min.distanceTo(boxBefore.min)).toBeLessThan(0.005);
+    expect(boxAfter.max.distanceTo(boxBefore.max)).toBeLessThan(0.005);
+    expect([...materialsOf()].sort()).toEqual([...before].sort());
   });
 
   it('çapa uyarısı eşlemeli modellerde gürültü yapmaz', async () => {

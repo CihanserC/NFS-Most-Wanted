@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useThree } from '@react-three/fiber';
 import type { Material } from 'three';
 import { applyModelState, slotsNeedingPlaceholder } from '../core/model/modelRules';
+import { mergeStaticMeshes } from '../core/model/mergeStatic';
 import { formatWarnings, prepareModel, type PreparedModel } from '../core/model/prepareModel';
 import type { CarDefinition } from '../data/cars';
 import { sharedMaterialMap } from './materials/carMaterials';
@@ -44,7 +45,10 @@ function useCarModel(car: CarDefinition): PreparedModel | null {
           if (text) console.warn(text);
         }
         // Gövdesiz model kullanılamaz: placeholder'da kalınır.
-        if (model.analysis.usable) setState({ url, model });
+        if (!model.analysis.usable) return;
+        // Statik gövde parçaları materyale göre birleşir: yüzlerce çizim çağrısı onlarcaya iner
+        mergeStaticMeshes(model.root);
+        setState({ url, model });
       })
       .catch((error: unknown) => {
         console.warn(`[Model] ${url} yüklenemedi, placeholder çiziliyor:`, error);
