@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { MeshStandardMaterial, type Material, type Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 /** Testler ve geliştirme araçları için: Node'da gerçek GLB yükleme (uygulama kodu kullanmaz). */
 /**
@@ -20,8 +21,13 @@ function stripTextures(buffer: Buffer): ArrayBuffer {
   delete json.images;
   delete json.textures;
   delete json.samplers;
-  delete json.extensionsUsed;
-  delete json.extensionsRequired;
+  // Geometri uzantıları (meshopt, nicemleme) kalır; doku uzantıları (webp, ktx2) atılır
+  const keep = (list: unknown) =>
+    Array.isArray(list)
+      ? list.filter((e) => typeof e === 'string' && /meshopt|quantization/i.test(e))
+      : [];
+  json.extensionsUsed = keep(json.extensionsUsed);
+  json.extensionsRequired = keep(json.extensionsRequired);
   json.materials = json.materials.map((m) => ({
     name: m.name,
     pbrMetallicRoughness: { baseColorFactor: [0.5, 0.5, 0.5, 1] },
@@ -42,8 +48,13 @@ function stripTextures(buffer: Buffer): ArrayBuffer {
 
 export function loadGlbScene(url: URL): Promise<Object3D> {
   const data = stripTextures(readFileSync(url));
-  return new Promise((resolve, reject) =>
-    new GLTFLoader().parse(data, '', (g) => resolve(g.scene), reject),
+  return MeshoptDecoder.ready.then(
+    () =>
+      new Promise((resolve, reject) =>
+        new GLTFLoader()
+          .setMeshoptDecoder(MeshoptDecoder)
+          .parse(data, '', (g) => resolve(g.scene), reject),
+      ),
   );
 }
 
