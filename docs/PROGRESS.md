@@ -2,6 +2,12 @@
 
 ## Durum: Fazlar 0–11 ve V2-1/V2-2 tamam; V2-3 büyük ölçüde tamam — bkz. `docs/PLAN_V2.md`, `docs/ANALYSIS.md`
 
+## Üçüncü araç + HUD ✅ (2026-10-20)
+
+- **2001 BMW M3 GTR** (Sketchfab, tonielpro520, **CC-BY-4.0**; kredi ekranında): GLB 18,9 → 3,6 MB (meshopt + WebP, doku ≤ 2048 px). Lastik/jantlar `hideMaterials` ile gizlenir, oyunun tekerlekleri takılır (konumlar lastik adalarından ölçüldü: ön ±0,755 / z 1,475, arka ±0,745 / z −1,26, r 0,315). Boya bölgeleri yüzey adalarıyla: kapı, kaput, bagaj, ayna, tampon + tavan (bölge kutusu) + gövde. Slotlar: kaput ve marşpiyel (GTR'nin kanadı/splitter'ı ve kafesi modelde kaynaşık; overlay çakışırdı). Yarı slik 18", 1250 kg, daha yüksek tutuş (`driving.json`). Testli (`bmw.test.ts`); sürüş testleri üç araçta.
+- **Tur paneli** minimal: küçük "LAP n", büyük canlı süre, tek satır en iyi/son; süre `d:ss.cc` (salise 2 basamak).
+- **Minimap**: koyu kenarlı yol + açık şerit, turun gidilen kısmı turuncu, başlangıç çizgisi, parlak yön oklu araç.
+
 ## Kullanıcı geri bildirimi turu 2 ✅ (2026-10-20)
 
 **Sürüş**
