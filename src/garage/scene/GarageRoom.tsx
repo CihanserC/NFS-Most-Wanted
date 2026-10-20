@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { hexToLinearRgb } from '../../core/color/color';
 import { brickTextures, corrugatedNormal } from './garageTextures';
+import { GarageDetails } from './GarageDetails';
 import { sceneConfig } from './sceneConfig';
 
 /**
@@ -19,6 +20,7 @@ export function GarageRoom() {
       <WallStrips />
       <NeonSign />
       <Props />
+      <GarageDetails />
     </group>
   );
 }

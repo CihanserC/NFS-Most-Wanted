@@ -42,9 +42,11 @@ function piecesOf(mesh: Mesh, toRoot: Matrix4): Piece[] {
   else geometry.setIndex([...Array(source.getAttribute('position').count).keys()]);
   geometry.applyMatrix4(toRoot);
   const materials = [mesh.material].flat();
-  const groups = source.groups.length
-    ? source.groups
-    : [{ start: 0, count: geometry.index?.count ?? 0, materialIndex: 0 }];
+  // Tek materyalde gruplar anlamsızdır (ör. BoxGeometry'nin 6 yüz grubu): tümü tek parça
+  const groups =
+    Array.isArray(mesh.material) && source.groups.length
+      ? source.groups
+      : [{ start: 0, count: geometry.index?.count ?? 0, materialIndex: 0 }];
   const index = geometry.index as BufferAttribute;
   return groups.map((g) => {
     const part = geometry.clone();
