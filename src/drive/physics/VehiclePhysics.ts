@@ -30,8 +30,15 @@ const CHASSIS_CENTER_Y = 0.12;
 const FRICTION_BASE = 1.25;
 const ROLLING_RESISTANCE = 0.015;
 /** Direksiyon girişinin tam kilitten kilide çıkma hızı (1/sn) ve bırakınca merkeze dönme hızı */
-const STEER_RATE = 4.2;
-const STEER_RETURN_RATE = 6.5;
+const STEER_RATE = 6;
+const STEER_RETURN_RATE = 8;
+/** Arcade direksiyon yardımı bu hızdan (m/s) itibaren devreye girer, ARCADE_FULL_SPEED'de tam */
+const ARCADE_MIN_SPEED = 2;
+const ARCADE_FULL_SPEED = 7;
+/** Tam kilitte ön tekerlek açısı (kinematik yalpalama sınırı için, rad) */
+const ARCADE_LOCK = 0.55;
+/** El frenindeyken yardımların ölçeği: kontrollü drift mümkün kalsın */
+const ARCADE_HANDBRAKE_SCALE = 0.15;
 /** Tekerlek patinaj hızının (m/s) boşalma hızı */
 const SLIP_DECAY = 10;
 const SPIN_INERTIA_MASS = 110;
@@ -412,6 +419,7 @@ export class VehiclePhysics {
       );
     }
 
+    this.applyArcadeSteering(dt, input, forwardSpeed, wheels);
     controller.updateVehicle(dt);
     this.world.step();
 
@@ -438,6 +446,64 @@ export class VehiclePhysics {
     this.liftOff = this.flameTimer > 0;
     this.prevThrottle = o.throttle;
     this.lastBrake = o.brake;
+  }
+
+  /**
+   * Arcade direksiyon (NFS tarzı): lastik modeli gerçekçi tutuş sınırında kalır; bu yardım
+   * direksiyon girişinden hedef yalpalama hızı hesaplar ve gövdeyi ona doğru döndürür, hız
+   * vektörünü de gövde yönüne çevirir (büyüklüğü korunur: virajda hız kaybı yok). En az üç
+   * tekerlek yerdeyken çalışır; el freninde zayıflar ki drift yapılabilsin.
+   */
+  private applyArcadeSteering(
+    dt: number,
+    input: DriveInput,
+    forwardSpeed: number,
+    wheels: { contact: boolean }[],
+  ): void {
+    const { chassis, spec } = this;
+    const d = spec.driving;
+    if (wheels.filter((w) => w.contact).length < 3) return;
+    const v = Math.abs(forwardSpeed);
+    const fade = Math.min(
+      1,
+      Math.max(0, (v - ARCADE_MIN_SPEED) / (ARCADE_FULL_SPEED - ARCADE_MIN_SPEED)),
+    );
+    if (fade <= 0) return;
+    const scale = input.handbrake ? ARCADE_HANDBRAKE_SCALE : 1;
+    const direction = Math.sign(forwardSpeed);
+    // Hedef yalpalama: kinematik sınır (tam kilit) ile hedef yanal ivme sınırının küçüğü
+    const maxYaw = Math.min(
+      (v * Math.tan(ARCADE_LOCK)) / spec.wheelbase,
+      d.arcadeLateralAccel / Math.max(v, 0.1),
+    );
+    const target = this.steer * direction * maxYaw;
+    const w = chassis.angvel();
+    const blend = fade * scale * Math.min(1, d.yawResponse * dt);
+    const inertia = chassis.principalInertia().y;
+    chassis.applyTorqueImpulse({ x: 0, y: inertia * (target - w.y) * blend, z: 0 }, true);
+
+    // Hız hizalama: yatay hız vektörü gövde yönüne doğru döner (geri giderken arkaya)
+    const vel = chassis.linvel();
+    const speed = Math.hypot(vel.x, vel.z);
+    if (speed < 0.5) return;
+    const q = chassis.rotation();
+    const fwd = quatRotate(q, { x: 0, y: 0, z: 1 });
+    const heading = Math.atan2(fwd.x * direction, fwd.z * direction);
+    const course = Math.atan2(vel.x, vel.z);
+    let beta = heading - course;
+    while (beta > Math.PI) beta -= 2 * Math.PI;
+    while (beta < -Math.PI) beta += 2 * Math.PI;
+    const turn = beta * fade * scale * Math.min(1, d.gripAssist * dt);
+    const next = course + turn;
+    const mass = chassis.mass();
+    chassis.applyImpulse(
+      {
+        x: (Math.sin(next) * speed - vel.x) * mass,
+        y: 0,
+        z: (Math.cos(next) * speed - vel.z) * mass,
+      },
+      true,
+    );
   }
 
   /** Tekerlek başına son kayma açısı (rad) */

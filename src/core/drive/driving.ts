@@ -15,6 +15,16 @@ export type DrivingTuning = {
   frontBrakeBias: number;
   /** El frenindeyken arka tutuş çarpanı */
   handbrakeRearGrip: number;
+  /**
+   * Arcade direksiyon: tam direksiyonda hedeflenen yanal ivme (m/s²). Hedef yalpalama hızı
+   * = min(kinematik sınır, bu / hız). Lastik modelinin gerçekçi sınırının (~11 m/s²) üstünde
+   * olması aracı atik yapar (NFS tarzı).
+   */
+  arcadeLateralAccel: number;
+  /** Yalpalama hızının hedefe yaklaşma hızı (1/sn) */
+  yawResponse: number;
+  /** Hız vektörünü gövde yönüne döndürme hızı (1/sn): kaymayı toparlar, hız korunur */
+  gripAssist: number;
 };
 
 export const DEFAULT_DRIVING: DrivingTuning = {
@@ -24,6 +34,9 @@ export const DEFAULT_DRIVING: DrivingTuning = {
   rollInfluence: 0.15,
   frontBrakeBias: 0.65,
   handbrakeRearGrip: 0.45,
+  arcadeLateralAccel: 22,
+  yawResponse: 25,
+  gripAssist: 8,
 };
 
 const RANGES: Record<keyof DrivingTuning, readonly [number, number]> = {
@@ -33,6 +46,9 @@ const RANGES: Record<keyof DrivingTuning, readonly [number, number]> = {
   rollInfluence: [0, 1],
   frontBrakeBias: [0.4, 0.85],
   handbrakeRearGrip: [0.1, 1],
+  arcadeLateralAccel: [0, 40],
+  yawResponse: [0, 40],
+  gripAssist: [0, 40],
 };
 
 export function loadDriving(json: unknown, source = 'driving.json'): DrivingTuning {

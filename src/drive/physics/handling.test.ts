@@ -111,9 +111,18 @@ describe.each(listCars().map((c) => c.manifest.id))('sürüş testleri: %s', (id
     const half = yawRate(0.5);
     const full = yawRate(1);
     expect(full.yaw).toBeGreaterThan(half.yaw);
-    // 100 km/s'te ≈ 20°/sn ve üzeri: dönüş yarıçapı ~80 m'nin altında
-    expect((full.yaw * 180) / Math.PI).toBeGreaterThan(20);
-    expect(full.lat).toBeGreaterThan(0.95);
+    // Arcade hedef: 100 km/s tam direksiyonda ≥ 35°/sn (dönüş yarıçapı ≈ 45 m altı), ≈ 2 g
+    expect((full.yaw * 180) / Math.PI).toBeGreaterThan(35);
+    expect(full.lat).toBeGreaterThan(1.6);
+  });
+
+  it('direksiyon bırakılınca yalpalama hızla söner (düz gider)', () => {
+    const v = launch(id, 100 / 3.6);
+    step(v, 1.5, input({ throttle: 0.4, steer: 1 }));
+    step(v, 0.8, input({ throttle: 0.4 }));
+    expect(Math.abs((v.chassis.angvel().y * 180) / Math.PI)).toBeLessThan(3);
+    expect(Math.abs(v.snapshot().lateralSpeed)).toBeLessThan(1);
+    v.dispose();
   });
 
   it('slalom: hızlı sol-sağ geçişte devrilmez, kontrol kaybolmaz', () => {
