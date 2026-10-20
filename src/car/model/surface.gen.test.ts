@@ -10,7 +10,7 @@ import { sampleSurface } from './surfaceMap';
  * Model ya da modelMap değişince çalıştırın:
  *   GEN_SURFACE=1 node node_modules/vitest/vitest.mjs run src/car/model/surface.gen.test.ts
  */
-const CARS = ['ford_mustang_gt_2013'];
+const CARS = ['ford_mustang_gt_2013', 'bmw_m3_gtr_2001'];
 
 describe.runIf(process.env.GEN_SURFACE)('yüzey haritası üretimi', () => {
   it.each(CARS)(

@@ -142,7 +142,7 @@
   "statRanges": {
     "hp": [200, 700],
     "torqueNm": [400, 1000],
-    "weightKg": [1400, 1700],
+    "weightKg": [1100, 1700],
     "grip": [0.8, 1.5],
     "braking": [0.9, 1.7]
   },

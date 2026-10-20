@@ -9,6 +9,15 @@
       "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
       "usedFor": "İkinci araç: Ford Mustang GT gövdesi ve iç mekânı",
       "changes": "Ölçeklendi, tekerlek/lastik/fren parçaları oyunun prosedürel parçalarıyla değiştirildi, boya bölgelerine ayrıldı"
+    },
+    {
+      "name": "2001 BMW M3 GTR",
+      "author": "tonielpro520",
+      "source": "https://sketchfab.com/3d-models/2001-bmw-m3-gtr-51b155adad3c4dd18ff76bfcfe1a6e3b",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "usedFor": "Üçüncü araç: BMW M3 GTR gövdesi ve iç mekânı",
+      "changes": "Sıkıştırıldı (meshopt + WebP), lastik/jant parçaları oyunun prosedürel tekerlekleriyle değiştirildi, boya bölgelerine ayrıldı"
     }
   ]
 }

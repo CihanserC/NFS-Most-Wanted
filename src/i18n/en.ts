@@ -387,6 +387,7 @@ export const en: Record<string, string> = {
   'select.continue': 'Continue',
   'select.hint': '←/→ change car · Enter select',
   'car.vanta_stallion_70.tagline': "Fictional '70s muscle fastback",
+  'car.bmw_m3_gtr_2001.tagline': 'Race-bred GT coupe',
   'car.ford_mustang_gt_2013.tagline': 'Modern pony car',
   'credits.nonCommercial': 'Non-commercial use only, share alike (CC BY-NC-SA).',
   'ui.notAvailable': 'Not on this car',

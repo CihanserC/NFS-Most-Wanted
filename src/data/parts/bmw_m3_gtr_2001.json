@@ -1,0 +1,45 @@
+{
+  "hood": {
+    "stock": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "shaker_scoop": {
+      "price": 1400,
+      "weightKg": 4
+    },
+    "cowl_induction": {
+      "price": 800,
+      "weightKg": 2
+    }
+  },
+  "side_skirts": {
+    "none": {
+      "price": 0,
+      "weightKg": 0
+    },
+    "slim": {
+      "price": 500,
+      "weightKg": 3
+    },
+    "pro_touring": {
+      "price": 950,
+      "weightKg": 5,
+      "downforce": 0.02
+    },
+    "carbon_blade": {
+      "price": 1100,
+      "weightKg": 2,
+      "downforce": 0.02
+    },
+    "chrome_rocker": {
+      "price": 400,
+      "weightKg": 2
+    },
+    "aero_flick": {
+      "price": 1300,
+      "weightKg": 4,
+      "downforce": 0.03
+    }
+  }
+}

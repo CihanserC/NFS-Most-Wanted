@@ -1,0 +1,211 @@
+{
+  "id": "bmw_m3_gtr_2001",
+  "displayName": "2001 BMW M3 GTR",
+  "units": "meters",
+  "forwardAxis": "+Z",
+  "dimensions": {
+    "length": 4.62,
+    "width": 1.92,
+    "height": 1.38,
+    "wheelbase": 2.735
+  },
+  "massKg": 1250,
+  "drivetrain": "RWD",
+  "model": "assets/cars/bmw_m3_gtr_2001.glb",
+  "wheels": {
+    "FL": {
+      "position": [0.755, 0.312, 1.475]
+    },
+    "FR": {
+      "position": [-0.755, 0.312, 1.475]
+    },
+    "RL": {
+      "position": [0.745, 0.312, -1.26]
+    },
+    "RR": {
+      "position": [-0.745, 0.312, -1.26]
+    },
+    "wellClearanceMm": {
+      "front": 40,
+      "rear": 45
+    }
+  },
+  "paintZones": ["body", "hood", "roof", "doors", "trunk", "bumpers", "mirrors"],
+  "paintZoneCameras": {
+    "body": "paint_side",
+    "hood": "hood_top",
+    "roof": "roof_top",
+    "doors": "side",
+    "trunk": "rear_top",
+    "bumpers": "front_three_quarter",
+    "mirrors": "mirror"
+  },
+  "wheelCameras": {
+    "front": "wheel_front",
+    "rear": "wheel_rear"
+  },
+  "categoryCameras": {
+    "stance": "side",
+    "lights_glass": "front_three_quarter",
+    "photo_mode": "front_three_quarter"
+  },
+  "vinylCameras": {
+    "left": "vinyl_left",
+    "right": "vinyl_right",
+    "top": "vinyl_top",
+    "front": "vinyl_front",
+    "rear": "vinyl_rear"
+  },
+  "defaultCamera": "overview",
+  "cameraPresets": {
+    "overview": {
+      "position": [5.2, 1.6, 6],
+      "target": [0, 0.6, 0]
+    },
+    "front_three_quarter": {
+      "position": [3.2, 1.2, 4.8],
+      "target": [0, 0.55, 1.4]
+    },
+    "front_low": {
+      "position": [1.2, 0.55, 4.6],
+      "target": [0, 0.5, 2]
+    },
+    "hood_top": {
+      "position": [1.8, 2.5, 3.8],
+      "target": [0, 0.9, 1.3]
+    },
+    "side": {
+      "position": [5.4, 1, 0],
+      "target": [0, 0.55, 0]
+    },
+    "wheel_front": {
+      "position": [2.6, 0.75, 3.2],
+      "target": [0.75, 0.38, 1.6]
+    },
+    "mirror": {
+      "position": [2.4, 1.4, 1.8],
+      "target": [0.9, 1, 0.45]
+    },
+    "roof_top": {
+      "position": [3, 3.2, 0.6],
+      "target": [0, 1.1, -0.5]
+    },
+    "rear_three_quarter": {
+      "position": [3.4, 1.3, -4.8],
+      "target": [0, 0.55, -1.4]
+    },
+    "rear_low": {
+      "position": [1.2, 0.55, -4.6],
+      "target": [0, 0.5, -2]
+    },
+    "rear_low_side": {
+      "position": [2.9, 0.55, -3.9],
+      "target": [0.4, 0.35, -1.6]
+    },
+    "rear_top": {
+      "position": [2, 2.6, -4],
+      "target": [0, 1, -1.4]
+    },
+    "engine_bay": {
+      "position": [1.2, 2.5, 2.9],
+      "target": [0, 0.9, 1.25]
+    },
+    "interior": {
+      "position": [1.9, 2, -0.4],
+      "target": [0, 0.8, 0.1]
+    },
+    "paint_side": {
+      "position": [5.4, 1.6, 3.6],
+      "target": [0, 0.6, 1.2]
+    },
+    "wheel_rear": {
+      "position": [3.6, 0.9, 0.4],
+      "target": [0.6, 0.4, -1.2]
+    },
+    "vinyl_left": {
+      "position": [6.4, 1.4, 1.1],
+      "target": [0, 0.65, 1.1]
+    },
+    "vinyl_right": {
+      "position": [-6.4, 1.4, -1.1],
+      "target": [0, 0.65, -1.1]
+    },
+    "vinyl_top": {
+      "position": [-0.6, 6, -1.4],
+      "target": [0, 0.6, -1.4]
+    },
+    "vinyl_front": {
+      "position": [-0.9, 1.3, 6.2],
+      "target": [-0.9, 0.6, 0]
+    },
+    "vinyl_rear": {
+      "position": [0.9, 1.3, -6.2],
+      "target": [0.9, 0.6, 0]
+    },
+    "select": {
+      "position": [5.4, 1.5, 6.4],
+      "target": [0, -0.55, 0]
+    }
+  },
+  "slots": {
+    "hood": {
+      "options": ["stock", "shaker_scoop", "cowl_induction"],
+      "default": "stock",
+      "camera": "hood_top"
+    },
+    "side_skirts": {
+      "options": ["none", "slim", "pro_touring", "carbon_blade", "chrome_rocker", "aero_flick"],
+      "default": "none",
+      "camera": "side"
+    }
+  },
+  "modelEmptyOptions": {
+    "hood": ["stock"]
+  },
+  "fitment": {
+    "front": {
+      "fenderX": 0.95,
+      "archRadius": 0.37,
+      "wellInnerX": 0.58
+    },
+    "rear": {
+      "fenderX": 0.96,
+      "archRadius": 0.37,
+      "wellInnerX": 0.58
+    }
+  },
+  "defaultFitment": {
+    "wheels": {
+      "front": {
+        "style": "modern_multispoke",
+        "diameterIn": 18,
+        "widthIn": 10,
+        "offsetMm": 30,
+        "finish": "gunmetal",
+        "spokes": 10
+      },
+      "rear": {
+        "style": "modern_multispoke",
+        "diameterIn": 18,
+        "widthIn": 11,
+        "offsetMm": 30,
+        "finish": "gunmetal",
+        "spokes": 10
+      }
+    },
+    "tires": {
+      "front": {
+        "widthMm": 285,
+        "aspect": 30,
+        "sidewall": "black",
+        "type": "semi_slick"
+      },
+      "rear": {
+        "widthMm": 295,
+        "aspect": 30,
+        "sidewall": "black",
+        "type": "semi_slick"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "lateralMu": 1.65,
+  "rearSlipScale": 1.15,
+  "tireRelaxLength": 0.45,
+  "rollInfluence": 0.12,
+  "frontBrakeBias": 0.64,
+  "handbrakeRearGrip": 0.45,
+  "arcadeLateralAccel": 25,
+  "yawResponse": 26,
+  "gripAssist": 9
+}

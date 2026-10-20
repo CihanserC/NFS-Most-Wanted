@@ -26,6 +26,11 @@ export type ModelMap = {
   /** Adında (kendi ya da üst düğümlerinden birinde) bu parçalardan biri geçen mesh'ler kaldırılır (büyük/küçük harf duyarsız) */
   hide?: string[];
   /**
+   * Bu materyallerden birini taşıyan mesh'ler kaldırılır (tam ad). Düğüm adları anlamsız olan
+   * (ör. "Object_31") ve tüm tekerlekleri tek mesh'te birleştiren modeller için.
+   */
+  hideMaterials?: string[];
+  /**
    * Boya bölgesi kuralları (ilk eşleşen kazanır): `material` adlı materyal, `nodes` (regex, mesh ve
    * üst düğüm adları üzerinde) eşleşen yerlerde `paint_<zone>` olur; `nodes` yoksa her yerde.
    */
@@ -84,6 +89,15 @@ export function applyModelMap(root: Object3D, map: ModelMap): Object3D {
       if (!isMesh(o)) return;
       const ctx = context(o).toLowerCase();
       if (hide.some((h) => ctx.includes(h))) doomed.push(o);
+    });
+    for (const o of doomed) o.parent?.remove(o);
+  }
+  const hiddenMaterials = new Set(map.hideMaterials ?? []);
+  if (hiddenMaterials.size > 0) {
+    const doomed: Object3D[] = [];
+    root.traverse((o) => {
+      if (isMesh(o) && [o.material].flat().some((m) => hiddenMaterials.has(m.name)))
+        doomed.push(o);
     });
     for (const o of doomed) o.parent?.remove(o);
   }

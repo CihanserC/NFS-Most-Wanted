@@ -388,6 +388,7 @@ export const tr: Record<string, string> = {
   'select.continue': 'Devam et',
   'select.hint': '←/→ araç değiştir · Enter seç',
   'car.vanta_stallion_70.tagline': "Kurgusal 70'ler muscle fastback",
+  'car.bmw_m3_gtr_2001.tagline': 'Yarıştan gelen GT coupe',
   'car.ford_mustang_gt_2013.tagline': 'Modern pony car',
   'credits.nonCommercial':
     'Ticari olmayan kullanım ve aynı lisansla paylaşım koşulu (CC BY-NC-SA).',

@@ -1,0 +1,83 @@
+{
+  "scale": 1,
+  "offset": [0, 0.137, 0],
+  "hide": [],
+  "hideMaterials": ["tire", "Rim_Chrome", "Rim_Paint"],
+  "paint": [
+    {
+      "material": "CarPaint",
+      "zone": "doors",
+      "region": {
+        "absX": [0.66, 0.92],
+        "y": [0.237, 1.087],
+        "z": [-0.52, 0.88]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "hood",
+      "region": {
+        "absX": [0, 0.8],
+        "y": [0.437, 0.987],
+        "z": [0.8, 2.22]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "trunk",
+      "region": {
+        "absX": [0, 0.7],
+        "y": [0.637, 1.087],
+        "z": [-2.25, -1.55]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "mirrors",
+      "region": {
+        "absX": [0.7, 1.0],
+        "y": [0.857, 1.057],
+        "z": [0.4, 0.7]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "bumpers",
+      "region": {
+        "y": [0.087, 0.587],
+        "z": [1.7, 2.35]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "bumpers",
+      "region": {
+        "y": [0.137, 0.697],
+        "z": [-2.35, -1.4]
+      },
+      "whole": true
+    },
+    {
+      "material": "CarPaint",
+      "zone": "roof",
+      "region": {
+        "absX": [0, 0.6],
+        "y": [1.237, 1.537],
+        "z": [-0.95, 0.3]
+      }
+    },
+    {
+      "material": "CarPaint",
+      "zone": "body"
+    }
+  ],
+  "materials": {
+    "GLS_WindScreen": "mat_glass",
+    "GLS_Window": "mat_glass"
+  }
+}

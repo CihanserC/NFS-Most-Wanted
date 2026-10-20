@@ -18,6 +18,12 @@ import mustangMap from './ford_mustang_gt_2013/modelMap.json';
 import mustangPlaceholder from './ford_mustang_gt_2013/placeholder.json';
 import mustangParts from '../parts/ford_mustang_gt_2013.json';
 import mustangSurface from './ford_mustang_gt_2013/surface.json';
+import bmwManifest from './bmw_m3_gtr_2001/manifest.json';
+import bmwDriving from './bmw_m3_gtr_2001/driving.json';
+import bmwMap from './bmw_m3_gtr_2001/modelMap.json';
+import bmwPlaceholder from './bmw_m3_gtr_2001/placeholder.json';
+import bmwSurface from './bmw_m3_gtr_2001/surface.json';
+import bmwParts from '../parts/bmw_m3_gtr_2001.json';
 import { parseSurface, type CarSurface } from '../../car/surface';
 import type { ModelMap } from '../../core/model/modelMap';
 
@@ -67,6 +73,14 @@ for (const car of [
     mustangDriving,
     mustangMap as unknown as ModelMap,
     mustangSurface,
+  ),
+  defineCar(
+    bmwManifest,
+    bmwPlaceholder,
+    bmwParts,
+    bmwDriving,
+    bmwMap as unknown as ModelMap,
+    bmwSurface,
   ),
 ])
   definitions[car.manifest.id] = car;
