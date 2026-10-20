@@ -56,18 +56,20 @@ Boyutlar manifestteki `dimensions` ile uyumlu olmalıdır (Vanta Stallion: 4,75 
 
 Blender'da yeniden adlandırma yapmadan, araç başına `src/data/cars/<id>/modelMap.json` ile yükleme sırasında adlar kurallara çevrilir (örnek: `ford_mustang_gt_2013`). Eşleme modelin klonuna uygulanır; sonrasında hat (analiz, yedek parça, paylaşılan materyaller) aynen çalışır.
 
-| Alan        | Anlamı                                                                                                                                         |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scale`     | Modele uygulanan ölçek (model metre değilse; Mustang: 100)                                                                                     |
-| `offset`    | Ölçekten sonra `[x, y, z]` öteleme (zemini y = 0'a oturtmak için; Mustang: `[0, 0.176, 0]`)                                                    |
-| `hide`      | Adında (kendi ya da üst düğümünde) bu parçalardan biri geçen mesh'ler kaldırılır; jant, lastik, disk, kaliper gibi prosedürel üretilenler için |
-| `paint`     | `{ material, nodes?, zone }` kuralları, ilk eşleşen kazanır: `material` adlı materyal, `nodes` (regex) eşleşen yerlerde `paint_<zone>` olur    |
-| `materials` | Materyal adı → paylaşılan ad (ör. cam: `"fMAT_Glass1": "mat_glass"`)                                                                           |
+| Alan             | Anlamı                                                                                                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scale`          | Modele uygulanan ölçek (model metre değilse; Mustang: 100)                                                                                                                                                                                          |
+| `offset`         | Ölçekten sonra `[x, y, z]` öteleme (zemini y = 0'a oturtmak için; Mustang: `[0, 0.176, 0]`)                                                                                                                                                         |
+| `hide`           | Adında (kendi ya da üst düğümünde) bu parçalardan biri geçen mesh'ler kaldırılır; jant, lastik, disk, kaliper gibi prosedürel üretilenler için                                                                                                      |
+| `paint`          | `{ material, nodes?, zone }` kuralları, ilk eşleşen kazanır: `material` adlı materyal, `nodes` (regex) eşleşen yerlerde `paint_<zone>` olur                                                                                                         |
+| `paint[].region` | Opsiyonel `{ absX?, y?, z? }` araç uzayı kutusu: tek mesh'te birleşik paneller (ör. tavan+bagaj+çamurluk) üçgen ağırlık merkezine göre ayrı bölgelere bölünür; `whole: true` ise yalnız kutunun tamamen içindeki yüzey adaları (temiz panel sınırı) |
+| `materials`      | Materyal adı → paylaşılan ad (ör. cam: `"fMAT_Glass1": "mat_glass"`)                                                                                                                                                                                |
 
 Notlar:
 
 - Eşlemede tüm model `body__main` grubu altına alınır (gövde sayılır). Modelde ayrı seçenek nesneleri yoksa, seçenekler **overlay** olarak prosedürel çizilir; modelin kendi stok parçası için manifestte `modelEmptyOptions` verilir (ör. `"hood": ["stock"]`).
-- Boya bölgeleri mesh düzeyinde ayrılabildiği kadarıyla tanımlanır (Mustang'te ön/arka kit tek mesh olduğu için yalnızca `body` ve `hood`).
+- Boya bölgeleri mesh düzeyinde ya da `region` kurallarıyla ayrılır. Mustang: kaput ve kapılar düğüm adıyla; tek mesh olan arka kit tavan (ayrı ada, `whole`), bagaj, tampon ve gövdeye, ön kit tampon ve gövdeye bölünür. Kayıtta olmayan yeni bölge gövde boyasını devralır.
+- Yükleme sonrası statik gövde mesh'leri materyale göre birleştirilir (`mergeStaticMeshes`); slot seçeneği düğümleri (`slot__seçenek`) birleştirilmez.
 - Tekerlek çapası gerekmez (eşlemeli modellerde `anchor_missing` uyarısı verilmez); tekerlek konumları manifestten alınır, modelden ölçülür.
 - Aracın stok jant/lastik kurulumu `manifest.defaultFitment` ile verilir.
 
@@ -110,6 +112,7 @@ Vinil editörü, araç uzayında kutu projeksiyonu kullandığı için model UV'
 - Gövde + tüm slot seçenekleri toplam **≤ 300k üçgen** (tüm seçenekler dosyada bulunur; aynı anda yalnızca seçilenler çizilir).
 - Draco (geometri), KTX2/Basis (doku) ve Meshopt sıkıştırması desteklenir. Çözücüler `public/assets/decoders/` altındadır ve ağ olmadan çalışır (three sürümü güncellenince `npm run assets:decoders`).
 - Önerilen dışa aktarma: Blender glTF 2.0 → "Draco mesh compression" açık, dokular için `gltf-transform` ya da `toktx` ile KTX2.
+- Hazır GLB'yi sıkıştırma: `npm run assets:optimize -- giriş.glb çıkış.glb` (meshopt geometri + WebP doku; düğüm/mesh/materyal adları korunur, birleştirme ve sadeleştirme kapalı). Mustang 5,46 → 1,25 MB. Sonrasında `surface.json`'ı yeniden üretin (nicemleme milimetrik kaydırır).
 - Normal haritası ve ORM gibi dokuları 2048 px'i geçmeyecek şekilde tut.
 
 ## 6. Manifest alanları (özet)

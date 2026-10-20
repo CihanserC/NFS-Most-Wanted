@@ -208,6 +208,7 @@ Her faz: uygula → test/lint/build → tarayıcıda doğrula → `PROGRESS.md` 
 - [x] İngilizce + Türkçe dil desteği, varsayılan İngilizce (Ayarlar → Dil; kalıcı)
 - [x] Pist: kesintisiz bariyerler, başlangıç kapısı (katı direkler), mat asfalt, çevre; fren tabelaları kaldırıldı
 - [x] Çimde geri/ileri çekiş, vinil gizmo dikdörtgeni, performans istatistikleri sağ üstte
+- [x] (2026-10-20) Arcade direksiyon (≈2 g), nitro (3 kademe, mavi-kırmızı alev), bariyer titremesi, kaput pimleri kaldırıldı, marşpiyel/spoyler seçenekleri, "tüm araç" + parça parça boya (Mustang tavan/kapı/bagaj/tampon), garaj ayrıntıları, GLB sıkıştırma (5,46 → 1,25 MB), statik mesh birleştirme (255 → 123 çizim çağrısı)
 
 ### V2-4 — Mobil uyumluluk
 

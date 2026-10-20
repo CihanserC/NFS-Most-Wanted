@@ -30,6 +30,13 @@ Kabul ölçütleri (`npm run lint`, `npm test`, `npm run build`): hepsi yeşil �
 - **Dil:** İngilizce (varsayılan) + Türkçe, kalıcı seçim; iki sözlüğün anahtar eşitliği testte.
 - **Testler:** 386 / 40 dosya (bkz. `PROGRESS.md`).
 
+## 1c. Güncelleme (2026-10-20)
+
+- **Sürüş:** arcade direksiyon yardımı (hedef yalpalama hızı + hız hizalama; 100 km/s yarıçap 38 m), 3 kademeli nitro, titremesiz tek parça bariyer duvarı.
+- **Atölye:** "tüm araç" + parça parça boya (Mustang'te bölge kurallarıyla tavan/kapı/bagaj/tampon), yeni marşpiyel/spoyler seçenekleri, kaput pimleri kaldırıldı, garaj ayrıntıları.
+- **Performans:** Mustang GLB %77 küçük (meshopt + WebP), statik mesh birleştirme ile çizim çağrısı yarıya indi.
+- **Testler:** 398 / 44 dosya.
+
 ## 2. Mimari
 
 - **Veri odaklı:** araç manifesti, parça kataloğu, boya/jant/duruş/performans/pist verileri JSON; kodda sihirli sayı yok (görsel ayarlar `sceneConfig`, `materialConfig`, fizik sabitleri adlandırılmış sabitlerde).

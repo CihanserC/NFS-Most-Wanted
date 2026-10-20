@@ -2,6 +2,29 @@
 
 ## Durum: Fazlar 0–11 ve V2-1/V2-2 tamam; V2-3 büyük ölçüde tamam — bkz. `docs/PLAN_V2.md`, `docs/ANALYSIS.md`
 
+## Kullanıcı geri bildirimi turu 2 ✅ (2026-10-20)
+
+**Sürüş**
+
+- **Arcade direksiyon** (`VehiclePhysics.applyArcadeSteering`): lastik modeli gerçekçi sınırda (~1,1 g) kalıyordu. Direksiyon girişinden hedef yalpalama hızı = min(kinematik sınır, `arcadeLateralAccel`/hız) hesaplanır, gövde tork impulsuyla ona çekilir; hız vektörü gövde yönüne döndürülür (büyüklük korunur, virajda hız kaybı yok). El freninde yardımlar %15'e iner (drift korunur). `driving.json`: `arcadeLateralAccel` 22 m/s², `yawResponse` 25/sn, `gripAssist` 8/sn. Direksiyon hızı 4,2 → 6/sn.
+  - 100 km/s tam direksiyon: 32 → **41°/sn**, yarıçap 62 → **38 m** (≈2 g); 140 km/s: 112 → 66 m. Testler: ≥35°/sn ve >1,6 g; direksiyon bırakılınca yalpalama <3°/sn'ye söner.
+  - Hazır kütüphane: zaten Rapier'in raycast araç denetleyicisi kullanılıyor; cannon-es/ammo.js aynı yöntem. Fark ayarda olduğu için kütüphane değiştirilmedi.
+- **Nitro** (performans parçası, 3 kademe): Shift / gamepad RB; kademe başına ek ivme 3 / 4,5 / 6,5 m/s², süre 4 / 5 / 6 sn, dolum 14 / 11 / 8 sn. Tüp kullanılırken boşalır, bırakınca dolar. Egzozlardan mavi çekirdekli, kırmızı-turuncu uçlu sürekli alev; HUD'da tüp göstergesi. Testli (`nitro.test.ts`).
+- **Bariyer titremesi:** görsel kutular 0,6 m örtüşüyordu, aynı düzlemdeki kırmızı/beyaz yüzler z-fighting yapıyordu. Artık eklemde köşeleri paylaşan tek parça duvar (`barrierWallGeometry`, testli).
+
+**Atölye**
+
+- Kaput pimleri kaldırıldı. **Marşpiyel** +3 (karbon bıçak, krom eşik çıtası, aero kanatçıklı), **arka spoyler** +3 (bagaj lip, kaide kanat, karbon GT kanat — kuğu boynu, uç plakalı); hepsi yüzey haritasıyla iki araca oturur.
+- **Boya:** listenin başında "Kaporta (tüm araç)" tüm bölgeleri boyar; altında parça parça. Mustang'te yeni bölgeler: tavan, kapılar, bagaj, tamponlar (+ kalan "çamurluk & yan paneller"). `modelMap` boya kuralına bölge desteği: tek mesh'teki paneller üçgen ağırlık merkezine ya da bütün yüzey adasına (`whole`, temiz panel sınırı — tavan) göre ayrılır. Eski kayıtlarda yeni bölge gövde boyasını devralır.
+- **Garaj:** iki direkli lift, standda motor, kepenk kapı, yangın tüpü, lastik rafı, aletli pano, kompresör, zemin park şeritleri ve tehlike bandı; birleştirilerek +9 çizim çağrısı.
+
+**Performans**
+
+- **Mustang GLB 5,46 → 1,25 MB** (meshopt geometri + WebP doku; adlar korunur): `npm run assets:optimize -- giriş.glb çıkış.glb`.
+- **Statik mesh birleştirme** (`core/model/mergeStatic.ts`): model yüklenince gövde parçaları materyale göre birleşir. Mustang seçim ekranı (Düşük) **255 → 123** çizim çağrısı, aynı üçgen sayısı.
+
+**Testler:** 398 (397 + 1 geliştirme aracı); lint ve tip denetimi temiz.
+
 ## V2-3 + kullanıcı geri bildirimi turu ✅ (2026-10-19)
 
 **Sürüş hissi (ölçümle)**
